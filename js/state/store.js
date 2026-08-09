@@ -1,9 +1,16 @@
 export const store = {
   state: {
-    currentView: 'dashboard', // 'dashboard' | 'drugCenter' | 'airway'
+    currentView: 'dashboard', // 'dashboard' | 'drugCenter' | 'airway' | 'fluidAbl'
     patientWeight: 0,
     patientAge: '',
     patientGender: 'male',
+    fastingHours: 6,
+    fluidStrategy: 'eras',
+    surgicalTrauma: 'moderate',
+    ebvAgeGroup: 'adult_male',
+    hbInitial: '',
+    hbTarget: '',
+    currentBloodLoss: '',
     searchQuery: '',
     currentCategory: 'All',
     selectedConcentrations: {},
