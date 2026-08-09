@@ -1,6 +1,8 @@
 @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
 
-/* 1. الإعدادات العامة */
+/* ==========================================================================
+   1. الإعدادات العامة
+   ========================================================================== */
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   direction: rtl;
@@ -9,39 +11,49 @@ body {
   color: #0f172a;
 }
 
-/* 2. تحسين حقول المدخلات والقوائم */
+/* إجبار النص داخل حقول الكتابة والقوائم على الظهور باللون الأسود الواضح */
 input, select, textarea {
   color: #0f172a !important;
   background-color: #ffffff !important;
 }
 
-/* ضبط محاذاة الأرقام داخل مربع الوزن والبحث */
-input[type="number"], input[type="text"] {
-  unicode-bidi: plaintext;
-}
-
-/* 3. أزرار الفئات النشطة */
 .cat-btn.active {
   background-color: #2563eb !important;
   color: #ffffff !important;
   border-color: #2563eb !important;
 }
 
-/* 4. معالجة مشكلة انعكاس الجرعات والأرقام والنطاقات (LTR Fix for Medical Metrics) */
+/* ==========================================================================
+   2. معالجة انعكاس الأرقام والجرعات والأوقات (Bidi / LTR Isolation)
+   ========================================================================== */
 .ltr-text,
+.dose-value,
 .dose-range,
-.metric-value,
+.volume-value,
+.volume-range,
 .time-range,
+.metric-value,
 .drug-concentration,
-[data-ltr="true"] {
+.concentration-select,
+.numeric-data,
+[dir="ltr"] {
   direction: ltr !important;
   unicode-bidi: isolate !important;
   display: inline-block;
   text-align: left;
 }
 
-/* 5. إصلاح محاذاة الأيقونات والأسهم في أزرار الإجراءات */
-.action-buttons, .card-actions {
+.colon-fix, .unit-label {
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+}
+
+/* ==========================================================================
+   3. إصلاح محاذاة الأيقونات والأسهم في أزرار الإجراءات
+   ========================================================================== */
+.action-buttons,
+.card-actions,
+.drug-card-actions {
   direction: ltr !important;
   display: flex !important;
   align-items: center !important;
@@ -49,23 +61,31 @@ input[type="number"], input[type="text"] {
   gap: 0.5rem;
 }
 
-/* 6. إصلاح اللوحات الفرعية والمنسدلة (Expanded Collapsible Panels) */
+/* ==========================================================================
+   4. إصلاح اللوحات الفرعية والمنسدلة (Collapsible Sub-panels)
+   ========================================================================== */
 .expanded-panel,
-.collapsible-content,
-.info-subpanel {
+.collapsible-panel,
+.info-subpanel,
+.drug-details-panel {
   direction: ltr !important;
   text-align: left !important;
   background-color: #f1f5f9 !important;
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
   margin-top: 0.5rem;
   color: #0f172a !important;
   font-size: 0.875rem;
-  line-height: 1.5;
+  line-height: 1.6;
+  border: 1px solid #e2e8f0;
 }
 
-/* 7. تصحيح اتجاه علامات التنبيه والنقطتين الفوقيتين */
-.alert-badge, .ismp-notice {
+/* ==========================================================================
+   5. تصحيح شارات التنبيه عالية الخطورة (Safety Badges)
+   ========================================================================== */
+.badge-high-alert,
+.ismp-badge,
+.safety-notice {
   direction: ltr !important;
   unicode-bidi: isolate !important;
   display: inline-flex;
