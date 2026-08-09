@@ -1,9 +1,10 @@
 export const store = {
   state: {
-    currentView: 'dashboard', // 'dashboard' | 'drugCenter' | 'airway' | 'fluidAbl'
+    currentView: 'dashboard', // 'dashboard' | 'drugCenter' | 'airway' | 'fluidAbl' | 'regionalLast'
     patientWeight: 0,
     patientAge: '',
     patientGender: 'male',
+    // Fluids State
     fastingHours: 6,
     fluidStrategy: 'eras',
     surgicalTrauma: 'moderate',
@@ -11,6 +12,11 @@ export const store = {
     hbInitial: '',
     hbTarget: '',
     currentBloodLoss: '',
+    // Regional Anesthesia State (Phase 5)
+    regionalDrug: 'bupivacaine',
+    regionalWithEpi: false,
+    regionalConc: 0,
+    // Drug Center State
     searchQuery: '',
     currentCategory: 'All',
     selectedConcentrations: {},
