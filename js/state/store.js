@@ -1,7 +1,9 @@
 export const store = {
   state: {
-    currentView: 'dashboard', // 'dashboard' | 'drugCenter'
+    currentView: 'dashboard', // 'dashboard' | 'drugCenter' | 'airway'
     patientWeight: 0,
+    patientAge: '',
+    patientGender: 'male',
     searchQuery: '',
     currentCategory: 'All',
     selectedConcentrations: {},
@@ -15,6 +17,14 @@ export const store = {
 
   setWeight(weight) {
     this.state.patientWeight = weight;
+  },
+
+  setAge(age) {
+    this.state.patientAge = age;
+  },
+
+  setGender(gender) {
+    this.state.patientGender = gender;
   },
 
   setSearchQuery(query) {
