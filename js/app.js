@@ -102,18 +102,18 @@ function render() {
 
     const matchesSearch =
       drug.name.toLowerCase().includes(searchVal) ||
-      drug.arabicName.includes(searchVal) ||
-      drug.searchKeywords.some(keyword =>
+      (drug.arabicName && drug.arabicName.includes(searchVal)) ||
+      (drug.searchKeywords && drug.searchKeywords.some(keyword =>
         keyword.toLowerCase().includes(searchVal)
-      );
+      ));
 
     return matchesCategory && matchesSearch;
   });
 
   if (filtered.length === 0) {
     container.innerHTML = `
-      <div class="text-center py-8 text-slate-400">
-        لا توجد أدوية مطابقة للبحث
+      <div class="text-center py-8 text-slate-400 font-semibold bg-white rounded-2xl border border-slate-200">
+        🔍 لا توجد أدوية مطابقة للبحث
       </div>
     `;
     return;
@@ -194,7 +194,7 @@ function renderDrugCard(drug, weight) {
   }
 
   // =========================================================
-  // 3. حساب الجرعة والحجم
+  // 3. حساب الجرعة والحجم مع الحماية من الانعكاس (LTR Fix)
   // =========================================================
 
   let calcResultHTML = '';
@@ -226,16 +226,16 @@ function renderDrugCard(drug, weight) {
       calcResultHTML = `
         <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1 text-xs">
 
-          <div class="font-bold text-blue-900 flex justify-between gap-2">
+          <div class="font-bold text-blue-900 flex justify-between items-center gap-2">
             <span>🎯 الجرعة المحسوبة (${weight} kg):</span>
-            <span class="text-left" dir="ltr">
+            <span class="text-left font-mono font-bold text-blue-800" dir="ltr" style="unicode-bidi: isolate;">
               ${doseRangeText}
             </span>
           </div>
 
-          <div class="font-bold text-emerald-700 flex justify-between gap-2 border-t border-blue-200/60 pt-1">
+          <div class="font-bold text-emerald-700 flex justify-between items-center gap-2 border-t border-blue-200/60 pt-1.5">
             <span>💉 حجم السرنجة المطلوب:</span>
-            <span class="text-left" dir="ltr">
+            <span class="text-left font-mono font-bold text-emerald-700" dir="ltr" style="unicode-bidi: isolate;">
               ${volumeRangeText}
             </span>
           </div>
@@ -243,9 +243,9 @@ function renderDrugCard(drug, weight) {
           ${
             result.isCapped
               ? `
-                <div class="text-[10px] text-amber-700 font-semibold mt-1">
-                  ⚠️ تم تطبيق الحد الأقصى للجرعة
-                  (${result.maxDoseLimit} ${result.doseUnit})
+                <div class="text-[10px] text-amber-700 font-semibold mt-1 flex items-center gap-1">
+                  <span>⚠️ تم تطبيق الحد الأقصى للجرعة</span>
+                  <span dir="ltr" class="font-mono">(${result.maxDoseLimit} ${result.doseUnit})</span>
                 </div>
               `
               : ''
@@ -257,7 +257,7 @@ function renderDrugCard(drug, weight) {
     } else {
 
       calcResultHTML = `
-        <div class="mt-2 text-xs text-rose-600 font-semibold p-2 bg-rose-50 border border-rose-200 rounded-lg">
+        <div class="mt-2 text-xs text-rose-600 font-semibold p-2.5 bg-rose-50 border border-rose-200 rounded-lg">
           ⚠️ ${result.error}
         </div>
       `;
@@ -265,7 +265,7 @@ function renderDrugCard(drug, weight) {
   }
 
   // =========================================================
-  // 4. HIGH ALERT
+  // 4. HIGH ALERT BADGE
   // =========================================================
 
   const isHighAlert =
@@ -273,7 +273,7 @@ function renderDrugCard(drug, weight) {
 
   const alertBadge = isHighAlert
     ? `
-      <span class="px-2 py-0.5 text-[10px] font-bold bg-rose-100 text-rose-800 rounded-md border border-rose-300">
+      <span dir="ltr" class="px-2 py-0.5 text-[10px] font-bold bg-rose-100 text-rose-800 rounded-md border border-rose-300 inline-flex items-center gap-1">
         ⚠️ HIGH ALERT
       </span>
     `
@@ -288,7 +288,7 @@ function renderDrugCard(drug, weight) {
   if (drug.indications.length > 1) {
 
     indicationsHTML = `
-      <div class="flex justify-between items-center bg-slate-50 p-2 rounded-xl border border-slate-200 text-xs my-2 gap-2">
+      <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs my-2 gap-2">
 
         <span class="font-bold text-slate-700">
           الاستطباب (Indication):
@@ -296,7 +296,7 @@ function renderDrugCard(drug, weight) {
 
         <select
           onchange="handleIndicationChange('${drug.id}', this.value)"
-          class="p-1 bg-white border border-slate-300 rounded-lg text-xs font-semibold max-w-[60%]"
+          class="p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold max-w-[60%] text-slate-900 focus:outline-none"
         >
           ${drug.indications.map(indication => `
             <option
@@ -320,7 +320,7 @@ function renderDrugCard(drug, weight) {
     indicationsHTML = `
       <div class="text-xs text-slate-600 font-semibold mb-1">
         الاستطباب:
-        ${activeIndication.title}
+        <span class="text-slate-900">${activeIndication.title}</span>
       </div>
     `;
   }
@@ -356,7 +356,7 @@ function renderDrugCard(drug, weight) {
 
           </div>
 
-          <p class="text-xs text-slate-500">
+          <p class="text-xs text-slate-500 mt-0.5">
             ${drug.arabicName}
             •
             <span class="font-semibold text-blue-800">
@@ -383,7 +383,8 @@ function renderDrugCard(drug, weight) {
           <select
             id="conc-select-${drug.id}"
             onchange="handleConcChange('${drug.id}', this.value)"
-            class="p-1 bg-white border border-slate-300 rounded-lg text-xs font-semibold"
+            class="p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:outline-none"
+            dir="ltr"
           >
 
             ${concConfig.availableConcentrations.map(concentration => `
@@ -431,7 +432,7 @@ function renderDrugCard(drug, weight) {
           } pt-1"
         >
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 justify-between">
 
             <label class="text-[11px] text-slate-600">
               أدخل التركيز (${concConfig.defaultUnit}):
@@ -441,10 +442,11 @@ function renderDrugCard(drug, weight) {
               type="number"
               step="any"
               min="0"
+              dir="ltr"
               value="${customConcVal}"
               oninput="handleCustomConcInput('${drug.id}', this.value)"
               placeholder="مثال: 5"
-              class="w-24 p-1 border border-blue-400 rounded-md text-xs font-bold"
+              class="w-24 p-1.5 border border-blue-400 rounded-md text-xs font-bold text-center text-slate-900 bg-white"
             />
 
           </div>
@@ -453,8 +455,8 @@ function renderDrugCard(drug, weight) {
             concConfig.minCustomConcentration !== null ||
             concConfig.maxCustomConcentration !== null
               ? `
-                <div class="text-[10px] text-slate-400 mt-1">
-                  النطاق المسموح:
+                <div class="text-[10px] text-slate-400 mt-1" dir="ltr">
+                  Allowed Range:
                   ${concConfig.minCustomConcentration ?? 0}
                   -
                   ${concConfig.maxCustomConcentration ?? '∞'}
@@ -472,48 +474,45 @@ function renderDrugCard(drug, weight) {
       <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100">
 
         <div>
-          <span class="text-slate-500">
+          <span class="text-slate-500 block mb-0.5">
             الجرعة القياسية:
           </span>
 
-          <strong>
-            ${activeIndication.doseConfig.doseMin}
-            ${
-              activeIndication.doseConfig.doseMax !==
-              activeIndication.doseConfig.doseMin
+          <strong class="font-mono text-slate-900" dir="ltr" style="unicode-bidi: isolate;">
+            ${activeIndication.doseConfig.doseMin}${
+              activeIndication.doseConfig.doseMax !== activeIndication.doseConfig.doseMin
                 ? ` - ${activeIndication.doseConfig.doseMax}`
                 : ''
-            }
-            ${activeIndication.doseConfig.unitLabel}
+            } ${activeIndication.doseConfig.unitLabel}
           </strong>
         </div>
 
         <div>
-          <span class="text-slate-500">
+          <span class="text-slate-500 block mb-0.5">
             طريق الإعطاء:
           </span>
 
-          <strong>
+          <strong class="text-slate-900" dir="ltr" style="unicode-bidi: isolate;">
             ${activeIndication.route}
           </strong>
         </div>
 
         <div>
-          <span class="text-slate-500">
+          <span class="text-slate-500 block mb-0.5">
             بدء الفاعلية:
           </span>
 
-          <strong>
+          <strong class="font-mono text-slate-900" dir="ltr" style="unicode-bidi: isolate;">
             ${drug.pharmacokinetics.onset}
           </strong>
         </div>
 
         <div>
-          <span class="text-slate-500">
+          <span class="text-slate-500 block mb-0.5">
             المدة:
           </span>
 
-          <strong>
+          <strong class="font-mono text-slate-900" dir="ltr" style="unicode-bidi: isolate;">
             ${drug.pharmacokinetics.duration}
           </strong>
         </div>
@@ -527,13 +526,13 @@ function renderDrugCard(drug, weight) {
       ${
         drug.safetyProfile?.safetyNotes
           ? `
-            <div class="p-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px]">
+            <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px] leading-relaxed">
 
-              <strong>
+              <strong class="font-bold">
                 ⚠️ تنبيه السلامة:
               </strong>
 
-              ${drug.safetyProfile.safetyNotes}
+              <span>${drug.safetyProfile.safetyNotes}</span>
 
             </div>
           `
@@ -546,22 +545,25 @@ function renderDrugCard(drug, weight) {
         <!-- Administration -->
         <button
           onclick="toggleAccordion('acc-admin-${drug.id}')"
-          class="w-full text-right font-bold text-blue-600 py-1 hover:underline"
+          class="w-full font-bold text-blue-600 py-1.5 hover:underline flex justify-between items-center text-right"
         >
-          💉 الاستعمال والتخفيف ▼
+          <span>💉 الاستعمال والتخفيف</span>
+          <span class="text-slate-400 text-[10px]">▼</span>
         </button>
 
         <div
           id="acc-admin-${drug.id}"
-          class="hidden p-2 bg-slate-50 rounded-lg text-[11px] text-slate-700 space-y-1"
+          class="hidden p-2.5 bg-slate-50 rounded-xl text-[11px] text-slate-700 space-y-1.5 border border-slate-100"
         >
 
           <p>
-            <strong>
+            <strong class="text-slate-900">
               طريقة الإعطاء:
             </strong>
 
-            ${drug.clinicalDetails.administration}
+            <span dir="ltr" class="inline-block" style="unicode-bidi: isolate;">
+              ${drug.clinicalDetails.administration}
+            </span>
           </p>
 
           ${
@@ -569,11 +571,13 @@ function renderDrugCard(drug, weight) {
             drug.dilutions.length
               ? `
                 <p>
-                  <strong>
+                  <strong class="text-slate-900">
                     التخفيف:
                   </strong>
 
-                  ${drug.dilutions[0].instructions}
+                  <span dir="ltr" class="inline-block" style="unicode-bidi: isolate;">
+                    ${drug.dilutions[0].instructions}
+                  </span>
                 </p>
               `
               : ''
@@ -584,30 +588,35 @@ function renderDrugCard(drug, weight) {
         <!-- Warnings -->
         <button
           onclick="toggleAccordion('acc-warn-${drug.id}')"
-          class="w-full text-right font-bold text-blue-600 py-1 hover:underline"
+          class="w-full font-bold text-blue-600 py-1.5 hover:underline flex justify-between items-center text-right"
         >
-          ⚠️ التحذيرات وموانع الاستعمال ▼
+          <span>⚠️ التحذيرات وموانع الاستعمال</span>
+          <span class="text-slate-400 text-[10px]">▼</span>
         </button>
 
         <div
           id="acc-warn-${drug.id}"
-          class="hidden p-2 bg-slate-50 rounded-lg text-[11px] text-slate-700 space-y-1"
+          class="hidden p-2.5 bg-slate-50 rounded-xl text-[11px] text-slate-700 space-y-1.5 border border-slate-100"
         >
 
           <p>
-            <strong>
+            <strong class="text-slate-900">
               التحذيرات:
             </strong>
 
-            ${drug.clinicalDetails.warnings.join(' • ')}
+            <span dir="ltr" class="inline-block" style="unicode-bidi: isolate;">
+              ${drug.clinicalDetails.warnings.join(' • ')}
+            </span>
           </p>
 
           <p>
-            <strong>
+            <strong class="text-slate-900">
               موانع الاستعمال:
             </strong>
 
-            ${drug.clinicalDetails.contraindications.join(' • ')}
+            <span dir="ltr" class="inline-block" style="unicode-bidi: isolate;">
+              ${drug.clinicalDetails.contraindications.join(' • ')}
+            </span>
           </p>
 
         </div>
@@ -615,36 +624,41 @@ function renderDrugCard(drug, weight) {
         <!-- Reversal & References -->
         <button
           onclick="toggleAccordion('acc-rev-${drug.id}')"
-          class="w-full text-right font-bold text-blue-600 py-1 hover:underline"
+          class="w-full font-bold text-blue-600 py-1.5 hover:underline flex justify-between items-center text-right"
         >
-          🔄 العكس والمراجع ▼
+          <span>🔄 العكس والمراجع</span>
+          <span class="text-slate-400 text-[10px]">▼</span>
         </button>
 
         <div
           id="acc-rev-${drug.id}"
-          class="hidden p-2 bg-slate-50 rounded-lg text-[11px] text-slate-700 space-y-1"
+          class="hidden p-2.5 bg-slate-50 rounded-xl text-[11px] text-slate-700 space-y-1.5 border border-slate-100"
         >
 
           <p>
-            <strong>
+            <strong class="text-slate-900">
               المضاد (Reversal):
             </strong>
 
-            ${drug.clinicalDetails.reversal}
+            <span dir="ltr" class="inline-block" style="unicode-bidi: isolate;">
+              ${drug.clinicalDetails.reversal}
+            </span>
           </p>
 
           <p>
-            <strong>
+            <strong class="text-slate-900">
               المرجع:
             </strong>
 
-            ${drug.references
-              .map(
-                reference =>
-                  `${reference.source} (${reference.topic})`
-              )
-              .join(' • ')
-            }
+            <span dir="ltr" class="inline-block" style="unicode-bidi: isolate;">
+              ${drug.references
+                .map(
+                  reference =>
+                    `${reference.source} (${reference.topic})`
+                )
+                .join(' • ')
+              }
+            </span>
           </p>
 
         </div>
