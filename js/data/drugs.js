@@ -6,9 +6,9 @@
 //   - js/calculators/doseCalculator.js
 //
 // IMPORTANT:
-// Educational / clinical reference only.
-// Always verify local protocol, patient factors,
-// available concentration and monitoring requirements.
+// مرجع تعليمي وسريري فقط.
+// يجب دائماً التحقق من البروتوكول المحلي،
+// حالة المريض، تركيز الدواء المتوفر ومتطلبات المراقبة.
 // ============================================================
 
 export const drugsData = [
@@ -33,8 +33,8 @@ export const drugsData = [
     indications: [
       {
         id: "induction",
-        title: "Induction of General Anesthesia",
-        route: "IV",
+        title: "تحريض التخدير العام",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 1.5,
@@ -44,8 +44,8 @@ export const drugsData = [
       },
       {
         id: "sedation",
-        title: "Procedural / Sedation",
-        route: "IV",
+        title: "التهدئة / الإجراءات",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 0.5,
@@ -75,36 +75,36 @@ export const drugsData = [
     },
 
     pharmacokinetics: {
-      onset: "30–60 sec",
-      duration: "5–10 min"
+      onset: "30–60 ثانية",
+      duration: "5–10 دقائق"
     },
 
     safetyProfile: {
       isHighAlert: true,
       safetyNotes:
-        "قد يسبب هبوط ضغط الدم وتثبيط التنفس، خاصة مع الجرعات السريعة أو عند مشاركته مع أدوية مهدئة أخرى."
+        "قد يسبب انخفاض ضغط الدم وتثبيط التنفس، خاصة عند إعطائه بسرعة أو عند استخدامه مع أدوية مهدئة أخرى."
     },
 
     clinicalDetails: {
       administration:
-        "IV injection administered slowly and titrated according to clinical response.",
+        "يُعطى عن طريق الوريد ببطء مع معايرة الجرعة وفق الاستجابة السريرية.",
       warnings: [
-        "Hypotension",
-        "Respiratory depression",
-        "Apnea",
-        "Pain on injection"
+        "انخفاض ضغط الدم",
+        "تثبيط التنفس",
+        "انقطاع التنفس",
+        "ألم أثناء الحقن"
       ],
       contraindications: [
-        "Known hypersensitivity to propofol or formulation components"
+        "فرط الحساسية المعروف للبروبوفول أو لأحد مكونات المستحضر"
       ],
       reversal:
-        "No specific reversal agent; provide airway and cardiovascular support."
+        "لا يوجد مضاد نوعي؛ يجب توفير دعم مجرى الهواء والدعم التنفسي والقلبـي الوعائي عند الحاجة."
     },
 
     dilutions: [
       {
         instructions:
-          "Use according to product formulation and local protocol. Avoid unnecessary dilution unless specifically indicated."
+          "يُستخدم حسب تركيبة المستحضر والبروتوكول المحلي. تجنب التخفيف غير الضروري إلا عند وجود استطباب واضح."
       }
     ],
 
@@ -134,6 +134,8 @@ export const drugsData = [
       "ketamine",
       "ketalar",
       "كيتامين",
+      "تحريض",
+      "تسكين",
       "induction",
       "analgesia"
     ],
@@ -141,8 +143,8 @@ export const drugsData = [
     indications: [
       {
         id: "induction",
-        title: "Induction of General Anesthesia",
-        route: "IV",
+        title: "تحريض التخدير العام",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 1.0,
@@ -152,8 +154,8 @@ export const drugsData = [
       },
       {
         id: "im",
-        title: "IM Induction",
-        route: "IM",
+        title: "تحريض عضلي IM",
+        route: "عضلي IM",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 4.0,
@@ -188,37 +190,37 @@ export const drugsData = [
     },
 
     pharmacokinetics: {
-      onset: "30–60 sec IV",
-      duration: "10–20 min"
+      onset: "30–60 ثانية IV",
+      duration: "10–20 دقيقة"
     },
 
     safetyProfile: {
       isHighAlert: true,
       safetyNotes:
-        "قد يسبب زيادة ضغط الدم ومعدل القلب، وزيادة الإفرازات، وأحيانًا ظواهر emergence."
+        "قد يسبب ارتفاع ضغط الدم ومعدل القلب وزيادة الإفرازات، وقد يسبب أحياناً ظواهر الاستيقاظ غير المريحة."
     },
 
     clinicalDetails: {
       administration:
-        "IV administration should be given slowly and titrated to clinical response.",
+        "يُعطى وريدياً ببطء مع معايرة الجرعة وفق الاستجابة السريرية.",
       warnings: [
-        "Hypertension",
-        "Tachycardia",
-        "Increased secretions",
-        "Emergence reactions"
+        "ارتفاع ضغط الدم",
+        "تسرع القلب",
+        "زيادة الإفرازات",
+        "تفاعلات الاستيقاظ"
       ],
       contraindications: [
-        "Known hypersensitivity",
-        "Situations where significant blood pressure elevation is hazardous"
+        "فرط الحساسية المعروف",
+        "الحالات التي يكون فيها ارتفاع ضغط الدم أمراً خطيراً"
       ],
       reversal:
-        "No specific reversal agent; provide supportive airway and cardiovascular management."
+        "لا يوجد مضاد نوعي؛ يجب توفير الدعم المناسب لمجرى الهواء والجهازين التنفسي والقلبـي الوعائي."
     },
 
     dilutions: [
       {
         instructions:
-          "Dilution depends on the formulation and intended administration; follow local protocol."
+          "يعتمد التخفيف على تركيز المستحضر وطريقة الاستخدام المقصودة؛ يجب اتباع البروتوكول المحلي."
       }
     ],
 
@@ -249,6 +251,7 @@ export const drugsData = [
       "esmeron",
       "zemuron",
       "روكورونيوم",
+      "مرخي عضلات",
       "NMB",
       "RSI",
       "intubation"
@@ -257,8 +260,8 @@ export const drugsData = [
     indications: [
       {
         id: "intubation",
-        title: "Tracheal Intubation",
-        route: "IV",
+        title: "التنبيب الرغامي",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 0.6,
@@ -268,8 +271,8 @@ export const drugsData = [
       },
       {
         id: "rsi",
-        title: "Rapid Sequence Intubation (RSI)",
-        route: "IV",
+        title: "التنبيب بالتسلسل السريع RSI",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 0.6,
@@ -279,8 +282,8 @@ export const drugsData = [
       },
       {
         id: "maintenance",
-        title: "Maintenance Bolus",
-        route: "IV",
+        title: "جرعة الصيانة",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 0.1,
@@ -305,36 +308,36 @@ export const drugsData = [
     },
 
     pharmacokinetics: {
-      onset: "60–90 sec",
-      duration: "30–45 min"
+      onset: "60–90 ثانية",
+      duration: "30–45 دقيقة"
     },
 
     safetyProfile: {
       isHighAlert: true,
       safetyNotes:
-        "Neuromuscular blocker. Causes skeletal muscle paralysis including respiratory muscles. Adequate airway management, ventilation and monitoring must be immediately available."
+        "مرخٍ للعضلات. يسبب شللاً في العضلات الهيكلية بما فيها عضلات التنفس. يجب توفر وسائل تأمين مجرى الهواء والتهوية والمراقبة المناسبة فوراً."
     },
 
     clinicalDetails: {
       administration:
-        "IV administration only. Use with appropriate airway management and neuromuscular monitoring.",
+        "يُعطى وريدياً فقط. يجب استخدامه مع تأمين مناسب لمجرى الهواء والتهوية والمراقبة العصبية العضلية.",
       warnings: [
-        "Complete respiratory muscle paralysis",
-        "Anaphylaxis",
-        "Prolonged effect in some patients",
-        "Requires neuromuscular monitoring"
+        "شلل كامل لعضلات التنفس",
+        "تفاعلات الحساسية المفرطة",
+        "إطالة مدة التأثير لدى بعض المرضى",
+        "ضرورة المراقبة العصبية العضلية"
       ],
       contraindications: [
-        "Known hypersensitivity to rocuronium or other neuromuscular blocking agents"
+        "فرط الحساسية المعروف للروكورونيوم أو لمرخيات العضلات الأخرى"
       ],
       reversal:
-        "Sugammadex or neostigmine with an appropriate antimuscarinic when clinically appropriate."
+        "يمكن استخدام Sugammadex أو Neostigmine مع مضاد مسكاريني مناسب عندما يكون ذلك ملائماً سريرياً."
     },
 
     dilutions: [
       {
         instructions:
-          "May be diluted with compatible IV solutions such as 0.9% sodium chloride according to product and local protocol."
+          "يمكن تخفيفه بمحاليل وريدية متوافقة مثل محلول كلوريد الصوديوم 0.9% وفق تعليمات المستحضر والبروتوكول المحلي."
       }
     ],
 
@@ -368,6 +371,8 @@ export const drugsData = [
       "fentanyl",
       "sublimaze",
       "فنتانيل",
+      "أفيوني",
+      "تسكين",
       "opioid",
       "analgesia"
     ],
@@ -375,8 +380,8 @@ export const drugsData = [
     indications: [
       {
         id: "analgesia",
-        title: "Perioperative Analgesia",
-        route: "IV",
+        title: "التسكين حول العملية",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mcg/kg",
           doseMin: 1,
@@ -386,8 +391,8 @@ export const drugsData = [
       },
       {
         id: "high_dose",
-        title: "Higher-dose Opioid Technique",
-        route: "IV",
+        title: "تقنية الأفيونات بجرعات أعلى",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mcg/kg",
           doseMin: 2,
@@ -412,37 +417,37 @@ export const drugsData = [
     },
 
     pharmacokinetics: {
-      onset: "1–2 min IV",
-      duration: "30–60 min"
+      onset: "1–2 دقيقة IV",
+      duration: "30–60 دقيقة"
     },
 
     safetyProfile: {
       isHighAlert: true,
       safetyNotes:
-        "Potent opioid. May cause respiratory depression, chest wall rigidity with rapid/high doses, bradycardia and hypotension."
+        "أفيون قوي. قد يسبب تثبيط التنفس وتيبس جدار الصدر عند الجرعات العالية أو الإعطاء السريع وبطء القلب وانخفاض ضغط الدم."
     },
 
     clinicalDetails: {
       administration:
-        "Administer IV slowly and titrate according to analgesic and respiratory response.",
+        "يُعطى وريدياً ببطء مع معايرة الجرعة وفق الاستجابة المسكنة والتنفسية.",
       warnings: [
-        "Respiratory depression",
-        "Bradycardia",
-        "Hypotension",
-        "Chest wall rigidity with rapid administration"
+        "تثبيط التنفس",
+        "بطء القلب",
+        "انخفاض ضغط الدم",
+        "تيبس جدار الصدر عند الإعطاء السريع"
       ],
       contraindications: [
-        "Known hypersensitivity",
-        "Unmonitored severe respiratory depression"
+        "فرط الحساسية المعروف",
+        "تثبيط تنفسي شديد دون مراقبة مناسبة"
       ],
       reversal:
-        "Naloxone may be used for clinically significant opioid-induced respiratory depression."
+        "يمكن استخدام Naloxone لعلاج تثبيط التنفس المهم الناتج عن الأفيونات."
     },
 
     dilutions: [
       {
         instructions:
-          "May be diluted with compatible IV fluids according to local protocol."
+          "يمكن تخفيفه بمحاليل وريدية متوافقة وفق البروتوكول المحلي."
       }
     ],
 
@@ -472,6 +477,8 @@ export const drugsData = [
       "atropine",
       "atropine sulfate",
       "أتروبين",
+      "بطء القلب",
+      "مضاد كولين",
       "bradycardia",
       "anticholinergic"
     ],
@@ -479,8 +486,8 @@ export const drugsData = [
     indications: [
       {
         id: "bradycardia",
-        title: "Symptomatic Bradycardia",
-        route: "IV",
+        title: "بطء القلب العرضي",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "fixed_mg",
           fixedDoseValue: 1,
@@ -491,8 +498,8 @@ export const drugsData = [
       },
       {
         id: "neostigmine",
-        title: "With Neostigmine Reversal",
-        route: "IV",
+        title: "مع عكس تأثير النيوستغمين",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 0.01,
@@ -527,37 +534,37 @@ export const drugsData = [
     },
 
     pharmacokinetics: {
-      onset: "1–2 min IV",
-      duration: "2–4 hours"
+      onset: "1–2 دقيقة IV",
+      duration: "2–4 ساعات"
     },
 
     safetyProfile: {
       isHighAlert: true,
       safetyNotes:
-        "May cause tachycardia, dry mouth, urinary retention, mydriasis and anticholinergic effects."
+        "قد يسبب تسرع القلب وجفاف الفم واحتباس البول وتوسع الحدقة وتأثيرات مضادة للكولين."
     },
 
     clinicalDetails: {
       administration:
-        "For symptomatic bradycardia, administer IV according to current resuscitation guidance and repeat as clinically indicated.",
+        "في حالة بطء القلب العرضي، يُعطى وريدياً وفق إرشادات الإنعاش الحالية وتُكرر الجرعة حسب الاستجابة السريرية.",
       warnings: [
-        "Tachycardia",
-        "Anticholinergic effects",
-        "Urinary retention",
-        "Mydriasis"
+        "تسرع القلب",
+        "تأثيرات مضادة للكولين",
+        "احتباس البول",
+        "توسع الحدقة"
       ],
       contraindications: [
-        "Known hypersensitivity",
-        "Use cautiously in conditions where anticholinergic effects are hazardous"
+        "فرط الحساسية المعروف",
+        "يُستخدم بحذر في الحالات التي قد تكون فيها التأثيرات المضادة للكولين خطرة"
       ],
       reversal:
-        "No routine specific reversal; manage anticholinergic toxicity according to clinical protocol."
+        "لا يوجد عكس نوعي روتيني؛ تُعالج سمية مضادات الكولين وفق البروتوكول السريري."
     },
 
     dilutions: [
       {
         instructions:
-          "Use available concentration according to indication and local protocol."
+          "يُستخدم التركيز المتوفر وفق الاستطباب والبروتوكول المحلي."
       }
     ],
 
@@ -587,6 +594,7 @@ export const drugsData = [
       "atracurium",
       "tracrium",
       "أتراكوريوم",
+      "مرخي عضلات",
       "NMB",
       "muscle relaxant"
     ],
@@ -594,8 +602,8 @@ export const drugsData = [
     indications: [
       {
         id: "intubation",
-        title: "Tracheal Intubation",
-        route: "IV",
+        title: "التنبيب الرغامي",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 0.4,
@@ -605,8 +613,8 @@ export const drugsData = [
       },
       {
         id: "maintenance",
-        title: "Maintenance",
-        route: "IV",
+        title: "جرعة الصيانة",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 0.08,
@@ -631,36 +639,36 @@ export const drugsData = [
     },
 
     pharmacokinetics: {
-      onset: "2–3 min",
-      duration: "20–35 min"
+      onset: "2–3 دقائق",
+      duration: "20–35 دقيقة"
     },
 
     safetyProfile: {
       isHighAlert: true,
       safetyNotes:
-        "May cause histamine release with flushing, hypotension or bronchospasm, especially with rapid administration."
+        "قد يسبب إطلاق الهيستامين مع احمرار وانخفاض ضغط الدم أو تشنج قصبي، خاصة عند الإعطاء السريع."
     },
 
     clinicalDetails: {
       administration:
-        "Administer IV. Slow administration may reduce histamine-related cardiovascular effects.",
+        "يُعطى وريدياً. قد يساعد الإعطاء البطيء على تقليل التأثيرات القلبية الوعائية المرتبطة بإطلاق الهيستامين.",
       warnings: [
-        "Respiratory paralysis",
-        "Histamine release",
-        "Hypotension",
-        "Bronchospasm"
+        "شلل عضلات التنفس",
+        "إطلاق الهيستامين",
+        "انخفاض ضغط الدم",
+        "تشنج قصبي"
       ],
       contraindications: [
-        "Known hypersensitivity to atracurium"
+        "فرط الحساسية المعروف للأتراكوريوم"
       ],
       reversal:
-        "Neostigmine with an appropriate antimuscarinic when clinically indicated."
+        "يمكن استخدام Neostigmine مع مضاد مسكاريني مناسب عند وجود استطباب سريري."
     },
 
     dilutions: [
       {
         instructions:
-          "May be administered IV according to product instructions and local protocol."
+          "يمكن إعطاؤه وريدياً وفق تعليمات المستحضر والبروتوكول المحلي."
       }
     ],
 
@@ -692,14 +700,15 @@ export const drugsData = [
       "sux",
       "سكسينيل كولين",
       "RSI",
+      "مرخي مزيل للاستقطاب",
       "depolarizing"
     ],
 
     indications: [
       {
         id: "intubation",
-        title: "Tracheal Intubation / RSI",
-        route: "IV",
+        title: "التنبيب الرغامي / التنبيب بالتسلسل السريع",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 1.0,
@@ -729,40 +738,40 @@ export const drugsData = [
     },
 
     pharmacokinetics: {
-      onset: "30–60 sec",
-      duration: "5–10 min"
+      onset: "30–60 ثانية",
+      duration: "5–10 دقائق"
     },
 
     safetyProfile: {
       isHighAlert: true,
       safetyNotes:
-        "Rapid-onset depolarizing neuromuscular blocker. Major concerns include hyperkalemia, malignant hyperthermia and bradyarrhythmias."
+        "مرخٍ سريع المفعول ومزيل للاستقطاب. من أهم المخاطر فرط بوتاسيوم الدم وفرط الحرارة الخبيث واضطرابات النظم وبطء القلب."
     },
 
     clinicalDetails: {
       administration:
-        "IV administration by clinicians prepared for airway management and mechanical ventilation.",
+        "يُعطى وريدياً بواسطة مختصين مستعدين لتأمين مجرى الهواء وتوفير التهوية الميكانيكية.",
       warnings: [
-        "Hyperkalemia",
-        "Malignant hyperthermia",
-        "Bradycardia",
-        "Prolonged apnea",
-        "Masseter spasm"
+        "فرط بوتاسيوم الدم",
+        "فرط الحرارة الخبيث",
+        "بطء القلب",
+        "انقطاع التنفس المطول",
+        "تشنج عضلة الفك"
       ],
       contraindications: [
-        "Known malignant hyperthermia susceptibility",
-        "Known significant hyperkalemia risk",
-        "Certain neuromuscular disorders",
-        "Known hypersensitivity"
+        "القابلية المعروفة للإصابة بفرط الحرارة الخبيث",
+        "وجود خطر مهم معروف لفرط بوتاسيوم الدم",
+        "بعض الاضطرابات العصبية العضلية",
+        "فرط الحساسية المعروف"
       ],
       reversal:
-        "No direct reversal agent. Provide airway support and ventilation until spontaneous recovery."
+        "لا يوجد مضاد عكسي مباشر. يجب توفير دعم مجرى الهواء والتهوية حتى عودة الوظيفة العضلية تلقائياً."
     },
 
     dilutions: [
       {
         instructions:
-          "Use according to formulation and local protocol."
+          "يُستخدم وفق تركيبة المستحضر والبروتوكول المحلي."
       }
     ],
 
@@ -791,6 +800,8 @@ export const drugsData = [
     searchKeywords: [
       "ephedrine",
       "إيفيدرين",
+      "انخفاض ضغط الدم",
+      "مقبض وعائي",
       "hypotension",
       "vasopressor"
     ],
@@ -798,8 +809,8 @@ export const drugsData = [
     indications: [
       {
         id: "hypotension",
-        title: "Anesthesia-related Hypotension",
-        route: "IV",
+        title: "انخفاض ضغط الدم المرتبط بالتخدير",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "fixed_mg",
           fixedDoseValue: 5,
@@ -835,37 +846,37 @@ export const drugsData = [
     },
 
     pharmacokinetics: {
-      onset: "1–2 min IV",
-      duration: "10–60 min"
+      onset: "1–2 دقيقة IV",
+      duration: "10–60 دقيقة"
     },
 
     safetyProfile: {
       isHighAlert: true,
       safetyNotes:
-        "Sympathomimetic drug. May cause tachycardia, hypertension and arrhythmias."
+        "دواء محاكي للجهاز الودي. قد يسبب تسرع القلب وارتفاع ضغط الدم واضطرابات نظم القلب."
     },
 
     clinicalDetails: {
       administration:
-        "IV bolus should be administered in a titrated manner according to blood pressure and heart rate.",
+        "تُعطى الجرعة الوريدية تدريجياً وفق ضغط الدم ومعدل القلب والاستجابة السريرية.",
       warnings: [
-        "Tachycardia",
-        "Hypertension",
-        "Arrhythmias",
-        "Tachyphylaxis with repeated doses"
+        "تسرع القلب",
+        "ارتفاع ضغط الدم",
+        "اضطرابات نظم القلب",
+        "انخفاض الاستجابة مع تكرار الجرعات"
       ],
       contraindications: [
-        "Known hypersensitivity",
-        "Use cautiously in significant cardiovascular disease"
+        "فرط الحساسية المعروف",
+        "يُستخدم بحذر في أمراض القلب والأوعية الدموية المهمة"
       ],
       reversal:
-        "No specific reversal agent; manage excessive sympathomimetic effects supportively."
+        "لا يوجد مضاد نوعي؛ تُعالج التأثيرات المفرطة للدواء بشكل داعم وفق البروتوكول السريري."
     },
 
     dilutions: [
       {
         instructions:
-          "Verify ampoule concentration and dilute to a clearly labeled working concentration before IV administration."
+          "يجب التحقق من تركيز الأمبول وتخفيفه إلى تركيز عملي واضح ومُعنون قبل الإعطاء الوريدي."
       }
     ],
 
@@ -895,6 +906,8 @@ export const drugsData = [
       "neostigmine",
       "prostigmin",
       "نيوستغمين",
+      "عكس المرخيات",
+      "عكس الحصر العصبي العضلي",
       "reversal",
       "NMB reversal"
     ],
@@ -902,8 +915,8 @@ export const drugsData = [
     indications: [
       {
         id: "reversal",
-        title: "Reversal of Nondepolarizing Neuromuscular Block",
-        route: "IV",
+        title: "عكس الحصر العصبي العضلي غير مزيل الاستقطاب",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 0.03,
@@ -934,38 +947,38 @@ export const drugsData = [
     },
 
     pharmacokinetics: {
-      onset: "3–10 min",
-      duration: "40–60 min"
+      onset: "3–10 دقائق",
+      duration: "40–60 دقيقة"
     },
 
     safetyProfile: {
       isHighAlert: true,
       safetyNotes:
-        "Should be administered only when clinically appropriate recovery from neuromuscular blockade is present and with appropriate antimuscarinic protection."
+        "يجب إعطاؤه فقط عند وجود عودة مناسبة سريرياً من الحصر العصبي العضلي ومع استخدام مضاد مسكاريني مناسب."
     },
 
     clinicalDetails: {
       administration:
-        "IV administration. Dose should be selected according to the depth of neuromuscular blockade and clinical context.",
+        "يُعطى وريدياً. تُحدد الجرعة وفق درجة الحصر العصبي العضلي والسياق السريري.",
       warnings: [
-        "Bradycardia",
-        "Bronchospasm",
-        "Increased secretions",
-        "Cholinergic effects"
+        "بطء القلب",
+        "تشنج قصبي",
+        "زيادة الإفرازات",
+        "تأثيرات كولينية"
       ],
       contraindications: [
-        "Known hypersensitivity",
-        "Mechanical intestinal obstruction",
-        "Mechanical urinary tract obstruction"
+        "فرط الحساسية المعروف",
+        "الانسداد الميكانيكي للأمعاء",
+        "الانسداد الميكانيكي للمسالك البولية"
       ],
       reversal:
-        "Neostigmine itself is a reversal agent; administer with an appropriate antimuscarinic such as atropine or glycopyrrolate."
+        "النيوستغمين نفسه دواء لعكس الحصر العصبي العضلي؛ ويُعطى مع مضاد مسكاريني مناسب مثل الأتروبين أو الغليكوبيرولات."
     },
 
     dilutions: [
       {
         instructions:
-          "Dilute or administer according to available concentration and local reversal protocol."
+          "يُخفف أو يُعطى وفق التركيز المتوفر وبحسب بروتوكول عكس الحصر العصبي العضلي المحلي."
       }
     ],
 
@@ -996,6 +1009,8 @@ export const drugsData = [
       "versed",
       "dormicum",
       "ميدازولام",
+      "بنزوديازيبين",
+      "تهدئة",
       "benzodiazepine",
       "sedation"
     ],
@@ -1003,8 +1018,8 @@ export const drugsData = [
     indications: [
       {
         id: "sedation",
-        title: "IV Sedation",
-        route: "IV",
+        title: "التهدئة الوريدية",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 0.01,
@@ -1014,8 +1029,8 @@ export const drugsData = [
       },
       {
         id: "premedication",
-        title: "Preoperative Sedation",
-        route: "IV",
+        title: "التهدئة قبل العملية",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
           doseMin: 0.02,
@@ -1045,37 +1060,37 @@ export const drugsData = [
     },
 
     pharmacokinetics: {
-      onset: "1–3 min",
-      duration: "30–80 min"
+      onset: "1–3 دقائق",
+      duration: "30–80 دقيقة"
     },
 
     safetyProfile: {
       isHighAlert: true,
       safetyNotes:
-        "May cause respiratory depression, apnea and hypotension. Risk increases with opioids and other CNS depressants."
+        "قد يسبب تثبيط التنفس وانقطاعه وانخفاض ضغط الدم. يزداد الخطر عند استخدامه مع الأفيونات ومثبطات الجهاز العصبي المركزي الأخرى."
     },
 
     clinicalDetails: {
       administration:
-        "Administer slowly and titrate to the desired level of sedation. Continuous monitoring of respiratory and cardiovascular status is required.",
+        "يُعطى ببطء مع معايرة الجرعة للوصول إلى مستوى التهدئة المطلوب، مع ضرورة المراقبة المستمرة للحالة التنفسية والقلبية الوعائية.",
       warnings: [
-        "Respiratory depression",
-        "Apnea",
-        "Hypotension",
-        "Enhanced effects with opioids"
+        "تثبيط التنفس",
+        "انقطاع التنفس",
+        "انخفاض ضغط الدم",
+        "زيادة التأثير عند استخدامه مع الأفيونات"
       ],
       contraindications: [
-        "Known hypersensitivity to benzodiazepines",
-        "Acute narrow-angle glaucoma"
+        "فرط الحساسية المعروف للبنزوديازيبينات",
+        "الزرق الحاد ضيق الزاوية"
       ],
       reversal:
-        "Flumazenil may reverse benzodiazepine effects in selected situations, but recurrent sedation and seizure risk must be considered."
+        "يمكن استخدام Flumazenil لعكس تأثير البنزوديازيبينات في حالات مختارة، مع مراعاة احتمال عودة التهدئة وخطر الاختلاجات."
     },
 
     dilutions: [
       {
         instructions:
-          "May be diluted with compatible IV solutions according to product instructions and local protocol."
+          "يمكن تخفيفه بمحاليل وريدية متوافقة وفق تعليمات المستحضر والبروتوكول المحلي."
       }
     ],
 
@@ -1107,6 +1122,9 @@ export const drugsData = [
       "epi",
       "أدرينالين",
       "إبينفرين",
+      "التأق",
+      "توقف القلب",
+      "مقبض وعائي",
       "anaphylaxis",
       "cardiac arrest",
       "vasopressor"
@@ -1115,8 +1133,8 @@ export const drugsData = [
     indications: [
       {
         id: "anaphylaxis",
-        title: "Anaphylaxis",
-        route: "IM",
+        title: "التأق / الحساسية المفرطة",
+        route: "عضلي IM",
         doseConfig: {
           doseType: "fixed_mg",
           fixedDoseValue: 0.5,
@@ -1127,8 +1145,8 @@ export const drugsData = [
       },
       {
         id: "cardiac_arrest",
-        title: "Adult Cardiac Arrest",
-        route: "IV / IO",
+        title: "توقف القلب عند البالغين",
+        route: "وريدي / داخل العظم IV / IO",
         doseConfig: {
           doseType: "fixed_mg",
           fixedDoseValue: 1,
@@ -1139,8 +1157,8 @@ export const drugsData = [
       },
       {
         id: "hypotension_infusion",
-        title: "Vasopressor Infusion",
-        route: "IV Infusion",
+        title: "ضخ مقبض وعائي",
+        route: "تسريب وريدي IV Infusion",
         doseConfig: {
           doseType: "mcg/kg/min",
           doseMin: 0.01,
@@ -1170,43 +1188,43 @@ export const drugsData = [
     },
 
     pharmacokinetics: {
-      onset: "Rapid",
-      duration: "5–10 min IV"
+      onset: "سريع",
+      duration: "5–10 دقائق IV"
     },
 
     safetyProfile: {
       isHighAlert: true,
       safetyNotes:
-        "HIGH ALERT. Epinephrine concentrations and routes differ by indication. Always verify concentration, route and clinical indication before administration."
+        "دواء عالي الخطورة. تختلف تراكيز الإبينفرين وطرق إعطائه حسب الاستطباب. يجب دائماً التحقق من التركيز والطريق والاستطباب قبل الإعطاء."
     },
 
     clinicalDetails: {
       administration:
-        "Route and concentration depend on the indication. For anaphylaxis, IM administration into the anterolateral thigh is standard. Cardiac arrest dosing follows current resuscitation guidelines.",
+        "يعتمد الطريق والتركيز على الاستطباب. في حالات التأق، يُعطى عضلياً في الجانب الأمامي الوحشي من الفخذ. أما في توقف القلب فتُتبع إرشادات الإنعاش الحالية.",
       warnings: [
-        "Arrhythmias",
-        "Severe hypertension",
-        "Myocardial ischemia",
-        "Medication concentration errors",
-        "High risk of dosing error"
+        "اضطرابات نظم القلب",
+        "ارتفاع شديد في ضغط الدم",
+        "نقص تروية عضلة القلب",
+        "أخطاء التركيز الدوائي",
+        "خطر مرتفع لأخطاء الجرعات"
       ],
       contraindications: [
-        "No absolute contraindication in life-threatening anaphylaxis or cardiac arrest; use according to indication and route."
+        "لا يوجد مانع استعمال مطلق في التأق المهدد للحياة أو توقف القلب؛ يجب استخدامه وفق الاستطباب والطريق المناسبين."
       ],
       reversal:
-        "No specific reversal agent. Treat excessive cardiovascular effects supportively according to clinical protocol."
+        "لا يوجد مضاد نوعي. تُعالج التأثيرات القلبية الوعائية المفرطة بشكل داعم وفق البروتوكول السريري."
     },
 
     dilutions: [
       {
         instructions:
-          "For IV administration, use a clearly identified and appropriately prepared concentration according to the specific clinical protocol. Do not assume that an IM anaphylaxis concentration is interchangeable with an IV cardiac-arrest concentration."
+          "عند الإعطاء الوريدي، يجب استخدام تركيز معروف ومُحضّر ومُعنون بشكل واضح وفق البروتوكول السريري المحدد. لا تفترض أن تركيز الإعطاء العضلي في التأق قابل للاستبدال مباشرة مع تركيز الإنعاش القلبي الوريدي."
       }
     ],
 
     references: [
       {
-        source: "AHA 2025 ACLS Guidelines",
+        source: "AHA ACLS Guidelines",
         topic: "Adult Cardiac Arrest"
       },
       {
@@ -1234,6 +1252,8 @@ export const drugsData = [
       "dexamethasone",
       "decadron",
       "ديكساميثازون",
+      "الغثيان والقيء بعد العملية",
+      "مضاد للقيء",
       "PONV",
       "antiemetic"
     ],
@@ -1241,8 +1261,8 @@ export const drugsData = [
     indications: [
       {
         id: "ponv",
-        title: "PONV Prophylaxis",
-        route: "IV",
+        title: "الوقاية من الغثيان والقيء بعد العملية",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "fixed_mg",
           fixedDoseValue: 4,
@@ -1253,8 +1273,8 @@ export const drugsData = [
       },
       {
         id: "airway_edema",
-        title: "Airway Edema / Inflammatory Use",
-        route: "IV",
+        title: "وذمة مجرى الهواء / الاستخدام المضاد للالتهاب",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "fixed_mg",
           fixedDoseValue: 8,
@@ -1285,36 +1305,36 @@ export const drugsData = [
     },
 
     pharmacokinetics: {
-      onset: "Within hours",
-      duration: "Several hours"
+      onset: "خلال ساعات",
+      duration: "عدة ساعات"
     },
 
     safetyProfile: {
       isHighAlert: false,
       safetyNotes:
-        "Consider glucose elevation, infection risk and other corticosteroid-related effects depending on dose and patient factors."
+        "يجب مراعاة احتمال ارتفاع سكر الدم وخطر العدوى والتأثيرات الأخرى المرتبطة بالكورتيكوستيرويدات حسب الجرعة وحالة المريض."
     },
 
     clinicalDetails: {
       administration:
-        "Administer IV or by another appropriate route according to the indication and local protocol.",
+        "يُعطى وريدياً أو بطريق مناسب آخر حسب الاستطباب والبروتوكول المحلي.",
       warnings: [
-        "Hyperglycemia",
-        "Potential infection risk",
-        "GI effects",
-        "Steroid-related adverse effects with repeated use"
+        "ارتفاع سكر الدم",
+        "احتمال زيادة خطر العدوى",
+        "تأثيرات على الجهاز الهضمي",
+        "آثار مرتبطة بالكورتيكوستيرويدات عند الاستخدام المتكرر"
       ],
       contraindications: [
-        "Known hypersensitivity to dexamethasone or formulation components"
+        "فرط الحساسية المعروف للديكساميثازون أو لأحد مكونات المستحضر"
       ],
       reversal:
-        "No specific reversal agent."
+        "لا يوجد مضاد نوعي."
     },
 
     dilutions: [
       {
         instructions:
-          "Use compatible IV solution if dilution is required by the product or local protocol."
+          "يُستخدم محلول وريدي متوافق عند الحاجة إلى التخفيف وفق تعليمات المستحضر والبروتوكول المحلي."
       }
     ],
 
