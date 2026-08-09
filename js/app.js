@@ -6,6 +6,8 @@ import { renderAirwayView, renderAirwayResultsHTML } from './components/airwayVi
 import { calculateAirwayParams } from './calculators/airwayCalculator.js';
 import { renderFluidView, renderFluidResultsHTML } from './components/fluidView.js';
 import { calculateFluidParams } from './calculators/fluidCalculator.js';
+import { renderRegionalView, renderRegionalResultsHTML, renderLastEmergencyHTML } from './components/regionalView.js';
+import { calculateRegionalParams, localAnestheticsDB } from './calculators/regionalCalculator.js';
 
 // =========================================================
 // INITIALIZATION & GLOBAL HANDLERS
@@ -90,6 +92,8 @@ function render() {
     renderAirwayLayout(contentContainer);
   } else if (store.state.currentView === 'fluidAbl') {
     renderFluidLayout(contentContainer);
+  } else if (store.state.currentView === 'regionalLast') {
+    renderRegionalLayout(contentContainer);
   }
 }
 
@@ -102,8 +106,8 @@ function renderDashboardView(container) {
     { id: 'drugCenter', title: 'مركز الأدوية والسرنجات', subtitle: 'حاسبة جرعات وأحجام أدوية التخدير', icon: '💊', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
     { id: 'airway', title: 'المجرى الهوائي والأنابيب', subtitle: 'قياسات ETT, LMA, Blade, OPA', icon: '🫁', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
     { id: 'fluidAbl', title: 'السوائل والنزف المسموح', subtitle: 'حاسبة 4-2-1 والصيام و ABL', icon: '💧', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-    { id: 'regionalLast', title: 'التخدير المناطقي و LAST', subtitle: 'الحد الأقصى للسمية والإنقاذ بـ Lipid', icon: '⚡', status: 'coming_soon', badge: 'المرحلة القادمة', badgeClass: 'bg-blue-100 text-blue-800 border-blue-300' },
-    { id: 'infusionTci', title: 'مضخات التنقيط المستمر', subtitle: 'حساب معدلات mcg/kg/min و mg/hr', icon: '🔂', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
+    { id: 'regionalLast', title: 'التخدير المناطقي و LAST', subtitle: 'الحد الأقصى للسمية والإنقاذ بـ Lipid', icon: '⚡', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
+    { id: 'infusionTci', title: 'مضخات التنقيط المستمر', subtitle: 'حساب معدلات mcg/kg/min و mg/hr', icon: '🔂', status: 'coming_soon', badge: 'المرحلة القادمة', badgeClass: 'bg-blue-100 text-blue-800 border-blue-300' },
     { id: 'pediatric', title: 'تخدير الأطفال الشامل', subtitle: 'حاسبة جرعات وأنابيب الأطفال', icon: '👶', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
     { id: 'vaporizers', title: 'تركيز الغازات الـ MAC', subtitle: 'حاسبة النسبة المئوية واستهلاك الغاز', icon: '💨', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
     { id: 'preOpRisk', title: 'تقييم المخاطر قبل العملية', subtitle: 'تصنيف ASA وتقييم القلب والتنفس', icon: '📋', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
@@ -158,6 +162,84 @@ function renderDashboardView(container) {
   const fluidAblCard = container.querySelector('[data-tool-id="fluidAbl"]');
   if (fluidAblCard) {
     fluidAblCard.addEventListener('click', () => window.navigateTo('fluidAbl'));
+  }
+
+  const regionalLastCard = container.querySelector('[data-tool-id="regionalLast"]');
+  if (regionalLastCard) {
+    regionalLastCard.addEventListener('click', () => window.navigateTo('regionalLast'));
+  }
+}
+
+// =========================================================
+// REGIONAL ANESTHESIA & LAST LAYOUT (Phase 5)
+// =========================================================
+
+function renderRegionalLayout(container) {
+  container.innerHTML = renderRegionalView();
+
+  const weightInput = document.getElementById('regionalWeightInput');
+  const drugSelect = document.getElementById('regionalDrugSelect');
+  const btnEpiFalse = document.getElementById('btnEpiFalse');
+  const btnEpiTrue = document.getElementById('btnEpiTrue');
+  const concSelect = document.getElementById('regionalConcSelect');
+
+  const updateResults = () => {
+    const regResultsContainer = document.getElementById('regionalResultsContainer');
+    const lastContainer = document.getElementById('lastEmergencyContainer');
+
+    const drugKey = store.state.regionalDrug || 'bupivacaine';
+    const drugObj = localAnestheticsDB[drugKey] || localAnestheticsDB.bupivacaine;
+
+    const res = calculateRegionalParams({
+      weightKg: store.state.patientWeight,
+      drugKey: store.state.regionalDrug,
+      withEpinephrine: store.state.regionalWithEpi,
+      concentrationMgMl: store.state.regionalConc || drugObj.defaultConcentrationMgMl
+    });
+
+    if (regResultsContainer) {
+      regResultsContainer.innerHTML = renderRegionalResultsHTML(res);
+    }
+    if (lastContainer) {
+      lastContainer.innerHTML = renderLastEmergencyHTML(res);
+    }
+  };
+
+  if (weightInput) {
+    weightInput.addEventListener('input', (e) => {
+      store.setWeight(parseFloat(e.target.value) || 0);
+      updateResults();
+    });
+  }
+
+  if (drugSelect) {
+    drugSelect.addEventListener('change', (e) => {
+      store.state.regionalDrug = e.target.value;
+      const drugObj = localAnestheticsDB[e.target.value];
+      store.state.regionalConc = drugObj ? drugObj.defaultConcentrationMgMl : 0;
+      renderRegionalLayout(container);
+    });
+  }
+
+  if (btnEpiFalse) {
+    btnEpiFalse.addEventListener('click', () => {
+      store.state.regionalWithEpi = false;
+      renderRegionalLayout(container);
+    });
+  }
+
+  if (btnEpiTrue) {
+    btnEpiTrue.addEventListener('click', () => {
+      store.state.regionalWithEpi = true;
+      renderRegionalLayout(container);
+    });
+  }
+
+  if (concSelect) {
+    concSelect.addEventListener('change', (e) => {
+      store.state.regionalConc = parseFloat(e.target.value) || 0;
+      updateResults();
+    });
   }
 }
 
