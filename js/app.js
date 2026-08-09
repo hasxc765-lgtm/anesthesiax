@@ -1,7 +1,10 @@
 import { drugsData } from './data/drugs.js';
 import { calculateDose } from './calculators/doseCalculator.js';
 
-// حفظ حالة الواجهة لمنع فقدان اختيارات المستخدم عند إعادة الرسم
+// =========================================================
+// GLOBAL STATE
+// =========================================================
+
 const state = {
   currentCategory: 'All',
   selectedConcentrations: {},
@@ -9,47 +12,72 @@ const state = {
   selectedIndications: {}
 };
 
+// =========================================================
+// INITIALIZATION
+// =========================================================
+
 function init() {
   const weightInput = document.getElementById('patientWeight');
   const searchInput = document.getElementById('searchInput');
 
+  // Weight input
   if (weightInput) {
     weightInput.addEventListener('input', render);
   }
 
+  // Search input
   if (searchInput) {
     searchInput.addEventListener('input', render);
   }
 
-  window.setCategory = (cat) => {
-    state.currentCategory = cat;
+  // =======================================================
+  // Category
+  // =======================================================
 
-    document.querySelectorAll('.cat-btn').forEach(btn => {
-      btn.classList.toggle(
+  window.setCategory = (category) => {
+    state.currentCategory = category;
+
+    document.querySelectorAll('.cat-btn').forEach((button) => {
+      button.classList.toggle(
         'active',
-        btn.dataset.cat === cat
+        button.dataset.cat === category
       );
     });
 
     render();
   };
 
+  // =======================================================
+  // Clear Weight
+  // =======================================================
+
   window.clearWeight = () => {
     if (weightInput) {
       weightInput.value = '';
+      weightInput.focus();
     }
 
     render();
   };
 
-  window.handleIndicationChange = (drugId, indId) => {
-    state.selectedIndications[drugId] = indId;
+  // =======================================================
+  // Indication Change
+  // =======================================================
+
+  window.handleIndicationChange = (drugId, indicationId) => {
+    state.selectedIndications[drugId] = indicationId;
     render();
   };
+
+  // =======================================================
+  // Concentration Change
+  // =======================================================
 
   window.handleConcChange = (drugId, value) => {
     state.selectedConcentrations[drugId] = value;
 
+    // إذا رجع المستخدم إلى تركيز جاهز
+    // نحذف التركيز المخصص القديم
     if (value !== 'custom') {
       delete state.customConcentrations[drugId];
     }
@@ -57,11 +85,18 @@ function init() {
     render();
   };
 
-  window.handleCustomConcInput = (drugId, value) => {
-    const num = parseFloat(value);
+  // =======================================================
+  // Custom Concentration
+  // =======================================================
 
-    if (Number.isFinite(num) && num > 0) {
-      state.customConcentrations[drugId] = num;
+  window.handleCustomConcInput = (drugId, value) => {
+    const numericValue = parseFloat(value);
+
+    if (
+      Number.isFinite(numericValue) &&
+      numericValue > 0
+    ) {
+      state.customConcentrations[drugId] = numericValue;
     } else {
       delete state.customConcentrations[drugId];
     }
@@ -69,142 +104,235 @@ function init() {
     render();
   };
 
+  // =======================================================
+  // Accordion
+  // =======================================================
+
   window.toggleAccordion = (id) => {
     const element = document.getElementById(id);
 
-    if (element) {
-      element.classList.toggle('hidden');
-    }
+    if (!element) return;
+
+    element.classList.toggle('hidden');
   };
 
+  // First render
   render();
 }
+
+// =========================================================
+// MAIN RENDER
+// =========================================================
 
 function render() {
   const container = document.getElementById('drugsContainer');
 
-  const weightVal =
-    parseFloat(
-      document.getElementById('patientWeight')?.value
-    ) || 0;
-
-  const searchVal =
-    (
-      document.getElementById('searchInput')?.value || ''
-    ).toLowerCase().trim();
-
   if (!container) return;
 
-  const filtered = drugsData.filter(drug => {
-    const matchesCategory =
+  const weightInput =
+    document.getElementById('patientWeight');
+
+  const searchInput =
+    document.getElementById('searchInput');
+
+  const weight =
+    parseFloat(weightInput?.value) || 0;
+
+  const searchValue =
+    (searchInput?.value || '')
+      .toLowerCase()
+      .trim();
+
+  // =======================================================
+  // FILTER DRUGS
+  // =======================================================
+
+  const filteredDrugs = drugsData.filter((drug) => {
+
+    const categoryMatch =
       state.currentCategory === 'All' ||
       drug.category === state.currentCategory;
 
-    const matchesSearch =
-      drug.name.toLowerCase().includes(searchVal) ||
-      (drug.arabicName && drug.arabicName.includes(searchVal)) ||
-      (drug.searchKeywords && drug.searchKeywords.some(keyword =>
-        keyword.toLowerCase().includes(searchVal)
-      ));
+    if (!categoryMatch) {
+      return false;
+    }
 
-    return matchesCategory && matchesSearch;
+    if (!searchValue) {
+      return true;
+    }
+
+    const nameMatch =
+      drug.name
+        ?.toLowerCase()
+        .includes(searchValue);
+
+    const arabicNameMatch =
+      drug.arabicName
+        ?.toLowerCase()
+        .includes(searchValue);
+
+    const keywordMatch =
+      Array.isArray(drug.searchKeywords) &&
+      drug.searchKeywords.some((keyword) =>
+        String(keyword)
+          .toLowerCase()
+          .includes(searchValue)
+      );
+
+    return (
+      nameMatch ||
+      arabicNameMatch ||
+      keywordMatch
+    );
   });
 
-  if (filtered.length === 0) {
+  // =======================================================
+  // EMPTY SEARCH RESULT
+  // =======================================================
+
+  if (filteredDrugs.length === 0) {
     container.innerHTML = `
-      <div class="text-center py-8 text-slate-400 font-semibold bg-white rounded-2xl border border-slate-200">
+      <div
+        class="text-center py-8 px-4 text-slate-400
+               font-semibold bg-white rounded-2xl
+               border border-slate-200"
+      >
         🔍 لا توجد أدوية مطابقة للبحث
       </div>
     `;
+
     return;
   }
 
-  container.innerHTML = filtered
-    .map(drug => renderDrugCard(drug, weightVal))
+  // =======================================================
+  // RENDER CARDS
+  // =======================================================
+
+  container.innerHTML = filteredDrugs
+    .map((drug) => renderDrugCard(drug, weight))
     .join('');
 }
 
+// =========================================================
+// DRUG CARD
+// =========================================================
+
 function renderDrugCard(drug, weight) {
 
-  // =========================================================
-  // 1. تحديد الاستطباب الحالي
-  // =========================================================
+  // =======================================================
+  // SAFETY CHECKS
+  // =======================================================
 
-  if (!state.selectedIndications[drug.id]) {
-    state.selectedIndications[drug.id] =
-      drug.indications[0]?.id || '';
+  if (!drug || !drug.id) {
+    return '';
   }
 
-  const activeIndId =
+  const indications =
+    Array.isArray(drug.indications)
+      ? drug.indications
+      : [];
+
+  const concConfig =
+    drug.concentrationConfig || {
+      defaultUnit: 'mg/mL',
+      customAllowed: false,
+      availableConcentrations: []
+    };
+
+  const availableConcentrations =
+    Array.isArray(
+      concConfig.availableConcentrations
+    )
+      ? concConfig.availableConcentrations
+      : [];
+
+  // =======================================================
+  // ACTIVE INDICATION
+  // =======================================================
+
+  if (
+    !state.selectedIndications[drug.id] &&
+    indications.length > 0
+  ) {
+    state.selectedIndications[drug.id] =
+      indications[0].id;
+  }
+
+  const activeIndicationId =
     state.selectedIndications[drug.id];
 
   const activeIndication =
-    drug.indications.find(
-      indication => indication.id === activeIndId
-    ) || drug.indications[0];
+    indications.find(
+      (indication) =>
+        indication.id === activeIndicationId
+    ) ||
+    indications[0];
 
   if (!activeIndication) {
     return '';
   }
 
-  // =========================================================
-  // 2. إعداد التركيز وحفظ اختيار المستخدم
-  // =========================================================
+  // =======================================================
+  // DEFAULT CONCENTRATION
+  // =======================================================
 
-  const concConfig = drug.concentrationConfig;
-
-  const defaultConcObj =
-    concConfig.availableConcentrations.find(
-      concentration => concentration.isDefault
+  const defaultConcentration =
+    availableConcentrations.find(
+      (concentration) =>
+        concentration.isDefault
     ) ||
-    concConfig.availableConcentrations[0];
+    availableConcentrations[0];
 
-  if (!state.selectedConcentrations[drug.id]) {
+  if (
+    state.selectedConcentrations[drug.id] ===
+    undefined
+  ) {
     state.selectedConcentrations[drug.id] =
-      defaultConcObj
-        ? defaultConcObj.value.toString()
-        : '10';
+      defaultConcentration
+        ? String(defaultConcentration.value)
+        : '';
   }
 
-  const selectedConcValStr =
+  const selectedConcentration =
     state.selectedConcentrations[drug.id];
 
-  let currentConcNum =
-    defaultConcObj
-      ? defaultConcObj.value
-      : 10;
+  // =======================================================
+  // CURRENT CONCENTRATION
+  // =======================================================
 
+  let currentConcentration = 0;
   let isCustom = false;
 
-  if (selectedConcValStr === 'custom') {
-
+  if (
+    selectedConcentration === 'custom'
+  ) {
     isCustom = true;
 
-    currentConcNum =
+    currentConcentration =
       state.customConcentrations[drug.id] || 0;
 
   } else {
 
-    const parsedConc =
-      parseFloat(selectedConcValStr);
+    const parsed =
+      parseFloat(selectedConcentration);
 
-    if (Number.isFinite(parsedConc)) {
-      currentConcNum = parsedConc;
+    if (Number.isFinite(parsed)) {
+      currentConcentration = parsed;
     }
   }
 
-  // =========================================================
-  // 3. حساب الجرعة والحجم مع الحماية من الانعكاس (LTR Fix)
-  // =========================================================
+  // =======================================================
+  // CALCULATION
+  // =======================================================
 
-  let calcResultHTML = '';
+  let calculationHTML = '';
 
   if (weight > 0) {
 
     const result = calculateDose(
       weight,
       activeIndication,
-      currentConcNum,
+      currentConcentration,
       concConfig.defaultUnit,
       concConfig,
       isCustom
@@ -212,40 +340,85 @@ function renderDrugCard(drug, weight) {
 
     if (result.isValid) {
 
-      const doseRangeText =
+      const doseRange =
         result.isFixed &&
         result.doseMin === result.doseMax
           ? `${result.doseMin} ${result.doseUnit}`
           : `${result.doseMin} - ${result.doseMax} ${result.doseUnit}`;
 
-      const volumeRangeText =
+      const volumeRange =
         result.volMin === result.volMax
           ? `${result.volMin} mL`
           : `${result.volMin} - ${result.volMax} mL`;
 
-      calcResultHTML = `
-        <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1 text-xs">
+      calculationHTML = `
+        <div
+          class="mt-3 p-3 bg-blue-50
+                 border border-blue-200 rounded-xl
+                 space-y-1.5 text-xs"
+        >
 
-          <div class="font-bold text-blue-900 flex justify-between items-center gap-2">
-            <span>🎯 الجرعة المحسوبة (${weight} kg):</span>
-            <span class="text-left font-mono font-bold text-blue-800" dir="ltr" style="unicode-bidi: isolate;">
-              ${doseRangeText}
+          <div
+            class="font-bold text-blue-900
+                   flex justify-between
+                   items-center gap-2"
+          >
+
+            <span>
+              🎯 الجرعة المحسوبة (${weight} kg):
             </span>
+
+            <span
+              dir="ltr"
+              class="text-left font-mono
+                     font-bold text-blue-800"
+              style="unicode-bidi: isolate;"
+            >
+              ${doseRange}
+            </span>
+
           </div>
 
-          <div class="font-bold text-emerald-700 flex justify-between items-center gap-2 border-t border-blue-200/60 pt-1.5">
-            <span>💉 حجم السرنجة المطلوب:</span>
-            <span class="text-left font-mono font-bold text-emerald-700" dir="ltr" style="unicode-bidi: isolate;">
-              ${volumeRangeText}
+          <div
+            class="font-bold text-emerald-700
+                   flex justify-between
+                   items-center gap-2
+                   border-t border-blue-200/60
+                   pt-1.5"
+          >
+
+            <span>
+              💉 حجم السرنجة المطلوب:
             </span>
+
+            <span
+              dir="ltr"
+              class="text-left font-mono
+                     font-bold text-emerald-700"
+              style="unicode-bidi: isolate;"
+            >
+              ${volumeRange}
+            </span>
+
           </div>
 
           ${
             result.isCapped
               ? `
-                <div class="text-[10px] text-amber-700 font-semibold mt-1 flex items-center gap-1">
-                  <span>⚠️ تم تطبيق الحد الأقصى للجرعة</span>
-                  <span dir="ltr" class="font-mono">(${result.maxDoseLimit} ${result.doseUnit})</span>
+                <div
+                  class="text-[10px]
+                         text-amber-700
+                         font-semibold
+                         mt-1"
+                >
+                  ⚠️ تم تطبيق الحد الأقصى للجرعة
+                  <span
+                    dir="ltr"
+                    class="font-mono"
+                  >
+                    (${result.maxDoseLimit}
+                    ${result.doseUnit})
+                  </span>
                 </div>
               `
               : ''
@@ -256,60 +429,100 @@ function renderDrugCard(drug, weight) {
 
     } else {
 
-      calcResultHTML = `
-        <div class="mt-2 text-xs text-rose-600 font-semibold p-2.5 bg-rose-50 border border-rose-200 rounded-lg">
+      calculationHTML = `
+        <div
+          class="mt-2 text-xs
+                 text-rose-600 font-semibold
+                 p-2.5 bg-rose-50
+                 border border-rose-200
+                 rounded-lg"
+        >
           ⚠️ ${result.error}
         </div>
       `;
     }
   }
 
-  // =========================================================
-  // 4. HIGH ALERT BADGE
-  // =========================================================
+  // =======================================================
+  // HIGH ALERT
+  // =======================================================
 
   const isHighAlert =
-    drug.safetyProfile?.isHighAlert;
+    drug.safetyProfile?.isHighAlert === true;
 
-  const alertBadge = isHighAlert
-    ? `
-      <span dir="ltr" class="px-2 py-0.5 text-[10px] font-bold bg-rose-100 text-rose-800 rounded-md border border-rose-300 inline-flex items-center gap-1">
-        ⚠️ HIGH ALERT
-      </span>
-    `
-    : '';
+  const alertBadge =
+    isHighAlert
+      ? `
+        <span
+          dir="ltr"
+          class="px-2 py-0.5
+                 text-[10px] font-bold
+                 bg-rose-100 text-rose-800
+                 rounded-md
+                 border border-rose-300
+                 inline-flex items-center gap-1"
+        >
+          ⚠️ HIGH ALERT
+        </span>
+      `
+      : '';
 
-  // =========================================================
-  // 5. قائمة الاستطبابات
-  // =========================================================
+  // =======================================================
+  // INDICATION SELECTOR
+  // =======================================================
 
   let indicationsHTML = '';
 
-  if (drug.indications.length > 1) {
+  if (indications.length > 1) {
 
     indicationsHTML = `
-      <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs my-2 gap-2">
+      <div
+        class="flex justify-between
+               items-center
+               bg-slate-50 p-2.5
+               rounded-xl
+               border border-slate-200
+               text-xs my-2 gap-2"
+      >
 
         <span class="font-bold text-slate-700">
           الاستطباب (Indication):
         </span>
 
         <select
-          onchange="handleIndicationChange('${drug.id}', this.value)"
-          class="p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold max-w-[60%] text-slate-900 focus:outline-none"
+          onchange="
+            handleIndicationChange(
+              '${drug.id}',
+              this.value
+            )
+          "
+          class="p-1.5 bg-white
+                 border border-slate-300
+                 rounded-lg text-xs
+                 font-semibold
+                 max-w-[60%]
+                 text-slate-900
+                 focus:outline-none"
         >
-          ${drug.indications.map(indication => `
-            <option
-              value="${indication.id}"
-              ${
-                indication.id === activeIndId
-                  ? 'selected'
-                  : ''
-              }
-            >
-              ${indication.title}
-            </option>
-          `).join('')}
+
+          ${indications
+            .map(
+              (indication) => `
+                <option
+                  value="${indication.id}"
+                  ${
+                    indication.id ===
+                    activeIndication.id
+                      ? 'selected'
+                      : ''
+                  }
+                >
+                  ${indication.title}
+                </option>
+              `
+            )
+            .join('')}
+
         </select>
 
       </div>
@@ -318,37 +531,124 @@ function renderDrugCard(drug, weight) {
   } else {
 
     indicationsHTML = `
-      <div class="text-xs text-slate-600 font-semibold mb-1">
+      <div
+        class="text-xs
+               text-slate-600
+               font-semibold mb-1"
+      >
         الاستطباب:
-        <span class="text-slate-900">${activeIndication.title}</span>
+        <span class="text-slate-900">
+          ${activeIndication.title}
+        </span>
       </div>
     `;
   }
 
-  // =========================================================
-  // 6. قيمة Custom Concentration
-  // =========================================================
+  // =======================================================
+  // CUSTOM CONCENTRATION
+  // =======================================================
 
-  const customConcVal =
-    state.customConcentrations[drug.id] !== undefined
-      ? state.customConcentrations[drug.id]
+  const customValue =
+    state.customConcentrations[drug.id] ??
+    '';
+
+  const customVisible =
+    selectedConcentration === 'custom';
+
+  // =======================================================
+  // DILUTION INFORMATION
+  // =======================================================
+
+  const dilutionHTML =
+    Array.isArray(drug.dilutions) &&
+    drug.dilutions.length > 0
+      ? `
+        <p>
+
+          <strong class="text-slate-900">
+            التخفيف:
+          </strong>
+
+          <span
+            class="inline-block"
+            dir="ltr"
+            style="unicode-bidi: isolate;"
+          >
+            ${drug.dilutions[0].instructions}
+          </span>
+
+        </p>
+      `
       : '';
 
-  // =========================================================
-  // 7. بطاقة الدواء
-  // =========================================================
+  // =======================================================
+  // WARNINGS
+  // =======================================================
+
+  const warnings =
+    Array.isArray(
+      drug.clinicalDetails?.warnings
+    )
+      ? drug.clinicalDetails.warnings
+      : [];
+
+  const contraindications =
+    Array.isArray(
+      drug.clinicalDetails?.contraindications
+    )
+      ? drug.clinicalDetails.contraindications
+      : [];
+
+  // =======================================================
+  // REFERENCES
+  // =======================================================
+
+  const references =
+    Array.isArray(drug.references)
+      ? drug.references
+      : [];
+
+  const referencesHTML =
+    references.length > 0
+      ? references
+          .map(
+            (reference) =>
+              `${reference.source} (${reference.topic})`
+          )
+          .join(' • ')
+      : 'لا توجد مراجع مسجلة';
+
+  // =======================================================
+  // DRUG CARD
+  // =======================================================
 
   return `
-    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+    <article
+      class="bg-white p-4 rounded-2xl
+             border border-slate-200
+             shadow-sm space-y-3"
+    >
 
-      <!-- Drug Header -->
-      <div class="flex justify-between items-start">
+      <!-- ============================================= -->
+      <!-- HEADER -->
+      <!-- ============================================= -->
+
+      <div
+        class="flex justify-between
+               items-start gap-2"
+      >
 
         <div>
 
-          <div class="flex items-center gap-2 flex-wrap">
+          <div
+            class="flex items-center
+                   gap-2 flex-wrap"
+          >
 
-            <h3 class="font-bold text-lg text-blue-600">
+            <h3
+              class="font-bold text-lg
+                     text-blue-600"
+            >
               ${drug.name}
             </h3>
 
@@ -356,10 +656,17 @@ function renderDrugCard(drug, weight) {
 
           </div>
 
-          <p class="text-xs text-slate-500 mt-0.5">
+          <p
+            class="text-xs
+                   text-slate-500
+                   mt-0.5"
+          >
             ${drug.arabicName}
             •
-            <span class="font-semibold text-blue-800">
+            <span
+              class="font-semibold
+                     text-blue-800"
+            >
               ${drug.category}
             </span>
           </p>
@@ -368,38 +675,68 @@ function renderDrugCard(drug, weight) {
 
       </div>
 
-      <!-- Indication -->
+      <!-- ============================================= -->
+      <!-- INDICATION -->
+      <!-- ============================================= -->
+
       ${indicationsHTML}
 
-      <!-- Concentration -->
-      <div class="p-2.5 bg-slate-50 rounded-xl space-y-2 text-xs">
+      <!-- ============================================= -->
+      <!-- CONCENTRATION -->
+      <!-- ============================================= -->
 
-        <div class="flex justify-between items-center gap-2">
+      <div
+        class="p-2.5 bg-slate-50
+               rounded-xl space-y-2
+               text-xs"
+      >
 
-          <span class="font-bold text-slate-700">
+        <div
+          class="flex justify-between
+                 items-center gap-2"
+        >
+
+          <span
+            class="font-bold
+                   text-slate-700"
+          >
             تركيز الأمبول:
           </span>
 
           <select
             id="conc-select-${drug.id}"
-            onchange="handleConcChange('${drug.id}', this.value)"
-            class="p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:outline-none"
+            onchange="
+              handleConcChange(
+                '${drug.id}',
+                this.value
+              )
+            "
+            class="p-1.5 bg-white
+                   border border-slate-300
+                   rounded-lg text-xs
+                   font-semibold
+                   text-slate-900
+                   focus:outline-none"
             dir="ltr"
           >
 
-            ${concConfig.availableConcentrations.map(concentration => `
-              <option
-                value="${concentration.value}"
-                ${
-                  selectedConcValStr ===
-                  concentration.value.toString()
-                    ? 'selected'
-                    : ''
-                }
-              >
-                ${concentration.label}
-              </option>
-            `).join('')}
+            ${availableConcentrations
+              .map(
+                (concentration) => `
+                  <option
+                    value="${concentration.value}"
+                    ${
+                      selectedConcentration ===
+                      String(concentration.value)
+                        ? 'selected'
+                        : ''
+                    }
+                  >
+                    ${concentration.label}
+                  </option>
+                `
+              )
+              .join('')}
 
             ${
               concConfig.customAllowed
@@ -407,7 +744,8 @@ function renderDrugCard(drug, weight) {
                   <option
                     value="custom"
                     ${
-                      selectedConcValStr === 'custom'
+                      selectedConcentration ===
+                      'custom'
                         ? 'selected'
                         : ''
                     }
@@ -423,19 +761,26 @@ function renderDrugCard(drug, weight) {
         </div>
 
         <!-- Custom Concentration -->
+
         <div
           id="custom-conc-${drug.id}"
-          class="${
-            selectedConcValStr === 'custom'
-              ? ''
-              : 'hidden'
-          } pt-1"
+          class="
+            ${customVisible ? '' : 'hidden'}
+            pt-1
+          "
         >
 
-          <div class="flex items-center gap-2 justify-between">
+          <div
+            class="flex items-center
+                   gap-2 justify-between"
+          >
 
-            <label class="text-[11px] text-slate-600">
-              أدخل التركيز (${concConfig.defaultUnit}):
+            <label
+              class="text-[11px]
+                     text-slate-600"
+            >
+              أدخل التركيز
+              (${concConfig.defaultUnit}):
             </label>
 
             <input
@@ -443,19 +788,37 @@ function renderDrugCard(drug, weight) {
               step="any"
               min="0"
               dir="ltr"
-              value="${customConcVal}"
-              oninput="handleCustomConcInput('${drug.id}', this.value)"
+              value="${customValue}"
+              oninput="
+                handleCustomConcInput(
+                  '${drug.id}',
+                  this.value
+                )
+              "
               placeholder="مثال: 5"
-              class="w-24 p-1.5 border border-blue-400 rounded-md text-xs font-bold text-center text-slate-900 bg-white"
+              class="w-24 p-1.5
+                     border border-blue-400
+                     rounded-md
+                     text-xs font-bold
+                     text-center
+                     text-slate-900
+                     bg-white"
             />
 
           </div>
 
           ${
-            concConfig.minCustomConcentration !== null ||
-            concConfig.maxCustomConcentration !== null
+            concConfig.minCustomConcentration !==
+              null ||
+            concConfig.maxCustomConcentration !==
+              null
               ? `
-                <div class="text-[10px] text-slate-400 mt-1" dir="ltr">
+                <div
+                  class="text-[10px]
+                         text-slate-400
+                         mt-1"
+                  dir="ltr"
+                >
                   Allowed Range:
                   ${concConfig.minCustomConcentration ?? 0}
                   -
@@ -470,204 +833,420 @@ function renderDrugCard(drug, weight) {
 
       </div>
 
-      <!-- Basic Information -->
-      <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+      <!-- ============================================= -->
+      <!-- BASIC INFORMATION -->
+      <!-- ============================================= -->
+
+      <div
+        class="grid grid-cols-2
+               gap-2 text-xs
+               bg-slate-50
+               p-2.5 rounded-xl
+               border border-slate-100"
+      >
 
         <div>
-          <span class="text-slate-500 block mb-0.5">
+
+          <span
+            class="text-slate-500
+                   block mb-0.5"
+          >
             الجرعة القياسية:
           </span>
 
-          <strong class="font-mono text-slate-900" dir="ltr" style="unicode-bidi: isolate;">
+          <strong
+            class="font-mono
+                   text-slate-900"
+            dir="ltr"
+            style="unicode-bidi: isolate;"
+          >
             ${activeIndication.doseConfig.doseMin}${
-              activeIndication.doseConfig.doseMax !== activeIndication.doseConfig.doseMin
+              activeIndication.doseConfig.doseMax !==
+              activeIndication.doseConfig.doseMin
                 ? ` - ${activeIndication.doseConfig.doseMax}`
                 : ''
-            } ${activeIndication.doseConfig.unitLabel}
+            }
+            ${activeIndication.doseConfig.unitLabel}
           </strong>
+
         </div>
 
         <div>
-          <span class="text-slate-500 block mb-0.5">
+
+          <span
+            class="text-slate-500
+                   block mb-0.5"
+          >
             طريق الإعطاء:
           </span>
 
-          <strong class="text-slate-900" dir="ltr" style="unicode-bidi: isolate;">
+          <strong
+            class="text-slate-900"
+            dir="ltr"
+            style="unicode-bidi: isolate;"
+          >
             ${activeIndication.route}
           </strong>
+
         </div>
 
         <div>
-          <span class="text-slate-500 block mb-0.5">
+
+          <span
+            class="text-slate-500
+                   block mb-0.5"
+          >
             بدء الفاعلية:
           </span>
 
-          <strong class="font-mono text-slate-900" dir="ltr" style="unicode-bidi: isolate;">
-            ${drug.pharmacokinetics.onset}
+          <strong
+            class="font-mono
+                   text-slate-900"
+            dir="ltr"
+            style="unicode-bidi: isolate;"
+          >
+            ${drug.pharmacokinetics?.onset || 'N/A'}
           </strong>
+
         </div>
 
         <div>
-          <span class="text-slate-500 block mb-0.5">
+
+          <span
+            class="text-slate-500
+                   block mb-0.5"
+          >
             المدة:
           </span>
 
-          <strong class="font-mono text-slate-900" dir="ltr" style="unicode-bidi: isolate;">
-            ${drug.pharmacokinetics.duration}
+          <strong
+            class="font-mono
+                   text-slate-900"
+            dir="ltr"
+            style="unicode-bidi: isolate;"
+          >
+            ${drug.pharmacokinetics?.duration || 'N/A'}
           </strong>
+
         </div>
 
       </div>
 
-      <!-- Calculation Result -->
-      ${calcResultHTML}
+      <!-- ============================================= -->
+      <!-- CALCULATION -->
+      <!-- ============================================= -->
 
-      <!-- Safety -->
+      ${calculationHTML}
+
+      <!-- ============================================= -->
+      <!-- SAFETY -->
+      <!-- ============================================= -->
+
       ${
         drug.safetyProfile?.safetyNotes
           ? `
-            <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px] leading-relaxed">
+            <div
+              class="p-2.5
+                     rounded-lg
+                     bg-amber-50
+                     border border-amber-200
+                     text-amber-900
+                     text-[11px]
+                     leading-relaxed"
+            >
 
-              <strong class="font-bold">
+              <strong
+                class="font-bold"
+              >
                 ⚠️ تنبيه السلامة:
               </strong>
 
-              <span>${drug.safetyProfile.safetyNotes}</span>
+              <span>
+                ${drug.safetyProfile.safetyNotes}
+              </span>
 
             </div>
           `
           : ''
       }
 
-      <!-- Accordions -->
-      <div class="border-t border-slate-100 pt-2 space-y-1 text-xs">
+      <!-- ============================================= -->
+      <!-- ACCORDIONS -->
+      <!-- ============================================= -->
+
+      <div
+        class="border-t
+               border-slate-100
+               pt-2 space-y-1
+               text-xs"
+      >
 
         <!-- Administration -->
+
         <button
-          onclick="toggleAccordion('acc-admin-${drug.id}')"
-          class="w-full font-bold text-blue-600 py-1.5 hover:underline flex justify-between items-center text-right"
+          type="button"
+          onclick="
+            toggleAccordion(
+              'acc-admin-${drug.id}'
+            )
+          "
+          class="w-full
+                 font-bold
+                 text-blue-600
+                 py-1.5
+                 hover:underline
+                 flex
+                 justify-between
+                 items-center
+                 text-right"
         >
-          <span>💉 الاستعمال والتخفيف</span>
-          <span class="text-slate-400 text-[10px]">▼</span>
+
+          <span>
+            💉 الاستعمال والتخفيف
+          </span>
+
+          <span
+            class="text-slate-400
+                   text-[10px]"
+          >
+            ▼
+          </span>
+
         </button>
 
         <div
           id="acc-admin-${drug.id}"
-          class="hidden p-2.5 bg-slate-50 rounded-xl text-[11px] text-slate-700 space-y-1.5 border border-slate-100"
+          class="hidden
+                 p-2.5
+                 bg-slate-50
+                 rounded-xl
+                 text-[11px]
+                 text-slate-700
+                 space-y-1.5
+                 border border-slate-100"
         >
 
           <p>
-            <strong class="text-slate-900">
+
+            <strong
+              class="text-slate-900"
+            >
               طريقة الإعطاء:
             </strong>
 
-            <span dir="ltr" class="inline-block" style="unicode-bidi: isolate;">
-              ${drug.clinicalDetails.administration}
+            <span
+              dir="ltr"
+              class="inline-block"
+              style="unicode-bidi: isolate;"
+            >
+              ${drug.clinicalDetails?.administration || 'غير متوفر'}
             </span>
+
+          </p>
+
+          ${dilutionHTML}
+
+        </div>
+
+        <!-- Warnings -->
+
+        <button
+          type="button"
+          onclick="
+            toggleAccordion(
+              'acc-warn-${drug.id}'
+            )
+          "
+          class="w-full
+                 font-bold
+                 text-blue-600
+                 py-1.5
+                 hover:underline
+                 flex
+                 justify-between
+                 items-center
+                 text-right"
+        >
+
+          <span>
+            ⚠️ التحذيرات وموانع الاستعمال
+          </span>
+
+          <span
+            class="text-slate-400
+                   text-[10px]"
+          >
+            ▼
+          </span>
+
+        </button>
+
+        <div
+          id="acc-warn-${drug.id}"
+          class="hidden
+                 p-2.5
+                 bg-slate-50
+                 rounded-xl
+                 text-[11px]
+                 text-slate-700
+                 space-y-1.5
+                 border border-slate-100"
+        >
+
+          <p>
+
+            <strong
+              class="text-slate-900"
+            >
+              التحذيرات:
+            </strong>
+
+            <span>
+              ${
+                warnings.length
+                  ? warnings.join(' • ')
+                  : 'لا توجد بيانات'
+              }
+            </span>
+
+          </p>
+
+          <p>
+
+            <strong
+              class="text-slate-900"
+            >
+              موانع الاستعمال:
+            </strong>
+
+            <span>
+              ${
+                contraindications.length
+                  ? contraindications.join(' • ')
+                  : 'لا توجد بيانات'
+              }
+            </span>
+
           </p>
 
           ${
-            drug.dilutions &&
-            drug.dilutions.length
+            drug.safetyProfile?.blackBoxWarning
               ? `
-                <p>
-                  <strong class="text-slate-900">
-                    التخفيف:
+                <div
+                  class="mt-2
+                         p-2
+                         bg-rose-50
+                         border border-rose-200
+                         rounded-lg
+                         text-rose-800"
+                >
+
+                  <strong>
+                    ⚠️ Black Box Warning:
                   </strong>
 
-                  <span dir="ltr" class="inline-block" style="unicode-bidi: isolate;">
-                    ${drug.dilutions[0].instructions}
+                  <span
+                    dir="ltr"
+                    class="inline-block"
+                    style="unicode-bidi: isolate;"
+                  >
+                    ${drug.safetyProfile.blackBoxWarning}
                   </span>
-                </p>
+
+                </div>
               `
               : ''
           }
 
         </div>
 
-        <!-- Warnings -->
-        <button
-          onclick="toggleAccordion('acc-warn-${drug.id}')"
-          class="w-full font-bold text-blue-600 py-1.5 hover:underline flex justify-between items-center text-right"
-        >
-          <span>⚠️ التحذيرات وموانع الاستعمال</span>
-          <span class="text-slate-400 text-[10px]">▼</span>
-        </button>
-
-        <div
-          id="acc-warn-${drug.id}"
-          class="hidden p-2.5 bg-slate-50 rounded-xl text-[11px] text-slate-700 space-y-1.5 border border-slate-100"
-        >
-
-          <p>
-            <strong class="text-slate-900">
-              التحذيرات:
-            </strong>
-
-            <span dir="ltr" class="inline-block" style="unicode-bidi: isolate;">
-              ${drug.clinicalDetails.warnings.join(' • ')}
-            </span>
-          </p>
-
-          <p>
-            <strong class="text-slate-900">
-              موانع الاستعمال:
-            </strong>
-
-            <span dir="ltr" class="inline-block" style="unicode-bidi: isolate;">
-              ${drug.clinicalDetails.contraindications.join(' • ')}
-            </span>
-          </p>
-
-        </div>
-
         <!-- Reversal & References -->
+
         <button
-          onclick="toggleAccordion('acc-rev-${drug.id}')"
-          class="w-full font-bold text-blue-600 py-1.5 hover:underline flex justify-between items-center text-right"
+          type="button"
+          onclick="
+            toggleAccordion(
+              'acc-rev-${drug.id}'
+            )
+          "
+          class="w-full
+                 font-bold
+                 text-blue-600
+                 py-1.5
+                 hover:underline
+                 flex
+                 justify-between
+                 items-center
+                 text-right"
         >
-          <span>🔄 العكس والمراجع</span>
-          <span class="text-slate-400 text-[10px]">▼</span>
+
+          <span>
+            🔄 العكس والمراجع
+          </span>
+
+          <span
+            class="text-slate-400
+                   text-[10px]"
+          >
+            ▼
+          </span>
+
         </button>
 
         <div
           id="acc-rev-${drug.id}"
-          class="hidden p-2.5 bg-slate-50 rounded-xl text-[11px] text-slate-700 space-y-1.5 border border-slate-100"
+          class="hidden
+                 p-2.5
+                 bg-slate-50
+                 rounded-xl
+                 text-[11px]
+                 text-slate-700
+                 space-y-1.5
+                 border border-slate-100"
         >
 
           <p>
-            <strong class="text-slate-900">
+
+            <strong
+              class="text-slate-900"
+            >
               المضاد (Reversal):
             </strong>
 
-            <span dir="ltr" class="inline-block" style="unicode-bidi: isolate;">
-              ${drug.clinicalDetails.reversal}
+            <span>
+              ${
+                drug.clinicalDetails?.reversal ||
+                'لا يوجد'
+              }
             </span>
+
           </p>
 
           <p>
-            <strong class="text-slate-900">
+
+            <strong
+              class="text-slate-900"
+            >
               المرجع:
             </strong>
 
-            <span dir="ltr" class="inline-block" style="unicode-bidi: isolate;">
-              ${drug.references
-                .map(
-                  reference =>
-                    `${reference.source} (${reference.topic})`
-                )
-                .join(' • ')
-              }
+            <span>
+              ${referencesHTML}
             </span>
+
           </p>
 
         </div>
 
       </div>
 
-    </div>
+    </article>
   `;
 }
+
+// =========================================================
+// START APPLICATION
+// =========================================================
 
 document.addEventListener(
   'DOMContentLoaded',
