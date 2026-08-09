@@ -5,6 +5,12 @@ body {
   direction: rtl;
 }
 
+/* إجبار النص داخل حقول الكتابة والقوائم على الظهور باللون الأسود الواضح */
+input, select {
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+}
+
 .cat-btn.active {
   background-color: #2563eb !important;
   color: #ffffff !important;
