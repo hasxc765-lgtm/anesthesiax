@@ -4,6 +4,8 @@ import { store } from './state/store.js';
 import { renderNavigation } from './components/navigation.js';
 import { renderAirwayView, renderAirwayResultsHTML } from './components/airwayView.js';
 import { calculateAirwayParams } from './calculators/airwayCalculator.js';
+import { renderFluidView, renderFluidResultsHTML } from './components/fluidView.js';
+import { calculateFluidParams } from './calculators/fluidCalculator.js';
 
 // =========================================================
 // INITIALIZATION & GLOBAL HANDLERS
@@ -86,6 +88,8 @@ function render() {
     renderDrugCenterLayout(contentContainer);
   } else if (store.state.currentView === 'airway') {
     renderAirwayLayout(contentContainer);
+  } else if (store.state.currentView === 'fluidAbl') {
+    renderFluidLayout(contentContainer);
   }
 }
 
@@ -97,8 +101,8 @@ function renderDashboardView(container) {
   const tools = [
     { id: 'drugCenter', title: 'مركز الأدوية والسرنجات', subtitle: 'حاسبة جرعات وأحجام أدوية التخدير', icon: '💊', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
     { id: 'airway', title: 'المجرى الهوائي والأنابيب', subtitle: 'قياسات ETT, LMA, Blade, OPA', icon: '🫁', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-    { id: 'fluidAbl', title: 'السوائل والنزف المسموح', subtitle: 'حاسبة 4-2-1 والصيام و ABL', icon: '💧', status: 'coming_soon', badge: 'المرحلة القادمة', badgeClass: 'bg-blue-100 text-blue-800 border-blue-300' },
-    { id: 'regionalLast', title: 'التخدير المناطقي و LAST', subtitle: 'الحد الأقصى للسمية والإنقاذ بـ Lipid', icon: '⚡', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
+    { id: 'fluidAbl', title: 'السوائل والنزف المسموح', subtitle: 'حاسبة 4-2-1 والصيام و ABL', icon: '💧', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
+    { id: 'regionalLast', title: 'التخدير المناطقي و LAST', subtitle: 'الحد الأقصى للسمية والإنقاذ بـ Lipid', icon: '⚡', status: 'coming_soon', badge: 'المرحلة القادمة', badgeClass: 'bg-blue-100 text-blue-800 border-blue-300' },
     { id: 'infusionTci', title: 'مضخات التنقيط المستمر', subtitle: 'حساب معدلات mcg/kg/min و mg/hr', icon: '🔂', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
     { id: 'pediatric', title: 'تخدير الأطفال الشامل', subtitle: 'حاسبة جرعات وأنابيب الأطفال', icon: '👶', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
     { id: 'vaporizers', title: 'تركيز الغازات الـ MAC', subtitle: 'حاسبة النسبة المئوية واستهلاك الغاز', icon: '💨', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
@@ -150,6 +154,11 @@ function renderDashboardView(container) {
   if (airwayCard) {
     airwayCard.addEventListener('click', () => window.navigateTo('airway'));
   }
+
+  const fluidAblCard = container.querySelector('[data-tool-id="fluidAbl"]');
+  if (fluidAblCard) {
+    fluidAblCard.addEventListener('click', () => window.navigateTo('fluidAbl'));
+  }
 }
 
 // =========================================================
@@ -197,6 +206,104 @@ function renderAirwayLayout(container) {
     btnFemale.addEventListener('click', () => {
       store.setGender('female');
       renderAirwayLayout(container);
+    });
+  }
+}
+
+// =========================================================
+// FLUID & ABL CALCULATOR LAYOUT
+// =========================================================
+
+function renderFluidLayout(container) {
+  container.innerHTML = renderFluidView();
+
+  const weightInput = document.getElementById('fluidWeightInput');
+  const fastingInput = document.getElementById('fluidFastingInput');
+  const btnStrategyEras = document.getElementById('btnStrategyEras');
+  const btnStrategyTrad = document.getElementById('btnStrategyTrad');
+  const traumaSelect = document.getElementById('fluidTraumaSelect');
+  const ebvGroupSelect = document.getElementById('fluidEbvGroupSelect');
+  const hbInitInput = document.getElementById('fluidHbInitInput');
+  const hbTargInput = document.getElementById('fluidHbTargInput');
+  const lossInput = document.getElementById('fluidLossInput');
+
+  const updateResults = () => {
+    const resultsContainer = document.getElementById('fluidResultsContainer');
+    if (resultsContainer) {
+      const res = calculateFluidParams({
+        weightKg: store.state.patientWeight,
+        fastingHours: store.state.fastingHours,
+        strategy: store.state.fluidStrategy,
+        surgicalTrauma: store.state.surgicalTrauma,
+        ageGroup: store.state.ebvAgeGroup,
+        hbInitial: store.state.hbInitial,
+        hbTarget: store.state.hbTarget,
+        currentBloodLoss: store.state.currentBloodLoss
+      });
+      resultsContainer.innerHTML = renderFluidResultsHTML(res);
+    }
+  };
+
+  if (weightInput) {
+    weightInput.addEventListener('input', (e) => {
+      store.setWeight(parseFloat(e.target.value) || 0);
+      updateResults();
+    });
+  }
+
+  if (fastingInput) {
+    fastingInput.addEventListener('input', (e) => {
+      store.state.fastingHours = parseFloat(e.target.value) || 0;
+      updateResults();
+    });
+  }
+
+  if (btnStrategyEras) {
+    btnStrategyEras.addEventListener('click', () => {
+      store.state.fluidStrategy = 'eras';
+      renderFluidLayout(container);
+    });
+  }
+
+  if (btnStrategyTrad) {
+    btnStrategyTrad.addEventListener('click', () => {
+      store.state.fluidStrategy = 'traditional';
+      renderFluidLayout(container);
+    });
+  }
+
+  if (traumaSelect) {
+    traumaSelect.addEventListener('change', (e) => {
+      store.state.surgicalTrauma = e.target.value;
+      updateResults();
+    });
+  }
+
+  if (ebvGroupSelect) {
+    ebvGroupSelect.addEventListener('change', (e) => {
+      store.state.ebvAgeGroup = e.target.value;
+      updateResults();
+    });
+  }
+
+  if (hbInitInput) {
+    hbInitInput.addEventListener('input', (e) => {
+      store.state.hbInitial = e.target.value;
+      updateResults();
+    });
+  }
+
+  if (hbTargInput) {
+    hbTargInput.addEventListener('input', (e) => {
+      store.state.hbTarget = e.target.value;
+      updateResults();
+    });
+  }
+
+  if (lossInput) {
+    lossInput.addEventListener('input', (e) => {
+      store.state.currentBloodLoss = e.target.value;
+      updateResults();
     });
   }
 }
