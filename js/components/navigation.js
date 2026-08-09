@@ -5,6 +5,7 @@ export function renderNavigation(currentView) {
   if (currentView === 'drugCenter') pageTitle = 'مركز الأدوية';
   if (currentView === 'airway') pageTitle = 'المجرى الهوائي';
   if (currentView === 'fluidAbl') pageTitle = 'السوائل والنزف المسموح';
+  if (currentView === 'regionalLast') pageTitle = 'التخدير المناطقي و LAST';
 
   return `
     <header class="max-w-2xl mx-auto flex justify-between items-center py-3 border-b border-slate-200 mb-4" dir="rtl">
