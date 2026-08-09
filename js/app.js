@@ -2,45 +2,38 @@ import { drugsData } from './data/drugs.js';
 import { calculateDose } from './calculators/doseCalculator.js';
 import { store } from './state/store.js';
 import { renderNavigation } from './components/navigation.js';
+import { renderAirwayView, renderAirwayResultsHTML } from './components/airwayView.js';
+import { calculateAirwayParams } from './calculators/airwayCalculator.js';
 
 // =========================================================
-// INITIALIZATION & GLOBAL WINDOW HANDLERS
+// INITIALIZATION & GLOBAL HANDLERS
 // =========================================================
 
 function init() {
-  // Navigation Handler
   window.navigateTo = (viewName) => {
     store.setView(viewName);
     render();
   };
 
-  // Category Handler
   window.setCategory = (category) => {
     store.setCategory(category);
-    document.querySelectorAll('.cat-btn').forEach((button) => {
-      button.classList.toggle('active', button.dataset.cat === category);
-    });
     renderCardsOnly();
   };
 
-  // Clear Weight Handler
   window.clearWeight = () => {
     const weightInput = document.getElementById('patientWeight');
     if (weightInput) {
       weightInput.value = '';
-      weightInput.focus();
     }
     store.setWeight(0);
     renderCardsOnly();
   };
 
-  // Indication Change Handler
   window.handleIndicationChange = (drugId, indicationId) => {
     store.setSelectedIndication(drugId, indicationId);
     renderCardsOnly();
   };
 
-  // Concentration Change Handler
   window.handleConcChange = (drugId, value) => {
     store.setSelectedConcentration(drugId, value);
     if (value !== 'custom') {
@@ -49,7 +42,6 @@ function init() {
     renderCardsOnly();
   };
 
-  // Custom Concentration Handler
   window.handleCustomConcInput = (drugId, value) => {
     const numericValue = parseFloat(value);
     if (Number.isFinite(numericValue) && numericValue > 0) {
@@ -60,7 +52,6 @@ function init() {
     renderCardsOnly();
   };
 
-  // Accordion Toggle Handler
   window.toggleAccordion = (id) => {
     const element = document.getElementById(id);
     if (element) {
@@ -79,7 +70,6 @@ function render() {
   const navContainer = document.getElementById('app-nav');
   const contentContainer = document.getElementById('app-content');
 
-  // Render Navigation Bar
   if (navContainer) {
     navContainer.innerHTML = renderNavigation(store.state.currentView);
     const backBtn = document.getElementById('btnBackToDashboard');
@@ -90,23 +80,24 @@ function render() {
 
   if (!contentContainer) return;
 
-  // Render View based on Current State
   if (store.state.currentView === 'dashboard') {
     renderDashboardView(contentContainer);
   } else if (store.state.currentView === 'drugCenter') {
     renderDrugCenterLayout(contentContainer);
+  } else if (store.state.currentView === 'airway') {
+    renderAirwayLayout(contentContainer);
   }
 }
 
 // =========================================================
-// DASHBOARD VIEW (DASHBOARD GRID)
+// DASHBOARD VIEW
 // =========================================================
 
 function renderDashboardView(container) {
   const tools = [
     { id: 'drugCenter', title: 'مركز الأدوية والسرنجات', subtitle: 'حاسبة جرعات وأحجام أدوية التخدير', icon: '💊', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-    { id: 'airway', title: 'المجرى الهوائي والأنابيب', subtitle: 'قياسات ETT, LMA, Blade, OPA', icon: '🫁', status: 'coming_soon', badge: 'المرحلة القادمة', badgeClass: 'bg-blue-100 text-blue-800 border-blue-300' },
-    { id: 'fluidAbl', title: 'السوائل والنزف المسموح', subtitle: 'حاسبة 4-2-1 والصيام و ABL', icon: '💧', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
+    { id: 'airway', title: 'المجرى الهوائي والأنابيب', subtitle: 'قياسات ETT, LMA, Blade, OPA', icon: '🫁', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
+    { id: 'fluidAbl', title: 'السوائل والنزف المسموح', subtitle: 'حاسبة 4-2-1 والصيام و ABL', icon: '💧', status: 'coming_soon', badge: 'المرحلة القادمة', badgeClass: 'bg-blue-100 text-blue-800 border-blue-300' },
     { id: 'regionalLast', title: 'التخدير المناطقي و LAST', subtitle: 'الحد الأقصى للسمية والإنقاذ بـ Lipid', icon: '⚡', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
     { id: 'infusionTci', title: 'مضخات التنقيط المستمر', subtitle: 'حساب معدلات mcg/kg/min و mg/hr', icon: '🔂', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
     { id: 'pediatric', title: 'تخدير الأطفال الشامل', subtitle: 'حاسبة جرعات وأنابيب الأطفال', icon: '👶', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
@@ -119,13 +110,11 @@ function renderDashboardView(container) {
 
   container.innerHTML = `
     <div class="space-y-4 max-w-2xl mx-auto" dir="rtl">
-      <!-- Welcome Banner -->
       <div class="p-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl shadow-md">
         <h2 class="text-lg font-bold">مرحباً بك في AnesthesiaX 👋</h2>
         <p class="text-xs opacity-90 mt-1">المنصة السريرية الشاملة لأدوات وحاسبات التخدير المتخصصة.</p>
       </div>
 
-      <!-- Safety Notice -->
       <div class="p-3 bg-amber-50 border-r-4 border-amber-500 text-amber-900 text-xs rounded-l-xl">
         <div class="font-bold flex items-center gap-1 mb-0.5">
           <span>⚠️</span> <span>تنبيه سلامة سريري (CLINICAL NOTICE)</span>
@@ -133,7 +122,6 @@ function renderDashboardView(container) {
         <p class="opacity-90">جميع الحاسبات مرجع استشاري وتعليمي. يجب دائماً التأكد من تركيز الأمبول والبروتوكول المحلي قبل الإعطاء.</p>
       </div>
 
-      <!-- Tools Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         ${tools.map(tool => `
           <div 
@@ -152,9 +140,64 @@ function renderDashboardView(container) {
     </div>
   `;
 
+  // Dynamic Routing Bindings
   const drugCenterCard = container.querySelector('[data-tool-id="drugCenter"]');
   if (drugCenterCard) {
     drugCenterCard.addEventListener('click', () => window.navigateTo('drugCenter'));
+  }
+
+  const airwayCard = container.querySelector('[data-tool-id="airway"]');
+  if (airwayCard) {
+    airwayCard.addEventListener('click', () => window.navigateTo('airway'));
+  }
+}
+
+// =========================================================
+// AIRWAY CALCULATOR LAYOUT
+// =========================================================
+
+function renderAirwayLayout(container) {
+  container.innerHTML = renderAirwayView();
+
+  const ageInput = document.getElementById('airwayAgeInput');
+  const weightInput = document.getElementById('airwayWeightInput');
+  const btnMale = document.getElementById('btnGenderMale');
+  const btnFemale = document.getElementById('btnGenderFemale');
+
+  const updateResults = () => {
+    const resultsContainer = document.getElementById('airwayResultsContainer');
+    if (resultsContainer) {
+      const res = calculateAirwayParams(store.state.patientAge, store.state.patientWeight, store.state.patientGender);
+      resultsContainer.innerHTML = renderAirwayResultsHTML(res);
+    }
+  };
+
+  if (ageInput) {
+    ageInput.addEventListener('input', (e) => {
+      store.setAge(e.target.value);
+      updateResults();
+    });
+  }
+
+  if (weightInput) {
+    weightInput.addEventListener('input', (e) => {
+      store.setWeight(parseFloat(e.target.value) || 0);
+      updateResults();
+    });
+  }
+
+  if (btnMale) {
+    btnMale.addEventListener('click', () => {
+      store.setGender('male');
+      renderAirwayLayout(container);
+    });
+  }
+
+  if (btnFemale) {
+    btnFemale.addEventListener('click', () => {
+      store.setGender('female');
+      renderAirwayLayout(container);
+    });
   }
 }
 
@@ -168,7 +211,6 @@ function renderDrugCenterLayout(container) {
 
   container.innerHTML = `
     <div class="max-w-2xl mx-auto space-y-3" dir="rtl">
-      <!-- Section Header -->
       <div class="flex justify-between items-center bg-blue-600 text-white p-3 rounded-2xl shadow-sm">
         <div class="flex items-center gap-2">
           <span class="text-xl">💊</span>
@@ -179,7 +221,6 @@ function renderDrugCenterLayout(container) {
         </div>
       </div>
 
-      <!-- Weight Banner -->
       <section class="p-4 bg-blue-600 text-white rounded-2xl shadow-md space-y-2">
         <label class="block text-xs font-semibold">⚖️ أدخل وزن المريض لحساب الجرعة والحجم تلقائياً:</label>
         <div class="flex gap-2">
@@ -196,7 +237,6 @@ function renderDrugCenterLayout(container) {
         </div>
       </section>
 
-      <!-- Search & Filters -->
       <section class="space-y-3">
         <input 
           type="text" 
@@ -220,12 +260,10 @@ function renderDrugCenterLayout(container) {
         </div>
       </section>
 
-      <!-- Cards Container -->
       <main class="space-y-4" id="drugsCardsContainer"></main>
     </div>
   `;
 
-  // Dynamic Event Listeners
   const weightInput = document.getElementById('patientWeight');
   const searchInput = document.getElementById('searchInput');
 
@@ -247,7 +285,7 @@ function renderDrugCenterLayout(container) {
 }
 
 // =========================================================
-// CARDS FILTER & RENDER
+// DRUG CARDS RENDER
 // =========================================================
 
 function renderCardsOnly() {
@@ -280,10 +318,6 @@ function renderCardsOnly() {
 
   container.innerHTML = filteredDrugs.map((drug) => renderDrugCard(drug, weight)).join('');
 }
-
-// =========================================================
-// DRUG CARD RENDER (PRESERVING ALL YOUR RTL/LTR FORMATS)
-// =========================================================
 
 function renderDrugCard(drug, weight) {
   if (!drug || !drug.id) return '';
@@ -422,7 +456,6 @@ function renderDrugCard(drug, weight) {
 
   return `
     <article class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-      <!-- HEADER -->
       <div class="flex justify-between items-start gap-2">
         <div>
           <div class="flex items-center gap-2 flex-wrap">
@@ -435,10 +468,8 @@ function renderDrugCard(drug, weight) {
         </div>
       </div>
 
-      <!-- INDICATION -->
       ${indicationsHTML}
 
-      <!-- CONCENTRATION -->
       <div class="p-2.5 bg-slate-50 rounded-xl space-y-2 text-xs">
         <div class="flex justify-between items-center gap-2">
           <span class="font-bold text-slate-700">تركيز الأمبول:</span>
@@ -461,7 +492,6 @@ function renderDrugCard(drug, weight) {
         </div>
       </div>
 
-      <!-- BASIC INFO -->
       <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100">
         <div>
           <span class="text-slate-500 block mb-0.5">الجرعة القياسية:</span>
@@ -486,10 +516,8 @@ function renderDrugCard(drug, weight) {
         </div>
       </div>
 
-      <!-- CALCULATION -->
       ${calculationHTML}
 
-      <!-- SAFETY -->
       ${drug.safetyProfile?.safetyNotes ? `
         <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px] leading-relaxed">
           <strong class="font-bold">⚠️ تنبيه السلامة:</strong>
@@ -497,9 +525,7 @@ function renderDrugCard(drug, weight) {
         </div>
       ` : ''}
 
-      <!-- ACCORDIONS -->
       <div class="border-t border-slate-100 pt-2 space-y-1 text-xs">
-        <!-- Administration -->
         <button type="button" onclick="toggleAccordion('acc-admin-${drug.id}')" class="w-full font-bold text-blue-600 py-1.5 hover:underline flex justify-between items-center text-right">
           <span>💉 الاستعمال والتخفيف</span>
           <span class="text-slate-400 text-[10px]">▼</span>
@@ -512,7 +538,6 @@ function renderDrugCard(drug, weight) {
           ${dilutionHTML}
         </div>
 
-        <!-- Warnings -->
         <button type="button" onclick="toggleAccordion('acc-warn-${drug.id}')" class="w-full font-bold text-blue-600 py-1.5 hover:underline flex justify-between items-center text-right">
           <span>⚠️ التحذيرات وموانع الاستعمال</span>
           <span class="text-slate-400 text-[10px]">▼</span>
@@ -528,7 +553,6 @@ function renderDrugCard(drug, weight) {
           ` : ''}
         </div>
 
-        <!-- Reversal & References -->
         <button type="button" onclick="toggleAccordion('acc-rev-${drug.id}')" class="w-full font-bold text-blue-600 py-1.5 hover:underline flex justify-between items-center text-right">
           <span>🔄 العكس والمراجع</span>
           <span class="text-slate-400 text-[10px]">▼</span>
@@ -542,5 +566,4 @@ function renderDrugCard(drug, weight) {
   `;
 }
 
-// Start application
 document.addEventListener('DOMContentLoaded', init);
