@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AnesthesiaX - المنصة الحسابية الطبية للتخدير</title>
+  <!-- تحميل التنسيقات مباشرة لتفادي مشاكل التحميل -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen p-4">
@@ -29,11 +31,14 @@
   <section class="max-w-2xl mx-auto my-3 p-4 bg-blue-600 text-white rounded-2xl shadow-md space-y-2">
     <label class="block text-xs font-semibold">⚖️ أدخل وزن المريض لحساب الجرعة والحجم تلقائياً:</label>
     <div class="flex gap-2">
+      <!-- ضبط اتجاه الرقم ولونه بوضوح لتفادي اختفائه في الموبايل -->
       <input 
         type="number" 
         id="patientWeight" 
         placeholder="الوزن بـ (kg) مثل: 70" 
-        class="w-full p-3 rounded-xl text-slate-900 font-bold bg-white focus:outline-none text-sm"
+        dir="ltr"
+        style="color: #000000 !important; background-color: #ffffff !important;"
+        class="w-full p-3 rounded-xl text-black font-bold text-center text-base focus:outline-none"
       >
       <button onclick="clearWeight()" class="px-4 bg-blue-800 hover:bg-blue-900 text-xs rounded-xl font-bold transition">مسح</button>
     </div>
@@ -45,7 +50,8 @@
       type="text" 
       id="searchInput" 
       placeholder="🔍 ابحث عن دواء (Propofol, Ketamine, Ephedrine)..." 
-      class="w-full p-3.5 rounded-xl border-2 border-blue-500 bg-white shadow-sm focus:outline-none text-sm"
+      style="color: #000000 !important; background-color: #ffffff !important;"
+      class="w-full p-3.5 rounded-xl border-2 border-blue-500 text-black shadow-sm focus:outline-none text-sm"
     >
 
     <div class="flex gap-2 overflow-x-auto pb-2 text-xs" id="categoryButtons">
