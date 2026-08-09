@@ -1,5 +1,6 @@
 /**
  * واجهة حاسبة المجرى الهوائي والأنابيب (Airway Calculator View Component)
+ * تم التحديث: إصلاح معالجة الوحدات الأبجدية وتنسيق النصوص البرمجية
  */
 
 import { store } from '../state/store.js';
@@ -84,11 +85,11 @@ export function renderAirwayView() {
         ${renderAirwayResultsHTML(results)}
       </div>
 
-      <!-- Clinical Airway Notes -->
-      <div class="p-3 bg-slate-100 border border-slate-200 text-slate-700 text-[11px] rounded-xl space-y-1">
+      <!-- Clinical Airway Notes (Clean HTML Formatting) -->
+      <div class="p-3 bg-slate-100 border border-slate-200 text-slate-700 text-[11px] rounded-xl space-y-1.5">
         <p class="font-bold text-slate-900">💡 ملاحظات سريرية هامة:</p>
-        <p>• معادلة الأنبوب بكَف (Cuffed): $\\text{Age}/4 + 3.5$ (معادلة Khine المعتمدة).</p>
-        <p>• يجب دائماً تجهيز أنبوب بمقاس $0.5\\text{ mm}$ أصغر وأكبر بجانب المقاس المحسوب.</p>
+        <p>• معادلة الأنبوب بكَف (Cuffed): <span dir="ltr" class="font-mono font-bold text-blue-800">(Age / 4) + 3.5</span> (معادلة Khine المعتمدة).</p>
+        <p>• يجب دائماً تجهيز أنبوب بمقاس <span dir="ltr" class="font-mono font-bold text-blue-800">0.5 mm</span> أصغر وأكبر بجانب المقاس المحسوب.</p>
         <p>• حجم الهواء للـ LMA هو الحد الأقصى المسموح؛ يُنفخ الكَف حتى إحكام الإغلاق بأقل كمية هواء.</p>
       </div>
     </div>
@@ -104,6 +105,19 @@ export function renderAirwayResultsHTML(results) {
     `;
   }
 
+  // دالة ذكية لإضافة الوحدة فقط إذا كانت النتيجة رقماً أو نطاقاً أرقام
+  const formatValue = (val, unit) => {
+    if (!val || val === 'N/A') return 'N/A';
+    // إذا كانت النتيجة تحتوي على نص عربي مثل "غير مستخدم" لا نضيف الوحدة
+    const hasArabic = /[\u0600-\u06FF]/.test(val);
+    if (hasArabic) return val;
+    return `${val} ${unit}`;
+  };
+
+  const ettCuffedText = formatValue(results.ettCuffed, 'mm');
+  const ettUncuffedText = formatValue(results.ettUncuffed, 'mm');
+  const ettDepthText = formatValue(results.ettDepth, 'cm');
+
   return `
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <!-- 1. Endotracheal Tube (ETT) Card -->
@@ -117,21 +131,21 @@ export function renderAirwayResultsHTML(results) {
           <div class="flex justify-between items-center bg-slate-50 p-2 rounded-xl">
             <span class="text-slate-600 font-medium">أنبوب مع كَف (Cuffed ID):</span>
             <strong dir="ltr" class="font-mono text-blue-800 text-sm" style="unicode-bidi: isolate;">
-              ${results.ettCuffed} mm
+              ${ettCuffedText}
             </strong>
           </div>
 
           <div class="flex justify-between items-center bg-slate-50 p-2 rounded-xl">
             <span class="text-slate-600 font-medium">أنبوب بدون كَف (Uncuffed ID):</span>
             <strong dir="ltr" class="font-mono text-slate-800 text-sm" style="unicode-bidi: isolate;">
-              ${results.ettUncuffed} mm
+              ${ettUncuffedText}
             </strong>
           </div>
 
           <div class="flex justify-between items-center bg-emerald-50 p-2 rounded-xl border border-emerald-100">
             <span class="text-emerald-900 font-bold">عمق الإدخال عند الشفة:</span>
             <strong dir="ltr" class="font-mono text-emerald-800 text-sm" style="unicode-bidi: isolate;">
-              ${results.ettDepth} cm
+              ${ettDepthText}
             </strong>
           </div>
         </div>
