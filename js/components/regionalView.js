@@ -1,5 +1,6 @@
 /**
  * Regional Anesthesia & LAST View Component (Phase 5)
+ * تم الإصلاح: معالجة اتجاه النصوص والأقواس والنقطتين الرأسيتين RTL/LTR
  */
 
 import { store } from '../state/store.js';
@@ -36,7 +37,8 @@ export function renderRegionalView() {
       <!-- Section 1: Regional Anesthesia Inputs & Calculations -->
       <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
         <h3 class="font-bold text-xs text-slate-800 border-b border-slate-100 pb-1.5 flex items-center gap-1">
-          <span>💉</span> <span>أولاً: حاسبة التخدير المناطقي (Regional Anesthesia)</span>
+          <span>💉</span> 
+          <span>أولاً: حاسبة التخدير المناطقي <span dir="ltr" class="inline-block">(Regional Anesthesia)</span></span>
         </h3>
 
         <!-- Patient Weight Input -->
@@ -55,7 +57,9 @@ export function renderRegionalView() {
 
         <!-- Local Anesthetic Selection -->
         <div>
-          <label class="block text-[11px] font-semibold text-slate-600 mb-1">المخدر الموضعي (Local Anesthetic):</label>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">
+            المخدر الموضعي <span dir="ltr" class="inline-block">(Local Anesthetic):</span>
+          </label>
           <select id="regionalDrugSelect" class="w-full p-2.5 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 bg-slate-50 focus:bg-white focus:outline-none">
             ${Object.keys(localAnestheticsDB).map(key => {
               const d = localAnestheticsDB[key];
@@ -66,7 +70,9 @@ export function renderRegionalView() {
 
         <!-- Additive (Epinephrine) Toggle -->
         <div>
-          <label class="block text-[11px] font-semibold text-slate-600 mb-1">إضافة مادة قابضة (Epinephrine 1:200,000):</label>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">
+            إضافة مادة قابضة <span dir="ltr" class="inline-block">(Epinephrine 1:200,000):</span>
+          </label>
           <div class="grid grid-cols-2 gap-2">
             <button 
               id="btnEpiFalse" 
@@ -85,7 +91,9 @@ export function renderRegionalView() {
 
         <!-- Concentration Selection -->
         <div>
-          <label class="block text-[11px] font-semibold text-slate-600 mb-1">التركيز المتاح (Concentration):</label>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">
+            التركيز المتاح <span dir="ltr" class="inline-block">(Concentration):</span>
+          </label>
           <select id="regionalConcSelect" class="w-full p-2.5 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 bg-slate-50 focus:bg-white focus:outline-none" dir="ltr">
             ${currentDrugObj.availableConcentrations.map(c => `
               <option value="${c.value}" ${c.value === (selectedConc || currentDrugObj.defaultConcentrationMgMl) ? 'selected' : ''}>${c.label}</option>
@@ -107,7 +115,10 @@ export function renderRegionalView() {
       <!-- Clinical Safety Notice & Educational Disclaimer -->
       <div class="p-3.5 bg-amber-50 border-r-4 border-amber-500 text-amber-900 text-xs rounded-l-xl space-y-1.5">
         <div class="font-bold flex items-center gap-1 text-slate-900">
-          <span>⚠️</span> <span>تنبيه سلامة سريري واستشاري (Clinical Safety Notice):</span>
+          <span>⚠️</span> 
+          <span>
+            تنبيه سلامة سريري واستشاري <span dir="ltr" class="inline-block">(Clinical Safety Notice):</span>
+          </span>
         </div>
         <p class="opacity-90 leading-relaxed">
           جميع الجرعات الموضحة أعلاه هي <strong>جرعات مرجعية قصوى (Maximum Reference Doses)</strong> وليست "جرعات آمنة مطلقة". الجرعة الفعلية المحقونة تعتمد على مكان الحقن (Block Site)، والروائية الدموية للمنطقة، والتقنية المستعملة، وحالة الكبد والقلب للمريض.
@@ -132,7 +143,9 @@ export function renderRegionalResultsHTML(results) {
   return `
     <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-2.5">
       <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-        <h4 class="font-bold text-xs text-blue-600">نتائج الجرعة المرجعية القصوى (${results.arabicName}):</h4>
+        <h4 class="font-bold text-xs text-blue-600">
+          نتائج الجرعة المرجعية القصوى <span dir="ltr" class="inline-block">(${results.arabicName}):</span>
+        </h4>
         <span class="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-lg border border-blue-100 font-bold">
           ${results.withEpinephrine ? 'مع إبينفرين' : 'بدون إبينفرين'}
         </span>
@@ -161,7 +174,9 @@ export function renderRegionalResultsHTML(results) {
         </div>
 
         <div class="flex justify-between items-center bg-emerald-50 p-2 rounded-xl border border-emerald-100">
-          <span class="text-emerald-900 font-bold">الحجم المرجعي الأقصى (Volume):</span>
+          <span class="text-emerald-900 font-bold">
+            الحجم المرجعي الأقصى <span dir="ltr" class="inline-block">(Volume):</span>
+          </span>
           <strong dir="ltr" class="font-mono text-emerald-800 text-sm" style="unicode-bidi: isolate;">
             ${results.maxReferenceVolumeMl.toFixed(1)} mL
           </strong>
@@ -185,16 +200,20 @@ export function renderLastEmergencyHTML(results) {
       <div class="flex items-center justify-between border-b border-rose-100 pb-2">
         <div class="flex items-center gap-2">
           <span class="text-lg">🚨</span>
-          <h4 class="font-bold text-xs text-rose-700">ثانياً: حاسبة طوارئ إنقاذ سمية المخدر الموضعي (LAST Emergency Calculator)</h4>
+          <h4 class="font-bold text-xs text-rose-700 leading-normal">
+            ثانياً: حاسبة طوارئ إنقاذ سمية المخدر الموضعي <span dir="ltr" class="inline-block">(LAST Emergency Calculator)</span>
+          </h4>
         </div>
-        <span class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-md border border-rose-200">Lipid Emulsion 20%</span>
+        <span class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-md border border-rose-200 whitespace-nowrap">Lipid Emulsion 20%</span>
       </div>
 
       <div class="space-y-2 text-xs">
         <!-- Initial Bolus -->
         <div class="p-2.5 bg-rose-50 border border-rose-100 rounded-xl flex justify-between items-center">
           <div>
-            <div class="font-bold text-rose-900">1. الجرعة الأولى المباشرة (Initial IV Bolus):</div>
+            <div class="font-bold text-rose-900">
+              1. الجرعة الأولى المباشرة <span dir="ltr" class="inline-block">(Initial IV Bolus):</span>
+            </div>
             <div class="text-[10px] text-rose-700">تُعطى وريدياً خلال دقيقة واحدة (1.5 mL/kg)</div>
           </div>
           <strong dir="ltr" class="font-mono text-rose-800 text-base font-bold" style="unicode-bidi: isolate;">
@@ -204,7 +223,9 @@ export function renderLastEmergencyHTML(results) {
 
         <!-- Continuous Infusion -->
         <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-          <div class="font-bold text-slate-800">2. التسريب المستمر (Continuous Infusion):</div>
+          <div class="font-bold text-slate-800">
+            2. التسريب المستمر <span dir="ltr" class="inline-block">(Continuous Infusion):</span>
+          </div>
           <div class="flex justify-between items-center text-[11px] pt-1 border-t border-slate-200">
             <span class="text-slate-600">المعدل بالدقيقة (0.25 mL/kg/min):</span>
             <strong dir="ltr" class="font-mono text-slate-900" style="unicode-bidi: isolate;">
@@ -212,7 +233,9 @@ export function renderLastEmergencyHTML(results) {
             </strong>
           </div>
           <div class="flex justify-between items-center text-[11px]">
-            <span class="text-slate-600">المعدل بالساعة (mL/hr):</span>
+            <span class="text-slate-600">
+              المعدل بالساعة <span dir="ltr" class="inline-block">(mL/hr):</span>
+            </span>
             <strong dir="ltr" class="font-mono text-blue-800 font-bold" style="unicode-bidi: isolate;">
               ${results.lipidInfusionMlHr.toFixed(1)} mL/hr
             </strong>
@@ -222,7 +245,9 @@ export function renderLastEmergencyHTML(results) {
         <!-- Maximum Cumulative Reference Ceiling -->
         <div class="p-2.5 bg-slate-100 border border-slate-200 rounded-xl flex justify-between items-center">
           <div>
-            <div class="font-bold text-slate-800">3. الحد التراكمي الأقصى المرجعي (Ceiling Limit):</div>
+            <div class="font-bold text-slate-800">
+              3. الحد التراكمي الأقصى المرجعي <span dir="ltr" class="inline-block">(Ceiling Limit):</span>
+            </div>
             <div class="text-[10px] text-slate-500">حد أقصى مسموح به خلال 30 دقيقة (12 mL/kg) - ليس هدفاً</div>
           </div>
           <strong dir="ltr" class="font-mono text-slate-800 text-sm font-bold" style="unicode-bidi: isolate;">
