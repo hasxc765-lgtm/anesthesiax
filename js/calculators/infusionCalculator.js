@@ -1,101 +1,61 @@
 /**
- * Continuous Infusion Calculator Engine Core (Phase 6.1 - Refactored)
- * Clinical References: FDA Infusion Pump Safety / ASA Guidelines / ISMP High-Alert Standards
+ * Continuous Infusion Calculator Engine Core (Phase 6.3)
+ * Data-Driven & Independent Calculation Engine
+ * 
+ * References:
+ * - FDA Infusion Pump Safety Guidelines
+ * - ISMP High-Alert Medication Standards
  */
 
-// قائمة الوحدات المسموحة للجرعات
-export const SUPPORTED_DOSE_UNITS = [
-  { id: 'mcg_kg_min', label: 'mcg/kg/min', requiresWeight: true, timeFactor: 60, baseUnit: 'mcg' },
-  { id: 'mcg_kg_hr', label: 'mcg/kg/hr', requiresWeight: true, timeFactor: 1, baseUnit: 'mcg' },
-  { id: 'mg_kg_hr', label: 'mg/kg/hr', requiresWeight: true, timeFactor: 1, baseUnit: 'mg' },
-  { id: 'mcg_hr', label: 'mcg/hr', requiresWeight: false, timeFactor: 1, baseUnit: 'mcg' },
-  { id: 'mg_hr', label: 'mg/hr', requiresWeight: false, timeFactor: 1, baseUnit: 'mg' },
-  { id: 'units_hr', label: 'units/hr', requiresWeight: false, timeFactor: 1, baseUnit: 'units' },
-  { id: 'units_min', label: 'units/min', requiresWeight: false, timeFactor: 60, baseUnit: 'units' },
-  { id: 'units_kg_hr', label: 'units/kg/hr', requiresWeight: true, timeFactor: 1, baseUnit: 'units' }
-];
+import { infusionDrugsData } from '../data/infusionDrugs.js';
 
-// قائمة الوحدات المسموحة لكميات الدواء في السرنجة
-export const SUPPORTED_AMOUNT_UNITS = [
-  { id: 'mg', label: 'mg' },
-  { id: 'mcg', label: 'mcg' },
-  { id: 'units', label: 'units' }
-];
+// قائمة جميع الوحدات المسموحة للجرعات
+export const SUPPORTED_DOSE_UNITS = {
+  'mcg_kg_min': { label: 'mcg/kg/min', requiresWeight: true, timeFactor: 60, baseUnit: 'mcg' },
+  'mcg_kg_hr':  { label: 'mcg/kg/hr',  requiresWeight: true, timeFactor: 1,  baseUnit: 'mcg' },
+  'mg_kg_hr':   { label: 'mg/kg/hr',   requiresWeight: true, timeFactor: 1,  baseUnit: 'mg' },
+  'mcg_hr':     { label: 'mcg/hr',     requiresWeight: false, timeFactor: 1, baseUnit: 'mcg' },
+  'mg_hr':      { label: 'mg/hr',      requiresWeight: false, timeFactor: 1, baseUnit: 'mg' },
+  'units_hr':   { label: 'units/hr',   requiresWeight: false, timeFactor: 1, baseUnit: 'units' },
+  'units_min':  { label: 'units/min',  requiresWeight: false, timeFactor: 60, baseUnit: 'units' },
+  'units_kg_hr':{ label: 'units/kg/hr',requiresWeight: true, timeFactor: 1,  baseUnit: 'units' }
+};
 
-// قائمة الوحدات المسموحة لتركيز السرنجة
-export const SUPPORTED_CONCENTRATION_UNITS = [
-  { id: 'mg/mL', label: 'mg/mL', baseUnit: 'mg' },
-  { id: 'mcg/mL', label: 'mcg/mL', baseUnit: 'mcg' },
-  { id: 'units/mL', label: 'units/mL', baseUnit: 'units' }
-];
+// قائمة التراكيز المسموحة
+export const SUPPORTED_CONCENTRATION_UNITS = {
+  'mg/mL':    { label: 'mg/mL',    baseUnit: 'mg' },
+  'mcg/mL':   { label: 'mcg/mL',   baseUnit: 'mcg' },
+  'units/mL': { label: 'units/mL', baseUnit: 'units' }
+};
 
 /**
- * 1. حساب التركيز النهائي للسرنجة (Syringe / Dilution Setup)
- */
-export function calculateSyringeConcentration({ drugAmount, amountUnitKey = 'mg', finalVolumeMl }) {
-  const amount = parseFloat(drugAmount);
-  const volume = parseFloat(finalVolumeMl);
-
-  const amountUnitObj = SUPPORTED_AMOUNT_UNITS.find(u => u.id === amountUnitKey);
-  if (!amountUnitObj) {
-    return {
-      isValid: false,
-      error: "وحدة كمية الدواء المحددة غير مدعومة."
-    };
-  }
-
-  if (isNaN(amount) || amount <= 0 || !Number.isFinite(amount)) {
-    return {
-      isValid: false,
-      error: "يرجى إدخال كمية دواء صحيحة أكبر من الصفر."
-    };
-  }
-
-  if (isNaN(volume) || volume <= 0 || !Number.isFinite(volume)) {
-    return {
-      isValid: false,
-      error: "يرجى إدخال حجم سرنجة نهائي صحيح أكبر من الصفر."
-    };
-  }
-
-  const concentration = amount / volume;
-
-  if (!Number.isFinite(concentration) || concentration <= 0) {
-    return {
-      isValid: false,
-      error: "خطأ في حساب التركيز النهائي للسرنجة."
-    };
-  }
-
-  const generatedConcUnit = `${amountUnitObj.id}/mL`;
-
-  return {
-    isValid: true,
-    drugAmount: amount,
-    amountUnit: amountUnitObj.id,
-    finalVolumeMl: volume,
-    concentrationValue: concentration,
-    concentrationUnit: generatedConcUnit
-  };
-}
-
-/**
- * 2. حساب معدل الضخ بالمضخة (Dose -> Pump Rate mL/hr)
+ * دالة حساب معدل الضخ الأساسية (Data-Driven Infusion Rate Calculation)
  */
 export function calculateInfusionRate({
-  patientWeight,
-  doseValue,
+  drugId = null,
+  patientWeight = null,
+  doseValue = null,
   doseUnitKey = 'mcg_kg_min',
-  concentrationValue,
-  concentrationUnitKey = 'mg/mL',
-  isHighAlertDrug = false
+  concentrationValue = null,
+  concentrationUnitKey = 'mcg/mL'
 }) {
-  const weight = parseFloat(patientWeight);
-  const dose = parseFloat(doseValue);
-  const conc = parseFloat(concentrationValue);
+  // 1. الاستعلام الديناميكي والتحقق الصارم من وجود الدواء عند تمرير drugId
+  let drugObj = null;
+  let isHighAlert = false;
 
-  // Modification 1: Remove fallback and return explicit error for unknown dose unit
-  const doseUnitObj = SUPPORTED_DOSE_UNITS.find(u => u.id === doseUnitKey);
+  if (drugId) {
+    drugObj = infusionDrugsData.find(d => d.id === drugId);
+    if (!drugObj) {
+      return {
+        isValid: false,
+        error: "الدواء المحدد غير موجود في قاعدة البيانات."
+      };
+    }
+    isHighAlert = Boolean(drugObj.isHighAlert);
+  }
+
+  // 2. التحقق من وجود وإتاحة الوحدات المدخلة
+  const doseUnitObj = SUPPORTED_DOSE_UNITS[doseUnitKey];
   if (!doseUnitObj) {
     return {
       isValid: false,
@@ -103,7 +63,7 @@ export function calculateInfusionRate({
     };
   }
 
-  const concUnitObj = SUPPORTED_CONCENTRATION_UNITS.find(u => u.id === concentrationUnitKey);
+  const concUnitObj = SUPPORTED_CONCENTRATION_UNITS[concentrationUnitKey];
   if (!concUnitObj) {
     return {
       isValid: false,
@@ -111,30 +71,46 @@ export function calculateInfusionRate({
     };
   }
 
-  // Strict Unit Compatibility Verification
+  // التحقق من أن الدواء المختار يدعم هذه الوحدة بداخل قاعدة البيانات
+  if (drugObj && Array.isArray(drugObj.supportedDoseUnitKeys)) {
+    if (!drugObj.supportedDoseUnitKeys.includes(doseUnitKey)) {
+      return {
+        isValid: false,
+        error: `وحدة الجرعة (${doseUnitObj.label}) غير مدعومة لهذا الدواء.`
+      };
+    }
+  }
+
+  // 3. التحقق الصارم من توافق فئات الوحدات (Strict Unit Compatibility)
   const doseBase = doseUnitObj.baseUnit; // 'mcg' | 'mg' | 'units'
   const concBase = concUnitObj.baseUnit; // 'mcg' | 'mg' | 'units'
 
   if (doseBase === 'units' && concBase !== 'units') {
     return {
       isValid: false,
-      error: "وحدات غير متوافقة: الجرعة المحددة بالوحدات (units) تتطلب تركيزاً بـ (units/mL)."
+      error: "وحدات غير متوافقة: الجرعة بالوحدات (units) تتطلب تركيزاً بـ (units/mL)."
     };
   }
 
   if (doseBase !== 'units' && concBase === 'units') {
     return {
       isValid: false,
-      error: "وحدات غير متوافقة: لا يمكن حساب جرعة بالكتلة (mg/mcg) مع تركيز بالوحدات (units/mL)."
+      error: "وحدات غير متوافقة: لا يمكن حساب جرعة بكتلة (mg/mcg) مع تركيز بالوحدات (units/mL)."
     };
   }
 
-  // Input Numeric Validations
-  if (doseUnitObj.requiresWeight && (isNaN(weight) || weight <= 0 || weight > 300 || !Number.isFinite(weight))) {
-    return {
-      isValid: false,
-      error: "الجرعة المحددة تتطلب إدخال وزن صحيح للمريض (بالكجم)."
-    };
+  // 4. التحقق الرقمي والرياضي من القيم المدخلة
+  const weight = parseFloat(patientWeight);
+  const dose = parseFloat(doseValue);
+  const conc = parseFloat(concentrationValue);
+
+  if (doseUnitObj.requiresWeight) {
+    if (isNaN(weight) || weight <= 0 || weight > 300 || !Number.isFinite(weight)) {
+      return {
+        isValid: false,
+        error: "الجرعة المحددة تتطلب إدخال وزن صحيح للمريض (بالكجم)."
+      };
+    }
   }
 
   if (isNaN(dose) || dose <= 0 || !Number.isFinite(dose)) {
@@ -151,57 +127,52 @@ export function calculateInfusionRate({
     };
   }
 
-  // Calculation of Total Hourly Dose
+  // 5. حساب الجرعة الساعية الإجمالية (Total Hourly Dose)
   let totalHourlyDose = dose * doseUnitObj.timeFactor;
   if (doseUnitObj.requiresWeight) {
     totalHourlyDose *= weight;
   }
 
-  // Conversion Factor to Align Units Internal Conversion
-  let effectiveConc = conc;
-
+  // 6. توحيد التراكيز حسابياً بين (mcg) و (mg)
+  let effectiveConcInDoseBase = conc;
   if (doseBase === 'mcg' && concBase === 'mg') {
-    // 1 mg/mL = 1000 mcg/mL
-    effectiveConc = conc * 1000;
+    effectiveConcInDoseBase = conc * 1000; // 1 mg/mL = 1000 mcg/mL
   } else if (doseBase === 'mg' && concBase === 'mcg') {
-    // 1 mcg/mL = 0.001 mg/mL
-    effectiveConc = conc / 1000;
+    effectiveConcInDoseBase = conc / 1000; // 1 mcg/mL = 0.001 mg/mL
   }
 
-  // Modification 2: Validation check via Number.isFinite() after internal unit conversion
-  if (isNaN(effectiveConc) || !Number.isFinite(effectiveConc) || effectiveConc <= 0) {
+  if (isNaN(effectiveConcInDoseBase) || !Number.isFinite(effectiveConcInDoseBase) || effectiveConcInDoseBase <= 0) {
     return {
       isValid: false,
       error: "خطأ في تحويل تركيز السرنجة إلى الوحدة الداخلية."
     };
   }
 
-  const pumpRateMlHr = totalHourlyDose / effectiveConc;
+  // 7. حساب معدل الضخ بالساعة (mL/hr)
+  const pumpRateMlHr = totalHourlyDose / effectiveConcInDoseBase;
 
-  // Final Safety Check on Calculation Result
   if (isNaN(pumpRateMlHr) || !Number.isFinite(pumpRateMlHr) || pumpRateMlHr <= 0) {
     return {
       isValid: false,
-      error: "خطأ في النتيجة الحسابية. يرجى المراجعة والتحقق من القوانين والمدخلات."
+      error: "خطأ في النتيجة الحسابية. يرجى مراجعة المدخلات."
     };
   }
 
-  // Modification 3: Renamed to Unusually High Pump Rate & clarified non-universal nature
-  const isUnusuallyHighRate = pumpRateMlHr > 200;
-
   return {
     isValid: true,
+    drugId: drugObj ? drugObj.id : null,
+    drugName: drugObj ? drugObj.name : null,
     patientWeight: doseUnitObj.requiresWeight ? weight : null,
     doseValue: dose,
+    doseUnitKey,
     doseUnitLabel: doseUnitObj.label,
     totalHourlyDose,
     totalHourlyDoseUnit: `${doseBase}/hr`,
     concentrationValue: conc,
+    concentrationUnitKey,
     concentrationUnitLabel: concUnitObj.label,
-    effectiveConcInDoseBase: effectiveConc,
+    effectiveConcInDoseBase,
     pumpRateMlHr,
-    isHighAlert: Boolean(isHighAlertDrug),
-    isUnusuallyHighRate,
-    unusuallyHighRateMessage: isUnusuallyHighRate ? "⚠️ تنبيه فحص (Unusually High Pump Rate): معدل الضخ أعلى من 200 mL/hr. يُرجى مراجعة الجرعة والتركيز (ملاحظة: هذا تنبيه تدقيق وليس حداً سريرياً قاطعاً)." : null
+    isHighAlert
   };
 }
