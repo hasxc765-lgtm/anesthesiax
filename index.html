@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AnesthesiaX - منصة التخدير الحسابية</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>AnesthesiaX - المنصة الحسابية الطبية للتخدير</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen p-4">
 
@@ -14,17 +14,24 @@
       <h1 class="text-2xl font-bold text-blue-600">AnesthesiaX 💉</h1>
       <p class="text-xs text-slate-500">المنصة الحسابية الطبية للتخدير</p>
     </div>
-    <span class="text-xs bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg">v2.1 Pro</span>
+    <span class="text-xs bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg">v2.5 Refactored</span>
   </header>
 
+  <!-- Global Clinical Safety Disclaimer -->
+  <div class="max-w-2xl mx-auto my-3 p-3 bg-amber-50 border-r-4 border-amber-500 text-amber-900 text-xs rounded-l-xl">
+    <div class="font-bold flex items-center gap-1 mb-0.5">
+      <span>⚠️</span> <span>تنبيه سلامة سريري (CLINICAL SAFETY NOTICE)</span>
+    </div>
+    <p class="opacity-90">هذه الحاسبة مرجع تعليمي واستشاري. يجب دائماً التأكد من تركيز الأمبول المتاح والبروتوكول المحلي قبل إعطاء أي دواء.</p>
+  </div>
+
   <!-- Weight Input & Calculator Banner -->
-  <section class="max-w-2xl mx-auto my-4 p-4 bg-blue-600 text-white rounded-2xl shadow-md space-y-2">
+  <section class="max-w-2xl mx-auto my-3 p-4 bg-blue-600 text-white rounded-2xl shadow-md space-y-2">
     <label class="block text-xs font-semibold">⚖️ أدخل وزن المريض لحساب الجرعة والحجم تلقائياً:</label>
     <div class="flex gap-2">
       <input 
         type="number" 
         id="patientWeight" 
-        oninput="filterDrugs()"
         placeholder="الوزن بـ (kg) مثل: 70" 
         class="w-full p-3 rounded-xl text-slate-900 font-bold bg-white focus:outline-none text-sm"
       >
@@ -37,189 +44,22 @@
     <input 
       type="text" 
       id="searchInput" 
-      oninput="filterDrugs()"
       placeholder="🔍 ابحث عن دواء (Propofol, Ketamine, Ephedrine)..." 
       class="w-full p-3.5 rounded-xl border-2 border-blue-500 bg-white shadow-sm focus:outline-none text-sm"
     >
 
     <div class="flex gap-2 overflow-x-auto pb-2 text-xs" id="categoryButtons">
-      <button onclick="setCategory('All')" class="cat-btn active px-3 py-1.5 rounded-lg bg-blue-600 text-white whitespace-nowrap">الكل</button>
-      <button onclick="setCategory('Induction')" class="cat-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 whitespace-nowrap">Induction</button>
-      <button onclick="setCategory('Emergency')" class="cat-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 whitespace-nowrap">Emergency</button>
-      <button onclick="setCategory('Muscle Relaxant')" class="cat-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 whitespace-nowrap">Muscle Relaxant</button>
-      <button onclick="setCategory('Vasopressor')" class="cat-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 whitespace-nowrap">Vasopressor</button>
-      <button onclick="setCategory('Opioid')" class="cat-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 whitespace-nowrap">Opioid</button>
+      <button onclick="setCategory('All')" data-cat="All" class="cat-btn active px-3 py-1.5 rounded-lg bg-blue-600 text-white whitespace-nowrap border border-blue-600">الكل</button>
+      <button onclick="setCategory('Induction')" data-cat="Induction" class="cat-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 whitespace-nowrap">Induction</button>
+      <button onclick="setCategory('Muscle Relaxant')" data-cat="Muscle Relaxant" class="cat-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 whitespace-nowrap">Muscle Relaxant</button>
+      <button onclick="setCategory('Vasopressor')" data-cat="Vasopressor" class="cat-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 whitespace-nowrap">Vasopressor</button>
+      <button onclick="setCategory('Opioid')" data-cat="Opioid" class="cat-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 whitespace-nowrap">Opioid</button>
     </div>
   </section>
 
   <!-- Drugs Container -->
   <main class="max-w-2xl mx-auto space-y-4" id="drugsContainer"></main>
 
-  <script>
-    const drugsData = [
-      {
-        id: "propofol",
-        name: "Propofol",
-        arabicName: "بروبوفول",
-        category: "Induction",
-        doseMin: 1.5,
-        doseMax: 2.5,
-        unit: "mg/kg",
-        concentration: 10, // mg/mL
-        onset: "30-40 sec",
-        duration: "4-8 min",
-        warning: "قد يسبب هبوطاً حاداً في ضغط الدم (Hypotension) وألماً عند الحقن الوريدي."
-      },
-      {
-        id: "ketamine",
-        name: "Ketamine",
-        arabicName: "كيتامين",
-        category: "Induction",
-        doseMin: 1.0,
-        doseMax: 2.0,
-        unit: "mg/kg",
-        concentration: 50, // mg/mL
-        onset: "30-60 sec",
-        duration: "10-20 min",
-        warning: "يحافظ على ضغط الدم والتنفس، وقد يسبب هلوسة عند الإفاقة."
-      },
-      {
-        id: "succinylcholine",
-        name: "Succinylcholine (Scoline)",
-        arabicName: "سكولين",
-        category: "Muscle Relaxant",
-        doseMin: 1.0,
-        doseMax: 1.5,
-        unit: "mg/kg",
-        concentration: 50, // mg/mL
-        onset: "30-60 sec",
-        duration: "5-10 min",
-        warning: "⚠️ طارئ: قد يسبب ارتفاع البوتاسيوم وارتفاع الحرارة الخبيث (Malignant Hyperthermia)."
-      },
-      {
-        id: "ephedrine",
-        name: "Ephedrine",
-        arabicName: "إيفيدرين",
-        category: "Vasopressor",
-        doseMin: 5,
-        doseMax: 10,
-        unit: "mg (Bolus)",
-        isFixed: true, // جرعة ثابتة وليست لكل كغم
-        concentration: 30, // mg/mL
-        onset: "2-5 min",
-        duration: "10-60 min",
-        warning: "يستخدم لعلاج هبوط الضغط المصاحب للتخدير النصفي أو العام."
-      },
-      {
-        id: "fentanyl",
-        name: "Fentanyl",
-        arabicName: "فنتانيل",
-        category: "Opioid",
-        doseMin: 1,
-        doseMax: 2,
-        unit: "mcg/kg",
-        concentration: 50, // mcg/mL
-        onset: "1-2 min",
-        duration: "30-60 min",
-        warning: "مسكن قوي جداً، قد يسبب تثبيط التنفس (Respiratory Depression)."
-      }
-    ];
-
-    let currentCategory = 'All';
-
-    function clearWeight() {
-      document.getElementById('patientWeight').value = '';
-      filterDrugs();
-    }
-
-    function renderDrugs(drugs) {
-      const container = document.getElementById('drugsContainer');
-      const weight = parseFloat(document.getElementById('patientWeight').value) || 0;
-      container.innerHTML = '';
-
-      if (drugs.length === 0) {
-        container.innerHTML = `<div class="text-center py-8 text-slate-400">لا توجد أدوية تطابق بحثك</div>`;
-        return;
-      }
-
-      drugs.forEach(drug => {
-        let calcHTML = '';
-
-        if (weight > 0 && !drug.isFixed) {
-          const totalDoseMin = (drug.doseMin * weight).toFixed(1);
-          const totalDoseMax = (drug.doseMax * weight).toFixed(1);
-          const volMin = (totalDoseMin / drug.concentration).toFixed(1);
-          const volMax = (totalDoseMax / drug.concentration).toFixed(1);
-
-          const doseUnitStr = drug.unit.includes('mcg') ? 'mcg' : 'mg';
-
-          calcHTML = `
-            <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1 text-xs">
-              <div class="font-bold text-blue-900 flex justify-between">
-                <span>🎯 الجرعة المحسوبة (${weight} kg):</span>
-                <span>${totalDoseMin} - ${totalDoseMax} ${doseUnitStr}</span>
-              </div>
-              <div class="font-bold text-emerald-700 flex justify-between border-t border-blue-200/60 pt-1">
-                <span>💉 الحجم المطلوب بالسرنجة:</span>
-                <span>${volMin} - ${volMax} mL</span>
-              </div>
-            </div>
-          `;
-        }
-
-        const card = document.createElement('div');
-        card.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2";
-        card.innerHTML = `
-          <div class="flex justify-between items-start">
-            <div>
-              <h3 class="font-bold text-lg text-blue-600">${drug.name} <span class="text-xs font-normal text-slate-500">(${drug.arabicName})</span></h3>
-              <span class="inline-block mt-1 px-2 py-0.5 text-[11px] font-semibold bg-blue-50 text-blue-700 rounded-md border border-blue-200">${drug.category}</span>
-            </div>
-            <div class="text-left text-xs bg-slate-100 p-2 rounded-lg">
-              <span class="block font-bold text-slate-600">التركيز:</span>
-              <span>${drug.concentration} ${drug.unit.includes('mcg') ? 'mcg/mL' : 'mg/mL'}</span>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-            <div><span class="text-slate-500">الجرعة القياسية:</span> <strong>${drug.doseMin} - ${drug.doseMax} ${drug.unit}</strong></div>
-            <div><span class="text-slate-500">بدء الفاعلية:</span> <strong>${drug.onset}</strong></div>
-            <div><span class="text-slate-500">المدة:</span> <strong>${drug.duration}</strong></div>
-          </div>
-
-          ${calcHTML}
-
-          <div class="p-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-[11px]">
-            <strong>⚠️ تنبيه:</strong> ${drug.warning}
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function filterDrugs() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = drugsData.filter(drug => {
-        const matchesQuery = drug.name.toLowerCase().includes(query) || drug.arabicName.includes(query);
-        const matchesCategory = currentCategory === 'All' || drug.category === currentCategory;
-        return matchesQuery && matchesCategory;
-      });
-      renderDrugs(filtered);
-    }
-
-    function setCategory(category) {
-      currentCategory = category;
-      document.querySelectorAll('.cat-btn').forEach(btn => {
-        if(btn.innerText.includes(category) || (category==='All' && btn.innerText==='الكل')) {
-          btn.className = "cat-btn active px-3 py-1.5 rounded-lg bg-blue-600 text-white whitespace-nowrap";
-        } else {
-          btn.className = "cat-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 whitespace-nowrap";
-        }
-      });
-      filterDrugs();
-    }
-
-    renderDrugs(drugsData);
-  </script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
