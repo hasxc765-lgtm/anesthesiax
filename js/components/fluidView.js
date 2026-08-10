@@ -1,6 +1,5 @@
 /**
  * واجهة حاسبة السوائل والنزف المسموح به (Fluid & ABL View Component)
- * تم الإصلاح: معالجة اتجاه النصوص والأقواس والنقطتين الرأسيتين RTL/LTR
  */
 
 import { store } from '../state/store.js';
@@ -122,9 +121,7 @@ export function renderFluidView() {
           <h4 class="font-bold text-xs text-blue-600">🩸 معاملات حساب النزف المسموح (ABL):</h4>
           <div class="grid grid-cols-3 gap-2">
             <div>
-              <label class="block text-[10px] font-semibold text-slate-600 mb-1">
-                Hb الابتدائي <span dir="ltr" class="inline-block">(g/dL):</span>
-              </label>
+              <label class="block text-[10px] font-semibold text-slate-600 mb-1">Hb الابتدائي (g/dL):</label>
               <input 
                 type="number" 
                 id="fluidHbInitInput" 
@@ -136,9 +133,7 @@ export function renderFluidView() {
               >
             </div>
             <div>
-              <label class="block text-[10px] font-semibold text-slate-600 mb-1">
-                Hb المستهدف <span dir="ltr" class="inline-block">(g/dL):</span>
-              </label>
+              <label class="block text-[10px] font-semibold text-slate-600 mb-1">Hb المستهدف (g/dL):</label>
               <input 
                 type="number" 
                 id="fluidHbTargInput" 
@@ -150,9 +145,7 @@ export function renderFluidView() {
               >
             </div>
             <div>
-              <label class="block text-[10px] font-semibold text-slate-600 mb-1">
-                النزف الحالي <span dir="ltr" class="inline-block">(mL):</span>
-              </label>
+              <label class="block text-[10px] font-semibold text-slate-600 mb-1">النزف الحالي (mL):</label>
               <input 
                 type="number" 
                 id="fluidLossInput" 
@@ -199,16 +192,12 @@ export function renderFluidResultsHTML(results) {
       <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-2">
         <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
           <span class="text-lg">🩸</span>
-          <h4 class="font-bold text-xs text-blue-600">
-            النزف المسموح به <span dir="ltr" class="inline-block">(Allowable Blood Loss - ABL):</span>
-          </h4>
+          <h4 class="font-bold text-xs text-blue-600">النزف المسموح به (Allowable Blood Loss - ABL)</h4>
         </div>
 
         <div class="space-y-1.5 text-xs">
           <div class="flex justify-between items-center bg-slate-50 p-2 rounded-xl">
-            <span class="text-slate-600 font-medium">
-              الحد الأقصى للنزف المسموح <span dir="ltr" class="inline-block">(ABL):</span>
-            </span>
+            <span class="text-slate-600 font-medium">الحد الأقصى للنزف المسموح (ABL):</span>
             <strong dir="ltr" class="font-mono text-blue-800 text-sm" style="unicode-bidi: isolate;">
               ${results.abl} mL
             </strong>
@@ -264,9 +253,7 @@ export function renderFluidResultsHTML(results) {
       <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-2">
         <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
           <span class="text-lg">⚙️</span>
-          <h4 class="font-bold text-xs text-blue-600">
-            صيانة السوائل الأساسية <span dir="ltr" class="inline-block">(4-2-1 Rule)</span>
-          </h4>
+          <h4 class="font-bold text-xs text-blue-600">صيانة السوائل الأساسية (4-2-1 Rule)</h4>
         </div>
 
         <div class="space-y-1.5 text-xs">
@@ -278,7 +265,7 @@ export function renderFluidResultsHTML(results) {
           </div>
 
           <div class="text-[11px] text-slate-500 pt-1">
-            📌 <span class="font-semibold text-slate-700">ملاحظة الصيام <span dir="ltr" class="inline-block">(NPO):</span></span> ${results.npoNote}
+            📌 <span class="font-semibold text-slate-700">ملاحظة الصيام (NPO):</span> ${results.npoNote}
           </div>
 
           ${npoDetailsHTML}
@@ -289,9 +276,7 @@ export function renderFluidResultsHTML(results) {
       <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-2">
         <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
           <span class="text-lg">🔪</span>
-          <h4 class="font-bold text-xs text-blue-600">
-            الفقدان الجراحي وحجم الدم <span dir="ltr" class="inline-block">(EBV)</span>
-          </h4>
+          <h4 class="font-bold text-xs text-blue-600">الفقدان الجراحي وحجم الدم (EBV)</h4>
         </div>
 
         <div class="space-y-1.5 text-xs">
@@ -303,9 +288,7 @@ export function renderFluidResultsHTML(results) {
           </div>
 
           <div class="flex justify-between items-center bg-slate-50 p-2 rounded-xl">
-            <span class="text-slate-600 font-medium">
-              حجم الدم الكلي <span dir="ltr" class="inline-block">(EBV):</span>
-            </span>
+            <span class="text-slate-600 font-medium">حجم الدم الكلي (EBV):</span>
             <strong dir="ltr" class="font-mono text-blue-800 text-sm" style="unicode-bidi: isolate;">
               ${results.ebv} mL
             </strong>
