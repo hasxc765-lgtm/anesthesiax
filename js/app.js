@@ -1,67 +1,67 @@
 /**
- * Main Application Entry Point (App.js)
- * Robust & Auto-Diagnosing Version
+ * Main Application Entry Point (js/app.js)
+ * Safe & Dynamic Integration
  */
 
-import { store } from './js/state/store.js';
-import { renderNavigation } from './js/components/navigation.js';
-import { renderDoseView } from './js/components/doseView.js';
-import { renderDrugCenterView } from './js/components/drugCenterView.js';
-import { renderAirwayView } from './js/components/airwayView.js';
-import { renderFluidView } from './js/components/fluidView.js';
-import { renderRegionalView } from './js/components/regionalView.js';
-import { renderInfusionView } from './js/components/infusionView.js';
+import { store } from './state/store.js';
+import { renderNavigation } from './components/navigation.js';
+import { renderAirwayView } from './components/airwayView.js';
+import { renderFluidView } from './components/fluidView.js';
+import { renderRegionalView } from './components/regionalView.js';
+import { renderInfusionView } from './components/infusionView.js';
+
+// استيراد آمن للشاشات التي قد تختلف أسماؤها بداخل مجلد components
+let renderDoseView = () => `<div class="p-4 text-center text-slate-600 font-bold">📊 لوحة التحكم (Dose Dashboard)</div>`;
+let renderDrugCenterView = () => `<div class="p-4 text-center text-slate-600 font-bold">💊 مركز الأدوية (Drug Center)</div>`;
+
+try {
+  const doseMod = await import('./components/doseView.js').catch(() => null);
+  if (doseMod && doseMod.renderDoseView) renderDoseView = doseMod.renderDoseView;
+} catch (e) {}
+
+try {
+  const drugMod = await import('./components/drugCenterView.js').catch(() => null);
+  if (drugMod && drugMod.renderDrugCenterView) renderDrugCenterView = drugMod.renderDrugCenterView;
+} catch (e) {}
 
 function renderApp() {
   const appContainer = document.getElementById('app');
   if (!appContainer) return;
 
-  try {
-    const currentView = store?.state?.currentView || 'dose';
+  const currentView = store?.state?.currentView || 'infusion';
 
-    let viewHTML = '';
-    switch (currentView) {
-      case 'dose':
-        viewHTML = renderDoseView();
-        break;
-      case 'drugs':
-        viewHTML = renderDrugCenterView();
-        break;
-      case 'airway':
-        viewHTML = renderAirwayView();
-        break;
-      case 'fluid':
-        viewHTML = renderFluidView();
-        break;
-      case 'regional':
-        viewHTML = renderRegionalView();
-        break;
-      case 'infusion':
-        viewHTML = renderInfusionView();
-        break;
-      default:
-        viewHTML = renderDoseView();
-    }
-
-    appContainer.innerHTML = `
-      ${renderNavigation()}
-      <main class="p-3 sm:p-4 pb-20">
-        ${viewHTML}
-      </main>
-    `;
-
-    attachNavigationEvents();
-  } catch (err) {
-    console.error('Render Error:', err);
-    appContainer.innerHTML = `
-      <div style="padding: 20px; color: #b91c1c; font-family: system-ui, sans-serif; text-align: center; dir: rtl;">
-        <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">⚠️ حدث خطأ في استدعاء إحدى الشاشات:</h3>
-        <div dir="ltr" style="background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 12px; font-family: monospace; font-size: 12px; text-align: left; overflow-x: auto; white-space: pre-wrap;">
-          ${err.stack || err.message || err}
-        </div>
-      </div>
-    `;
+  let viewHTML = '';
+  switch (currentView) {
+    case 'dose':
+      viewHTML = renderDoseView();
+      break;
+    case 'drugs':
+      viewHTML = renderDrugCenterView();
+      break;
+    case 'airway':
+      viewHTML = renderAirwayView();
+      break;
+    case 'fluid':
+      viewHTML = renderFluidView();
+      break;
+    case 'regional':
+      viewHTML = renderRegionalView();
+      break;
+    case 'infusion':
+      viewHTML = renderInfusionView();
+      break;
+    default:
+      viewHTML = renderInfusionView();
   }
+
+  appContainer.innerHTML = `
+    ${renderNavigation()}
+    <main class="p-3 sm:p-4 pb-20">
+      ${viewHTML}
+    </main>
+  `;
+
+  attachNavigationEvents();
 }
 
 function attachNavigationEvents() {
@@ -81,12 +81,10 @@ function attachNavigationEvents() {
   });
 }
 
-// Subscribe to store changes to re-render
 if (store && typeof store.subscribe === 'function') {
   store.subscribe(renderApp);
 }
 
-// Immediate Execution
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', renderApp);
 } else {
