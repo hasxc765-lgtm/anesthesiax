@@ -1,24 +1,32 @@
 /**
- * Continuous Infusion Calculator UI Component (Phase 6.4 - Fixed Listeners)
- * Mobile-First, RTL, Data-Driven Vanilla ES Module
+ * Continuous Infusion UI View Component (Phase 6.4 - Fully Audited)
+ * Dynamic Range Formatting, Interactive Overdose Alerts & Strict Input Validation
  */
 
 import { infusionDrugsData } from '../data/infusionDrugs.js';
-import { calculateInfusionRate, SUPPORTED_DOSE_UNITS } from '../calculators/infusionCalculator.js';
+import { calculateInfusionRate, convertDoseRange, SUPPORTED_DOSE_UNITS } from '../calculators/infusionCalculator.js';
 import { store } from '../state/store.js';
 
 export function renderInfusionView() {
-  // ربط الـ Listeners بالعنصر الجديد فور إضافته للـ DOM
   setTimeout(attachInfusionViewListeners, 0);
 
-  const defaultWeight = store?.state?.patientWeight || '';
-  const defaultDrug = infusionDrugsData[0]; // Noradrenaline
+  const defaultWeight = store?.state?.patientWeight || 70;
+  const defaultDrug = infusionDrugsData[0];
   const defaultIndication = defaultDrug.indications[0];
   const defaultConcObj = defaultDrug.standardConcentrations[0];
 
-  const results = calculateInfusionRate({
+  const initialRange = convertDoseRange(
+    defaultIndication.doseMin,
+    defaultIndication.doseMax,
+    defaultIndication.doseUnitKey,
+    defaultIndication.doseUnitKey,
+    defaultWeight
+  );
+
+  const initialResults = calculateInfusionRate({
     drugId: defaultDrug.id,
-    patientWeight: defaultWeight || 70,
+    indicationId: defaultIndication.id,
+    patientWeight: defaultWeight,
     doseValue: defaultIndication.doseMin,
     doseUnitKey: defaultIndication.doseUnitKey,
     concentrationValue: defaultConcObj.value,
@@ -33,7 +41,7 @@ export function renderInfusionView() {
           <span class="text-2xl">💉</span>
           <div>
             <h2 class="font-bold text-sm">حاسبة مضخات التنقيط المستمر (Continuous Infusion)</h2>
-            <p class="text-[10px] opacity-80">معدلات الضخ بالمضخة (mL/hr) والأدوية عالية الخطورة</p>
+            <p class="text-[10px] opacity-80">معدلات الضخ بالمضخة (mL/hr) والتنبيهات السريرية التفاعلية</p>
           </div>
         </div>
       </div>
@@ -79,7 +87,7 @@ export function renderInfusionView() {
 
         <!-- Inputs Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-          <!-- Weight Input (Conditional) -->
+          <!-- Weight Input -->
           <div id="weightContainer" class="${SUPPORTED_DOSE_UNITS[defaultIndication.doseUnitKey]?.requiresWeight ? 'block' : 'hidden'}">
             <label class="block text-[11px] font-semibold text-slate-700 mb-1">
               ⚖️ وزن المريض (kg):
@@ -87,8 +95,10 @@ export function renderInfusionView() {
             <input 
               type="number" 
               id="infusionWeightInput" 
+              min="1"
+              max="300"
               step="any"
-              value="${defaultWeight || 70}" 
+              value="${defaultWeight}" 
               placeholder="مثال: 70" 
               dir="ltr"
               class="w-full p-2.5 border border-slate-300 rounded-xl text-xs font-bold text-center text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:border-blue-500"
@@ -118,13 +128,14 @@ export function renderInfusionView() {
               type="number" 
               id="infusionDoseInput" 
               step="any"
+              min="0.0001"
               value="${defaultIndication.doseMin}" 
               placeholder="الجرعة" 
               dir="ltr"
               class="w-full p-2.5 border border-slate-300 rounded-xl text-xs font-bold text-center text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:border-blue-500"
             >
-            <div id="doseRangeText" class="text-[10px] text-slate-500 mt-1 font-mono text-center" dir="ltr">
-              Range: ${defaultIndication.doseMin} - ${defaultIndication.doseMax} ${defaultIndication.unitLabel}
+            <div id="doseRangeText" class="text-[10px] text-blue-700 font-bold mt-1 font-mono text-center" dir="ltr">
+              Range: ${initialRange.min} - ${initialRange.max} ${SUPPORTED_DOSE_UNITS[defaultIndication.doseUnitKey]?.label}
             </div>
           </div>
 
@@ -146,7 +157,7 @@ export function renderInfusionView() {
 
       <!-- Results Display Container -->
       <div id="infusionResultsContainer">
-        ${renderInfusionResultsHTML(results)}
+        ${renderInfusionResultsHTML(initialResults)}
       </div>
 
       <!-- Clinical Safety Notes & Reference Card -->
@@ -169,14 +180,25 @@ export function renderInfusionView() {
 export function renderInfusionResultsHTML(results) {
   if (!results || !results.isValid) {
     return `
-      <div class="p-4 bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold rounded-2xl text-center">
-        ⚠️ ${results?.error || 'يرجى التأكد من إدخال جميع البيانات بشكل صحيح.'}
+      <div class="p-4 bg-rose-50 border border-rose-300 text-rose-900 text-xs font-bold rounded-2xl text-center space-y-1">
+        <div>⚠️ خطأ في المدخلات:</div>
+        <div class="text-[11px] font-semibold">${results?.error || 'يرجى التأكد من إدخال جميع البيانات بشكل صحيح.'}</div>
       </div>
     `;
   }
 
   return `
     <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
+      <!-- Interactive Red Overdose Banner -->
+      ${results.isOverdose ? `
+        <div class="p-3 bg-rose-100 border-2 border-rose-500 text-rose-900 text-xs font-bold rounded-xl space-y-1 animate-pulse">
+          <div class="flex items-center gap-1 text-sm text-rose-800">
+            <span>⛔</span> <span>تنبيه سلامة حرج (OVERDOSE WARNING)</span>
+          </div>
+          <p class="text-[11px] font-semibold leading-relaxed">${results.overdoseMessage}</p>
+        </div>
+      ` : ''}
+
       <div class="flex justify-between items-center border-b border-slate-100 pb-2">
         <h4 class="font-bold text-xs text-blue-600 flex items-center gap-1">
           <span>⚙️</span>
@@ -192,7 +214,7 @@ export function renderInfusionResultsHTML(results) {
       <!-- Prominent Pump Rate Result -->
       <div class="p-3 bg-blue-50 border border-blue-200 rounded-2xl text-center space-y-1">
         <div class="text-[11px] font-bold text-blue-900">معدل الضخ المطلوب ضبطه على المضخة:</div>
-        <div dir="ltr" class="text-3xl font-black font-mono text-blue-700 tracking-tight">
+        <div dir="ltr" class="text-3xl font-black font-mono ${results.isOverdose ? 'text-rose-600' : 'text-blue-700'} tracking-tight">
           ${results.pumpRateMlHr.toFixed(2)} <span class="text-lg font-bold">mL/hr</span>
         </div>
       </div>
@@ -242,7 +264,6 @@ function attachInfusionViewListeners() {
   const wrapper = document.getElementById('infusionViewWrapper');
   if (!wrapper) return;
 
-  // إضافة Listeners للعنصر المعروض حالياً بدون أسطر شروط سابقة
   wrapper.addEventListener('change', handleInfusionViewEvent);
   wrapper.addEventListener('input', handleInfusionViewEvent);
 }
@@ -258,26 +279,26 @@ function handleInfusionViewEvent(e) {
   const drug = infusionDrugsData.find(d => d.id === drugId);
   if (!drug) return;
 
-  const highAlertBanner = document.getElementById('highAlertBanner');
   const indicationSelect = document.getElementById('infusionIndicationSelect');
-  const indicationNotesText = document.getElementById('indicationNotesText');
   const doseUnitSelect = document.getElementById('infusionDoseUnitSelect');
+  const weightInput = document.getElementById('infusionWeightInput');
   const doseInput = document.getElementById('infusionDoseInput');
-  const doseRangeText = document.getElementById('doseRangeText');
   const concSelect = document.getElementById('infusionConcSelect');
+
+  const highAlertBanner = document.getElementById('highAlertBanner');
+  const indicationNotesText = document.getElementById('indicationNotesText');
+  const doseRangeText = document.getElementById('doseRangeText');
   const weightContainer = document.getElementById('weightContainer');
   const safetyNotesText = document.getElementById('clinicalSafetyNotesText');
   const referenceText = document.getElementById('referenceText');
 
   if (targetId === 'infusionDrugSelect') {
-    // 1. تحديث شريط الدواء عالي الخطورة
     if (highAlertBanner) {
       highAlertBanner.className = drug.isHighAlert
         ? 'p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-[11px] font-bold flex items-center gap-1.5 block'
         : 'hidden';
     }
 
-    // 2. تحديث قائمة الاستطبابات
     if (indicationSelect) {
       indicationSelect.innerHTML = drug.indications.map(ind => `
         <option value="${ind.id}">${ind.title}</option>
@@ -287,7 +308,6 @@ function handleInfusionViewEvent(e) {
     const selectedInd = drug.indications[0];
     if (indicationNotesText) indicationNotesText.textContent = selectedInd.notes;
 
-    // 3. تحديث قائمة وحدات الجرعة
     if (doseUnitSelect) {
       doseUnitSelect.innerHTML = drug.supportedDoseUnitKeys.map(uKey => `
         <option value="${uKey}" ${uKey === selectedInd.doseUnitKey ? 'selected' : ''}>
@@ -296,55 +316,41 @@ function handleInfusionViewEvent(e) {
       `).join('');
     }
 
-    // 4. تحديث قيمة الجرعة ونطاقها
     if (doseInput) doseInput.value = selectedInd.doseMin;
-    if (doseRangeText) {
-      doseRangeText.textContent = `Range: ${selectedInd.doseMin} - ${selectedInd.doseMax} ${selectedInd.unitLabel}`;
-    }
 
-    // 5. تحديث قائمة التراكيز
     if (concSelect) {
       concSelect.innerHTML = drug.standardConcentrations.map((conc, idx) => `
         <option value="${idx}" ${idx === 0 ? 'selected' : ''}>${conc.label}</option>
       `).join('');
     }
 
-    // 6. تحديث إظهار/إخفاء حقل الوزن بناءً على الوحدة
-    const requiresWeight = SUPPORTED_DOSE_UNITS[selectedInd.doseUnitKey]?.requiresWeight;
-    if (weightContainer) {
-      weightContainer.className = requiresWeight ? 'block' : 'hidden';
-    }
-
-    // 7. تحديث الملاحظات والمصدر
     if (safetyNotesText) safetyNotesText.textContent = drug.clinicalSafetyNotes;
     if (referenceText) referenceText.textContent = drug.reference;
-
-  } else if (targetId === 'infusionIndicationSelect') {
-    const indId = indicationSelect.value;
-    const selectedInd = drug.indications.find(i => i.id === indId) || drug.indications[0];
-
-    if (indicationNotesText) indicationNotesText.textContent = selectedInd.notes;
-
-    if (doseUnitSelect) doseUnitSelect.value = selectedInd.doseUnitKey;
-    if (doseInput) doseInput.value = selectedInd.doseMin;
-    if (doseRangeText) {
-      doseRangeText.textContent = `Range: ${selectedInd.doseMin} - ${selectedInd.doseMax} ${selectedInd.unitLabel}`;
-    }
-
-    const requiresWeight = SUPPORTED_DOSE_UNITS[selectedInd.doseUnitKey]?.requiresWeight;
-    if (weightContainer) {
-      weightContainer.className = requiresWeight ? 'block' : 'hidden';
-    }
-
-  } else if (targetId === 'infusionDoseUnitSelect') {
-    const unitKey = doseUnitSelect.value;
-    const requiresWeight = SUPPORTED_DOSE_UNITS[unitKey]?.requiresWeight;
-    if (weightContainer) {
-      weightContainer.className = requiresWeight ? 'block' : 'hidden';
-    }
   }
 
-  // إعادة الحساب وتحديث مربع النتائج
+  const currentIndId = indicationSelect ? indicationSelect.value : drug.indications[0].id;
+  const selectedInd = drug.indications.find(i => i.id === currentIndId) || drug.indications[0];
+  const selectedUnitKey = doseUnitSelect ? doseUnitSelect.value : selectedInd.doseUnitKey;
+
+  const requiresWeight = SUPPORTED_DOSE_UNITS[selectedUnitKey]?.requiresWeight;
+  if (weightContainer) {
+    weightContainer.className = requiresWeight ? 'block' : 'hidden';
+  }
+
+  // تحديث ديناميكي لعنوان النطاق المسموح بناءً على الوحدة والوزن المختارين
+  if (doseRangeText) {
+    const currentWeight = weightInput ? parseFloat(weightInput.value) : 70;
+    const dynamicRange = convertDoseRange(
+      selectedInd.doseMin,
+      selectedInd.doseMax,
+      selectedInd.doseUnitKey,
+      selectedUnitKey,
+      currentWeight
+    );
+    const unitLabel = SUPPORTED_DOSE_UNITS[selectedUnitKey]?.label || selectedUnitKey;
+    doseRangeText.textContent = `Range: ${dynamicRange.min} - ${dynamicRange.max} ${unitLabel}`;
+  }
+
   calculateAndUpdateUI();
 }
 
@@ -356,6 +362,7 @@ function calculateAndUpdateUI() {
   const drug = infusionDrugsData.find(d => d.id === drugId);
   if (!drug) return;
 
+  const indicationSelect = document.getElementById('infusionIndicationSelect');
   const doseInput = document.getElementById('infusionDoseInput');
   const doseUnitSelect = document.getElementById('infusionDoseUnitSelect');
   const concSelect = document.getElementById('infusionConcSelect');
@@ -369,12 +376,14 @@ function calculateAndUpdateUI() {
   const concIdx = parseInt(concSelect.value, 10) || 0;
   const concObj = drug.standardConcentrations[concIdx] || drug.standardConcentrations[0];
   const weightVal = weightInput ? parseFloat(weightInput.value) : null;
+  const indId = indicationSelect ? indicationSelect.value : drug.indications[0].id;
 
   const results = calculateInfusionRate({
     drugId: drug.id,
+    indicationId: indId,
     patientWeight: weightVal,
     doseValue: doseVal,
-    doseUnitKey: doseUnitKey,
+    doseUnitKey,
     concentrationValue: concObj.value,
     concentrationUnitKey: concObj.unitKey
   });
