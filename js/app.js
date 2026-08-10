@@ -1,6 +1,6 @@
 /**
  * Main Application Entry Point (App.js)
- * Phase 6 Integration - Corrected Paths
+ * Phase 6 Integration - Instant Execution Fix
  */
 
 import { store } from './js/state/store.js';
@@ -67,5 +67,9 @@ function attachNavigationEvents() {
 // Subscribe to store changes to re-render
 store.subscribe(renderApp);
 
-// Initial Render
-document.addEventListener('DOMContentLoaded', renderApp);
+// التشغيل الفوري المباشر لتفادي إفلات حدث DOMContentLoaded في ES Modules
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderApp);
+} else {
+  renderApp();
+}
