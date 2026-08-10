@@ -1,6 +1,6 @@
 /**
  * Continuous Infusion Drugs Database
- * Phase 6.2 — Fully Audited
+ * Phase 6.2 — Fully Audited with mcg/min & Extended Unit Support
  * 
  * Clinical References & Guidelines:
  * - US FDA Official Prescribing Information & Drug Labeling
@@ -20,7 +20,7 @@ export const infusionDrugsData = [
     category: 'Vasopressor',
     isHighAlert: true,
     defaultDoseUnitKey: 'mcg_kg_min',
-    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_kg_hr', 'mcg_hr'],
+    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_min', 'mcg_kg_hr', 'mcg_hr'],
     defaultConcentrationUnitKey: 'mcg/mL',
     standardConcentrations: [
       { label: '4 mg / 50 mL (80 mcg/mL)', value: 80, unitKey: 'mcg/mL' },
@@ -39,12 +39,12 @@ export const infusionDrugsData = [
       },
       {
         id: 'fixed_rate_titration',
-        title: 'الضبط بجرعة زمنية بدون وزن (Fixed Hourly Rate)',
-        doseMin: 60,
-        doseMax: 1200,
-        doseUnitKey: 'mcg_hr',
-        unitLabel: 'mcg/hr',
-        notes: 'تُعادل (1 - 20 mcg/min). تُستخدم في بروتوكولات العناية المركزة التي تعتمد الضبط المباشر لمعدل الضخ بدون وزن.'
+        title: 'الضبط بجرعة زمنية بدون وزن (Fixed Minute Rate)',
+        doseMin: 1,
+        doseMax: 20,
+        doseUnitKey: 'mcg_min',
+        unitLabel: 'mcg/min',
+        notes: 'تُعادل (1 - 20 mcg/min). تُستخدم في بروتوكولات العناية المركزة والتخدير التي تعتمد الضبط المباشر بالدقيقة بدون وزن.'
       }
     ],
     clinicalSafetyNotes: 'دواء عالي الخطورة (HIGH-ALERT). يُوصى بالإعطاء عبر قسطرة وريدية مركزية (Central Line). وفقاً لتوصيات Surviving Sepsis Campaign الحديثة، يُسمح بالبدء المؤقت عبر خط وريدي محيطي (Peripheral Line) في أوردة كبيرة فوق المرفق لفترة قصيرة حتى الحصول على خط مركزي، لتجنب تأخير رفع ضغط الدم.',
@@ -102,7 +102,7 @@ export const infusionDrugsData = [
     category: 'Opioid Analgesic',
     isHighAlert: true,
     defaultDoseUnitKey: 'mcg_kg_min',
-    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_kg_hr'],
+    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_min', 'mcg_kg_hr'],
     defaultConcentrationUnitKey: 'mcg/mL',
     standardConcentrations: [
       { label: '1 mg / 50 mL (20 mcg/mL)', value: 20, unitKey: 'mcg/mL' },
@@ -139,7 +139,7 @@ export const infusionDrugsData = [
     category: 'Inotrope / Vasopressor',
     isHighAlert: true,
     defaultDoseUnitKey: 'mcg_kg_min',
-    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_hr'],
+    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_min', 'mcg_hr'],
     defaultConcentrationUnitKey: 'mcg/mL',
     standardConcentrations: [
       { label: '1 mg / 50 mL (20 mcg/mL)', value: 20, unitKey: 'mcg/mL' },
@@ -175,7 +175,7 @@ export const infusionDrugsData = [
     category: 'Inotrope / Vasopressor',
     isHighAlert: true,
     defaultDoseUnitKey: 'mcg_kg_min',
-    supportedDoseUnitKeys: ['mcg_kg_min'],
+    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_min'],
     defaultConcentrationUnitKey: 'mg/mL',
     standardConcentrations: [
       { label: '200 mg / 50 mL (4.0 mg/mL)', value: 4.0, unitKey: 'mg/mL' },
@@ -211,7 +211,7 @@ export const infusionDrugsData = [
     category: 'Inotrope / Vasodilator',
     isHighAlert: true,
     defaultDoseUnitKey: 'mcg_kg_min',
-    supportedDoseUnitKeys: ['mcg_kg_min'],
+    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_min'],
     defaultConcentrationUnitKey: 'mg/mL',
     standardConcentrations: [
       { label: '250 mg / 50 mL (5.0 mg/mL)', value: 5.0, unitKey: 'mg/mL' },
@@ -346,7 +346,7 @@ export const infusionDrugsData = [
     category: 'Vasodilating Agent',
     isHighAlert: true,
     defaultDoseUnitKey: 'mcg_hr',
-    supportedDoseUnitKeys: ['mcg_hr', 'mcg_kg_min', 'mg_hr'],
+    supportedDoseUnitKeys: ['mcg_hr', 'mcg_min', 'mcg_kg_min', 'mg_hr'],
     defaultConcentrationUnitKey: 'mg/mL',
     standardConcentrations: [
       { label: '25 mg / 50 mL (0.5 mg/mL)', value: 0.5, unitKey: 'mg/mL' },
