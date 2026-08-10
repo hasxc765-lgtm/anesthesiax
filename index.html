@@ -5,23 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AnesthesiaX</title>
 
-  <!-- كاشف الأخطاء الشامل على الشاشة مباشرة -->
-  <script>
-    function showError(msg) {
-      var el = document.getElementById('debug-error') || document.createElement('div');
-      el.id = 'debug-error';
-      el.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#ffffff;color:#dc2626;padding:20px;z-index:99999;font-family:monospace;overflow:auto;direction:ltr;text-align:left;box-sizing:border-box;';
-      el.innerHTML = '<h3 style="margin-top:0;">⚠️ JavaScript Error:</h3><pre style="white-space:pre-wrap;word-break:break-all;">' + msg + '</pre>';
-      if (document.body) { document.body.appendChild(el); }
-      else { window.addEventListener('DOMContentLoaded', function() { document.body.appendChild(el); }); }
-    }
-    window.onerror = function(msg, url, line) {
-      showError(msg + '\n\nFile: ' + url + '\nLine: ' + line);
-    };
-    window.addEventListener('unhandledrejection', function(e) {
-      showError('Unhandled Rejection: ' + (e.reason ? (e.reason.stack || e.reason) : e));
-    });
-  </script>
+  <!-- أداة الفحص المباشر للهاتف (Mobile Console) -->
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
