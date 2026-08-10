@@ -1,369 +1,792 @@
-/**
- * Continuous Infusion Drugs Database
- * Phase 6.2 — Fully Audited with mcg/min & Extended Unit Support
- * 
- * Clinical References & Guidelines:
- * - US FDA Official Prescribing Information & Drug Labeling
- * - ISMP (Institute for Safe Medication Practices) High-Alert Standards
- * - Surviving Sepsis Campaign International Guidelines
- * - AHA/ACLS Advanced Cardiovascular Life Support Standards
- * - ADA Standards of Medical Care in Diabetes
- * - Morgan & Mikhail's Clinical Anesthesiology
- * - Miller's Anesthesia
- */
+// ============================================================
+// AnesthesiaX - Drug Center
+// Version: 2.6 (Clinically Audited & Corrected)
+// Compatible with:
+//   - js/app.js
+//   - js/calculators/doseCalculator.js
+// ============================================================
 
-export const infusionDrugsData = [
+export const drugsData = [
+
+  // ==========================================================
+  // 1. PROPOFOL
+  // ==========================================================
   {
-    id: 'noradrenaline',
-    name: 'Noradrenaline (Norepinephrine)',
-    arabicName: 'نورأدرينالين (نورإبينفرين)',
-    category: 'Vasopressor',
-    isHighAlert: true,
-    defaultDoseUnitKey: 'mcg_kg_min',
-    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_min', 'mcg_kg_hr', 'mcg_hr'],
-    defaultConcentrationUnitKey: 'mcg/mL',
-    standardConcentrations: [
-      { label: '4 mg / 50 mL (80 mcg/mL)', value: 80, unitKey: 'mcg/mL' },
-      { label: '8 mg / 50 mL (160 mcg/mL)', value: 160, unitKey: 'mcg/mL' },
-      { label: '16 mg / 50 mL (320 mcg/mL)', value: 320, unitKey: 'mcg/mL' }
-    ],
+    id: "propofol",
+    name: "Propofol",
+    arabicName: "بروبوفول",
+    category: "Induction",
+
+    searchKeywords: ["propofol", "diprivan", "بروبوفول", "تحريض", "induction"],
+
     indications: [
       {
-        id: 'septic_vasodilatory_shock',
-        title: 'الصدمة الإنتانية والوعائية (Septic / Vasodilatory Shock)',
-        doseMin: 0.01,
-        doseMax: 0.5,
-        doseUnitKey: 'mcg_kg_min',
-        unitLabel: 'mcg/kg/min',
-        notes: 'الخط الأول الموصى به لرفع ضغط الدم الشرياني الوسطي (MAP ≥ 65 mmHg). قد تقتضي الحالات الشديدة جرعات أعلى من 0.5 mcg/kg/min تحت المراقبة الشريانية المباشرة.'
+        id: "induction",
+        title: "تحريض التخدير العام",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 1.5,
+          doseMax: 2.5,
+          unitLabel: "mg/kg"
+        }
       },
       {
-        id: 'fixed_rate_titration',
-        title: 'الضبط بجرعة زمنية بدون وزن (Fixed Minute Rate)',
-        doseMin: 1,
-        doseMax: 20,
-        doseUnitKey: 'mcg_min',
-        unitLabel: 'mcg/min',
-        notes: 'تُعادل (1 - 20 mcg/min). تُستخدم في بروتوكولات العناية المركزة والتخدير التي تعتمد الضبط المباشر بالدقيقة بدون وزن.'
+        id: "sedation",
+        title: "التهدئة / الإجراءات",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 0.5,
+          doseMax: 1.0,
+          unitLabel: "mg/kg"
+        }
       }
     ],
-    clinicalSafetyNotes: 'دواء عالي الخطورة (HIGH-ALERT). يُوصى بالإعطاء عبر قسطرة وريدية مركزية (Central Line). وفقاً لتوصيات Surviving Sepsis Campaign الحديثة، يُسمح بالبدء المؤقت عبر خط وريدي محيطي (Peripheral Line) في أوردة كبيرة فوق المرفق لفترة قصيرة حتى الحصول على خط مركزي، لتجنب تأخير رفع ضغط الدم.',
-    reference: 'US FDA Labeling: Levophed (Norepinephrine Bitartrate) Injection & Surviving Sepsis Campaign Guidelines'
+
+    concentrationConfig: {
+      defaultUnit: "mg/mL",
+      availableConcentrations: [
+        { value: 10, label: "10 mg/mL", isDefault: true },
+        { value: 20, label: "20 mg/mL", isDefault: false }
+      ],
+      customAllowed: true,
+      minCustomConcentration: 1,
+      maxCustomConcentration: 20
+    },
+
+    pharmacokinetics: { onset: "30–60 ثانية", duration: "5–10 دقائق" },
+
+    safetyProfile: {
+      isHighAlert: true,
+      safetyNotes: "قد يسبب انخفاض ضغط الدم وتثبيط التنفس، خاصة عند إعطائه بسرعة أو عند استخدامه مع أدوية مهدئة أخرى."
+    },
+
+    clinicalDetails: {
+      administration: "يُعطى عن طريق الوريد ببطء مع معايرة الجرعة وفق الاستجابة السريرية.",
+      warnings: ["انخفاض ضغط الدم", "تثبيط التنفس", "انقطاع التنفس", "ألم أثناء الحقن"],
+      contraindications: ["فرط الحساسية المعروف للبروبوفول أو لأحد مكونات المستحضر"],
+      reversal: "لا يوجد مضاد نوعي؛ يجب توفير دعم مجرى الهواء والدعم التنفسي والقلبي الوعائي عند الحاجة."
+    },
+
+    dilutions: [{ instructions: "يُستخدم حسب تركيبة المستحضر والبروتوكول المحلي. تجنب التخفيف غير الضروري." }],
+
+    references: [
+      { source: "Miller's Anesthesia", topic: "Intravenous Anesthetic Drugs" },
+      { source: "Morgan & Mikhail's Clinical Anesthesiology", topic: "Propofol" }
+    ]
   },
+
+  // ==========================================================
+  // 2. KETAMINE
+  // ==========================================================
   {
-    id: 'propofol',
-    name: 'Propofol (Diprivan)',
-    arabicName: 'بروبوفول',
-    category: 'Sedative / Anesthetic',
-    isHighAlert: true,
-    defaultDoseUnitKey: 'mg_kg_hr',
-    supportedDoseUnitKeys: ['mg_kg_hr', 'mcg_kg_min'],
-    defaultConcentrationUnitKey: 'mg/mL',
-    standardConcentrations: [
-      { label: '1% (10 mg/mL - Standard)', value: 10, unitKey: 'mg/mL' },
-      { label: '2% (20 mg/mL - High Concentration)', value: 20, unitKey: 'mg/mL' }
-    ],
+    id: "ketamine",
+    name: "Ketamine",
+    arabicName: "كيتامين",
+    category: "Induction",
+
+    searchKeywords: ["ketamine", "ketalar", "كيتامين", "تحريض", "تسكين"],
+
     indications: [
       {
-        id: 'icu_sedation',
-        title: 'التهدئة في العناية المركزة للمرضى على التنفس الاصطناعي (ICU Sedation)',
-        doseMin: 0.3,
-        doseMax: 3.0,
-        doseUnitKey: 'mg_kg_hr',
-        unitLabel: 'mg/kg/hr',
-        notes: 'تُعادل (5 - 50 mcg/kg/min). تُبدأ الجرعة بـ 0.3 mg/kg/hr وتُدرج كل 5-10 دقائق. الحد الأقصى المعتمد بالنشرة الرسمية لتهدئة العناية هو 3.0 mg/kg/hr (أي 50 mcg/kg/min).'
+        id: "induction",
+        title: "تحريض التخدير العام",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 1.0,
+          doseMax: 2.0,
+          unitLabel: "mg/kg"
+        }
       },
       {
-        id: 'tiva_maintenance',
-        title: 'المحافظة على التخدير العام الكلي (TIVA Maintenance)',
-        doseMin: 4.0,
-        doseMax: 12.0,
-        doseUnitKey: 'mg_kg_hr',
-        unitLabel: 'mg/kg/hr',
-        notes: 'تُعادل (67 - 200 mcg/kg/min). تُخفض الجرعة في كبار السن وفي حالات هبوط القلب أو الصدمة الوعائية.'
+        id: "im",
+        title: "تحريض عضلي IM",
+        route: "عضلي IM",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 4.0,
+          doseMax: 6.0,
+          unitLabel: "mg/kg"
+        }
+      }
+    ],
+
+    concentrationConfig: {
+      defaultUnit: "mg/mL",
+      availableConcentrations: [
+        { value: 10, label: "10 mg/mL", isDefault: false },
+        { value: 50, label: "50 mg/mL", isDefault: true },
+        { value: 100, label: "100 mg/mL", isDefault: false }
+      ],
+      customAllowed: true,
+      minCustomConcentration: 1,
+      maxCustomConcentration: 500
+    },
+
+    pharmacokinetics: { onset: "30–60 ثانية IV", duration: "10–20 دقيقة" },
+
+    safetyProfile: {
+      isHighAlert: true,
+      safetyNotes: "قد يسبب ارتفاع ضغط الدم ومعدل القلب وزيادة الإفرازات، وقد يسبب ظواهر الاستيقاظ غير المريحة."
+    },
+
+    clinicalDetails: {
+      administration: "يُعطى وريدياً ببطء مع معايرة الجرعة وفق الاستجابة السريرية.",
+      warnings: ["ارتفاع ضغط الدم", "تسرع القلب", "زيادة الإفرازات", "تفاعلات الاستيقاظ"],
+      contraindications: ["فرط الحساسية المعروف", "الحالات التي يكون فيها ارتفاع ضغط الدم أمراً خطيراً"],
+      reversal: "لا يوجد مضاد نوعي؛ يجب توفير الدعم المناسب لمجرى الهواء والجهازين التنفسي والقلبي الوعائي."
+    },
+
+    dilutions: [{ instructions: "يعتمد التخفيف على تركيز المستحضر والبروتوكول المحلي." }],
+
+    references: [
+      { source: "Miller's Anesthesia", topic: "Ketamine" },
+      { source: "Morgan & Mikhail's Clinical Anesthesiology", topic: "Intravenous Anesthetics" }
+    ]
+  },
+
+  // ==========================================================
+  // 3. ROCURONIUM (Corrected RSI Dosage)
+  // ==========================================================
+  {
+    id: "rocuronium",
+    name: "Rocuronium",
+    arabicName: "روكورونيوم",
+    category: "Muscle Relaxant",
+
+    searchKeywords: ["rocuronium", "esmeron", "zemuron", "روكورونيوم", "مرخي عضلات", "NMB", "RSI"],
+
+    indications: [
+      {
+        id: "intubation",
+        title: "التنبيب الرغامي الروتيني",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 0.6,
+          doseMax: 0.6,
+          unitLabel: "mg/kg"
+        }
       },
       {
-        id: 'mac_sedation',
-        title: 'التهدئة الإجرائية للعمليات الصغرى (MAC / Procedural Sedation)',
-        doseMin: 1.5,
-        doseMax: 4.5,
-        doseUnitKey: 'mg_kg_hr',
-        unitLabel: 'mg/kg/hr',
-        notes: 'تُعادل (25 - 75 mcg/kg/min) للوصول إلى التهدئة المتوسطة مع الحفاظ على التنفس التلقائي والاستجابة الكلامية.'
-      }
-    ],
-    clinicalSafetyNotes: 'دواء عالي الخطورة. يسبب انخفاضاً حاداً بضغط الدم وتثبيطاً تنفسياً. تجنب التسريب المستمر بجرعات تتجاوز 50 mcg/kg/min (أي 3.0 mg/kg/hr) لأكثر من 48 ساعة لتفادي متلازمة تسريب البروبوفول المميتة (PRIS).',
-    reference: 'US FDA Labeling: Diprivan (Propofol) Injectable Emulsion'
-  },
-  {
-    id: 'remifentanil',
-    name: 'Remifentanil (Ultiva)',
-    arabicName: 'ريميفنتانيل',
-    category: 'Opioid Analgesic',
-    isHighAlert: true,
-    defaultDoseUnitKey: 'mcg_kg_min',
-    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_min', 'mcg_kg_hr'],
-    defaultConcentrationUnitKey: 'mcg/mL',
-    standardConcentrations: [
-      { label: '1 mg / 50 mL (20 mcg/mL)', value: 20, unitKey: 'mcg/mL' },
-      { label: '2.5 mg / 50 mL (50 mcg/mL)', value: 50, unitKey: 'mcg/mL' },
-      { label: '5 mg / 50 mL (100 mcg/mL)', value: 100, unitKey: 'mcg/mL' }
-    ],
-    indications: [
-      {
-        id: 'general_anesthesia_maintenance',
-        title: 'تسكين التخدير العام (General Anesthesia Maintenance)',
-        doseMin: 0.05,
-        doseMax: 0.5,
-        doseUnitKey: 'mcg_kg_min',
-        unitLabel: 'mcg/kg/min',
-        notes: 'يُعطى بالتزامن مع المحفزات الاستنشاقية أو البروبوفول. قد ترتفع الجرعة إلى 1.0 mcg/kg/min أثناء الاستجابة الشديدة للتحفيز الجراحي.'
+        id: "rsi",
+        title: "التنبيب بالتسلسل السريع RSI (المعدل سريرياً)",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 0.9,
+          doseMax: 1.2,
+          unitLabel: "mg/kg"
+        }
       },
       {
-        id: 'mac_spontaneous_breathing',
-        title: 'التهدئة والتسكين مع التنفس التلقائي (MAC / Monitored Care)',
-        doseMin: 0.025,
-        doseMax: 0.1,
-        doseUnitKey: 'mcg_kg_min',
-        unitLabel: 'mcg/kg/min',
-        notes: 'تتطلب مراقبة دقيقة لمعدل التنفس ونسبة أكسجين الدم لتفادي التوقف التنفسي المفاجئ.'
+        id: "maintenance",
+        title: "جرعة الصيانة",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 0.1,
+          doseMax: 0.15,
+          unitLabel: "mg/kg"
+        }
       }
     ],
-    clinicalSafetyNotes: 'دواء عالي الخطورة. مسكن أفيوني فائق السرعة وينتهي تأثيره خلال دقائق من توقف التسريب. يسبب تباطؤ القلب (Bradycardia)، وتثبيطاً تنفسياً شديداً، وجساءة القفص الصدري (Chest Wall Rigidity) عند الإعطاء السريع.',
-    reference: 'US FDA Labeling: Ultiva (Remifentanil Hydrochloride) for Injection'
+
+    concentrationConfig: {
+      defaultUnit: "mg/mL",
+      availableConcentrations: [{ value: 10, label: "10 mg/mL", isDefault: true }],
+      customAllowed: true,
+      minCustomConcentration: 1,
+      maxCustomConcentration: 20
+    },
+
+    pharmacokinetics: { onset: "60–90 ثانية (60 ثانية بجرعة RSI)", duration: "30–45 دقيقة" },
+
+    safetyProfile: {
+      isHighAlert: true,
+      safetyNotes: "مرخٍ للعضلات. يسبب شللاً كاملاً لعضلات التنفس. يجب توفر وسائل تأمين مجرى الهواء والتهوية الميكانيكية فوراً."
+    },
+
+    clinicalDetails: {
+      administration: "يُعطى وريدياً فقط مع مراقبة الحصر العصبي العضلي.",
+      warnings: ["شلل عضلات التنفس", "تفاعلات الحساسية المفرطة", "ضرورة المراقبة العصبية العضلية"],
+      contraindications: ["فرط الحساسية المعروف للروكورونيوم"],
+      reversal: "يُعكس بـ Sugammadex أو Neostigmine مع مضاد مسكاريني."
+    },
+
+    dilutions: [{ instructions: "يمكن تخفيفه بمحلول كلوريد الصوديوم 0.9%." }],
+
+    references: [
+      { source: "FDA Prescribing Information", topic: "Rocuronium Bromide Injection" },
+      { source: "Miller's Anesthesia", topic: "Neuromuscular Blocking Drugs" }
+    ]
   },
+
+  // ==========================================================
+  // 4. FENTANYL
+  // ==========================================================
   {
-    id: 'adrenaline',
-    name: 'Adrenaline (Epinephrine)',
-    arabicName: 'أدرينالين (إبينفرين)',
-    category: 'Inotrope / Vasopressor',
-    isHighAlert: true,
-    defaultDoseUnitKey: 'mcg_kg_min',
-    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_min', 'mcg_hr'],
-    defaultConcentrationUnitKey: 'mcg/mL',
-    standardConcentrations: [
-      { label: '1 mg / 50 mL (20 mcg/mL)', value: 20, unitKey: 'mcg/mL' },
-      { label: '4 mg / 50 mL (80 mcg/mL)', value: 80, unitKey: 'mcg/mL' }
-    ],
+    id: "fentanyl",
+    name: "Fentanyl",
+    arabicName: "فنتانيل",
+    category: "Opioid",
+
+    searchKeywords: ["fentanyl", "sublimaze", "فنتانيل", "أفيوني", "تسكين"],
+
     indications: [
       {
-        id: 'inotropic_support',
-        title: 'تحفيز قلوصية القلب وزيادة نتاج الضربات (Inotropic Support)',
-        doseMin: 0.01,
-        doseMax: 0.05,
-        doseUnitKey: 'mcg_kg_min',
-        unitLabel: 'mcg/kg/min',
-        notes: 'تغلب التأثيرات المحفزة لمستقبلات Beta-1 القلوية بجرعات منخفضة لزيادة معدل ونتاج القلب.'
+        id: "analgesia",
+        title: "التسكين حول العملية",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mcg/kg",
+          doseMin: 1,
+          doseMax: 2,
+          unitLabel: "mcg/kg"
+        }
       },
       {
-        id: 'vasopressor_refractory_shock',
-        title: 'دعم المقاومة الوعائية وصدمة الحساسية (Vasopressor / Anaphylactic Shock)',
-        doseMin: 0.05,
-        doseMax: 0.5,
-        doseUnitKey: 'mcg_kg_min',
-        unitLabel: 'mcg/kg/min',
-        notes: 'تُستخدم الجرعات المرتفعة للتسريب المستمر في الصدمة الوعائية الشديدة وصدمة الحساسية. تنبيه: هذه الجرعات خاصة بالتسريب المستمر ولا تتداخل مع جرعات الدفعات الإنعاشية (ACLS Boluses: 1 mg IV).'
+        id: "high_dose",
+        title: "جرعات التسكين العالية",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mcg/kg",
+          doseMin: 2,
+          doseMax: 5,
+          unitLabel: "mcg/kg"
+        }
       }
     ],
-    clinicalSafetyNotes: 'دواء عالي الخطورة. يتسبب في تسارع القلب (Tachycardia)، واضطرابات النبض البطينية، وزيادة استهلاك الأكسجين القلبي، وارتفاع سكر الدم وزيادة اللاكتات بالدم.',
-    reference: 'US FDA Labeling: Epinephrine Injection & AHA ACLS Guidelines'
+
+    concentrationConfig: {
+      defaultUnit: "mcg/mL",
+      availableConcentrations: [{ value: 50, label: "50 mcg/mL", isDefault: true }],
+      customAllowed: true,
+      minCustomConcentration: 1,
+      maxCustomConcentration: 1000
+    },
+
+    pharmacokinetics: { onset: "1–2 دقيقة IV", duration: "30–60 دقيقة" },
+
+    safetyProfile: {
+      isHighAlert: true,
+      safetyNotes: "أفيون قوي. قد يسبب تثبيط التنفس وتيبس جدار الصدر عند الإعطاء السريع."
+    },
+
+    clinicalDetails: {
+      administration: "يُعطى وريدياً ببطء مع معايرة الجرعة وفق الاستجابة.",
+      warnings: ["تثبيط التنفس", "بطء القلب", "انخفاض ضغط الدم", "تيبس جدار الصدر"],
+      contraindications: ["فرط الحساسية المعروف"],
+      reversal: "يُعكس بـ Naloxone."
+    },
+
+    dilutions: [{ instructions: "يمكن تخفيفه بمحاليل وريدية متوافقة." }],
+
+    references: [{ source: "Miller's Anesthesia", topic: "Opioid Analgesics" }]
   },
+
+  // ==========================================================
+  // 5. ATROPINE (Corrected Category & Max Dose Cap)
+  // ==========================================================
   {
-    id: 'dopamine',
-    name: 'Dopamine',
-    arabicName: 'دوبامين',
-    category: 'Inotrope / Vasopressor',
-    isHighAlert: true,
-    defaultDoseUnitKey: 'mcg_kg_min',
-    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_min'],
-    defaultConcentrationUnitKey: 'mg/mL',
-    standardConcentrations: [
-      { label: '200 mg / 50 mL (4.0 mg/mL)', value: 4.0, unitKey: 'mg/mL' },
-      { label: '400 mg / 50 mL (8.0 mg/mL)', value: 8.0, unitKey: 'mg/mL' }
-    ],
+    id: "atropine",
+    name: "Atropine",
+    arabicName: "أتروبين",
+    category: "Anticholinergic", // Corrected from Vasopressor
+
+    searchKeywords: ["atropine", "أتروبين", "بطء القلب", "مضاد كولين", "bradycardia", "anticholinergic"],
+
     indications: [
       {
-        id: 'inotropic_range',
-        title: 'دعم قلوصية عضلة القلب (Inotropic Range)',
-        doseMin: 2.0,
-        doseMax: 10.0,
-        doseUnitKey: 'mcg_kg_min',
-        unitLabel: 'mcg/kg/min',
-        notes: 'يحفز القلوصية القلبية عبر مستقبلات Beta-1. تنبيه: تم نفي المفهوم القديم لمسمى (Renal Dose Dopamine) ولا يُعتمد كعلاج لحماية الكلى.'
+        id: "bradycardia",
+        title: "بطء القلب العرضي (ACLS)",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "fixed_mg",
+          fixedDoseValue: 1,
+          doseMin: 1,
+          doseMax: 1,
+          maxDoseLimit: 3, // Corrected Max Cumulative Dose Limit
+          unitLabel: "mg"
+        }
       },
       {
-        id: 'vasopressor_range',
-        title: 'دعم المقاومة الوعائية والضغط (Vasopressor Range)',
-        doseMin: 10.0,
-        doseMax: 20.0,
-        doseUnitKey: 'mcg_kg_min',
-        unitLabel: 'mcg/kg/min',
-        notes: 'يتغلب التأثير القابض للأوعية الدموية عبر مستقبلات Alpha-1 عند رفع الجرعة فوق 10 mcg/kg/min.'
+        id: "neostigmine",
+        title: "مع عكس النيوستغمين",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 0.01,
+          doseMax: 0.02,
+          unitLabel: "mg/kg"
+        }
       }
     ],
-    clinicalSafetyNotes: 'دواء عالي الخطورة. يرفع خطر حدوث اضطرابات النبض الأذينية والبطينية بشكل ملحوظ. لم يعد يُوصى باستخدامه كخيار أول في الصدمة الإنتانية وفق توصيات Surviving Sepsis Campaign الدولية.',
-    reference: 'US FDA Labeling: Dopamine Hydrochloride Injection & Surviving Sepsis Campaign'
+
+    concentrationConfig: {
+      defaultUnit: "mg/mL",
+      availableConcentrations: [
+        { value: 1, label: "1 mg/mL", isDefault: true },
+        { value: 0.5, label: "0.5 mg/mL", isDefault: false },
+        { value: 0.6, label: "0.6 mg/mL", isDefault: false }
+      ],
+      customAllowed: true,
+      minCustomConcentration: 0.1,
+      maxCustomConcentration: 10
+    },
+
+    pharmacokinetics: { onset: "1–2 دقيقة IV", duration: "2–4 ساعات" },
+
+    safetyProfile: {
+      isHighAlert: true,
+      safetyNotes: "مضاد كولين. يسبب تسرع القلب وجفاف الفم واحتباس البول. الحد الأقصى التراكمي للبالغين في بطء القلب هو 3 ملغم."
+    },
+
+    clinicalDetails: {
+      administration: "يُعطى وريدياً سريعاً في بطء القلب العرضي.",
+      warnings: ["تسرع القلب", "تأثيرات مضادة للكولين", "احتباس البول"],
+      contraindications: ["فرط الحساسية المعروف"],
+      reversal: "لا يوجد عكس نوعي روتيني."
+    },
+
+    dilutions: [{ instructions: "يُستخدم التركيز المتوفر وفق الاستطباب." }],
+
+    references: [{ source: "AHA ACLS Guidelines", topic: "Adult Bradycardia" }]
   },
+
+  // ==========================================================
+  // 6. ATRACURIUM
+  // ==========================================================
   {
-    id: 'dobutamine',
-    name: 'Dobutamine',
-    arabicName: 'دوبيوتامين',
-    category: 'Inotrope / Vasodilator',
-    isHighAlert: true,
-    defaultDoseUnitKey: 'mcg_kg_min',
-    supportedDoseUnitKeys: ['mcg_kg_min', 'mcg_min'],
-    defaultConcentrationUnitKey: 'mg/mL',
-    standardConcentrations: [
-      { label: '250 mg / 50 mL (5.0 mg/mL)', value: 5.0, unitKey: 'mg/mL' },
-      { label: '500 mg / 50 mL (10.0 mg/mL)', value: 10.0, unitKey: 'mg/mL' }
-    ],
+    id: "atracurium",
+    name: "Atracurium",
+    arabicName: "أتراكوريوم",
+    category: "Muscle Relaxant",
+
+    searchKeywords: ["atracurium", "tracrium", "أتراكوريوم", "مرخي عضلات"],
+
     indications: [
       {
-        id: 'cardiogenic_shock_low_co',
-        title: 'الصدمة القلبية وهبوط نتاج القلب (Cardiogenic Shock / Low CO)',
-        doseMin: 2.5,
-        doseMax: 20.0,
-        doseUnitKey: 'mcg_kg_min',
-        unitLabel: 'mcg/kg/min',
-        notes: 'الجرعة النموذجية المعتمدة لزيادة نتاج القلوصية القلبية. قد ترتفع في حالات الاستجابة المحدودة حتى 40 mcg/kg/min تحت المراقبة الدقيقة.'
-      }
-    ],
-    clinicalSafetyNotes: 'دواء عالي الخطورة. يحفز مستقبلات Beta-1 القلوية مع توسع وعائي محيطي موازٍ ناتج عن تحفيز Beta-2، مما يتسبب في هبوط حاد بضغط الدم في المرضى الذين يعانون من نقص حجم الدم (Hypovolemia).',
-    reference: 'US FDA Labeling: Dobutamine Injection'
-  },
-  {
-    id: 'dexmedetomidine',
-    name: 'Dexmedetomidine (Precedex)',
-    arabicName: 'ديكسميديتوميدين (بريسيديكس)',
-    category: 'Sedative / Alpha-2 Agonist',
-    isHighAlert: true,
-    defaultDoseUnitKey: 'mcg_kg_hr',
-    supportedDoseUnitKeys: ['mcg_kg_hr', 'mcg_kg_min'],
-    defaultConcentrationUnitKey: 'mcg/mL',
-    standardConcentrations: [
-      { label: '200 mcg / 50 mL (4 mcg/mL)', value: 4, unitKey: 'mcg/mL' },
-      { label: '400 mcg / 50 mL (8 mcg/mL)', value: 8, unitKey: 'mcg/mL' }
-    ],
-    indications: [
-      {
-        id: 'icu_sedation_maintenance',
-        title: 'التهدئة في العناية المركزة (ICU Sedation Maintenance)',
-        doseMin: 0.2,
-        doseMax: 0.7,
-        doseUnitKey: 'mcg_kg_hr',
-        unitLabel: 'mcg/kg/hr',
-        notes: 'نطاق الجرعة المعتمد رسمياً في نشرة FDA لتهدئة العناية هو (0.2 - 0.7 mcg/kg/hr). الجرعات التي تصل إلى 1.4 mcg/kg/hr تُعد استخداماً خارج النشرة الرسمية (Off-label).'
+        id: "intubation",
+        title: "التنبيب الرغامي",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 0.4,
+          doseMax: 0.5,
+          unitLabel: "mg/kg"
+        }
       },
       {
-        id: 'procedural_sedation_maintenance',
-        title: 'التهدئة الإجرائية للعمليات (Procedural Sedation Maintenance)',
-        doseMin: 0.2,
-        doseMax: 1.0,
-        doseUnitKey: 'mcg_kg_hr',
-        unitLabel: 'mcg/kg/hr',
-        notes: 'تُعدل الجرعة للوصول إلى مستوى التهدئة المطلوبة مع سهولة إيقاظ المريض.'
+        id: "maintenance",
+        title: "جرعة الصيانة",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 0.08,
+          doseMax: 0.1,
+          unitLabel: "mg/kg"
+        }
       }
     ],
-    clinicalSafetyNotes: 'دواء عالي الخطورة. مهدئ مميز لا يسبب تثبيطاً تنفسياً ملموساً. إذا استُخدمت جرعة التحميل (Loading Dose: 0.5 - 1.0 mcg/kg over 10 min)، فقد تسبب هبوطاً حاداً بضغط الدم وتباطؤاً شديداً بالنبض (Bradycardia).',
-    reference: 'US FDA Labeling: Precedex (Dexmedetomidine Hydrochloride) Injection'
+
+    concentrationConfig: {
+      defaultUnit: "mg/mL",
+      availableConcentrations: [{ value: 10, label: "10 mg/mL", isDefault: true }],
+      customAllowed: true,
+      minCustomConcentration: 1,
+      maxCustomConcentration: 20
+    },
+
+    pharmacokinetics: { onset: "2–3 دقائق", duration: "20–35 دقيقة" },
+
+    safetyProfile: {
+      isHighAlert: true,
+      safetyNotes: "قد يسبب إطلاق الهيستامين وانخفاض ضغط الدم والتشنج القصبي عند الإعطاء السريع."
+    },
+
+    clinicalDetails: {
+      administration: "يُعطى وريدياً ببطء لتقليل إطلاق الهيستامين.",
+      warnings: ["شلل عضلات التنفس", "إطلاق الهيستامين", "انخفاض ضغط الدم"],
+      contraindications: ["فرط الحساسية المعروف"],
+      reversal: "يُعكس بـ Neostigmine مع مضاد مسكاريني."
+    },
+
+    dilutions: [{ instructions: "يُعطى وريدياً وفق التركيز المتوفر." }],
+
+    references: [{ source: "Miller's Anesthesia", topic: "Neuromuscular Blocking Drugs" }]
   },
+
+  // ==========================================================
+  // 7. SUCCINYLCHOLINE
+  // ==========================================================
   {
-    id: 'vasopressin',
-    name: 'Vasopressin (Pitressin / Vasostrict)',
-    arabicName: 'فازوبريسين',
-    category: 'Vasopressor / Antidiuretic',
-    isHighAlert: true,
-    defaultDoseUnitKey: 'units_hr',
-    supportedDoseUnitKeys: ['units_hr', 'units_min'],
-    defaultConcentrationUnitKey: 'units/mL',
-    standardConcentrations: [
-      { label: '20 units / 50 mL (0.4 units/mL)', value: 0.4, unitKey: 'units/mL' },
-      { label: '40 units / 50 mL (0.8 units/mL)', value: 0.8, unitKey: 'units/mL' }
-    ],
+    id: "succinylcholine",
+    name: "Succinylcholine",
+    arabicName: "سكسينيل كولين",
+    category: "Muscle Relaxant",
+
+    searchKeywords: ["succinylcholine", "suxamethonium", "سكسينيل كولين", "RSI"],
+
     indications: [
       {
-        id: 'septic_shock_fixed_infusion',
-        title: 'الصدمة الإنتانية العصية (Refractory Septic Shock)',
-        doseMin: 0.6,
-        doseMax: 2.4,
-        doseUnitKey: 'units_hr',
-        unitLabel: 'units/hr',
-        notes: 'تُعطى كجرعة تسريب ثابتة غير قابلة للتدريج المفتوح (Fixed Non-titrated Infusion) بمعدل 0.03 units/min (أي 1.8 units/hr) كدواء مكمل للنورأدرينالين. زيادة الجرعة إلى 0.04 units/min يُحظر إلا في حالات عدم الاستجابة الشديدة بسبب خطر الإفقار المعوي والتاجي.'
+        id: "intubation",
+        title: "التنبيب الرغامي / RSI",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 1.0,
+          doseMax: 1.5,
+          unitLabel: "mg/kg"
+        }
+      }
+    ],
+
+    concentrationConfig: {
+      defaultUnit: "mg/mL",
+      availableConcentrations: [
+        { value: 20, label: "20 mg/mL", isDefault: true },
+        { value: 50, label: "50 mg/mL", isDefault: false }
+      ],
+      customAllowed: true,
+      minCustomConcentration: 1,
+      maxCustomConcentration: 100
+    },
+
+    pharmacokinetics: { onset: "30–60 ثانية", duration: "5–10 دقائق" },
+
+    safetyProfile: {
+      isHighAlert: true,
+      safetyNotes: "مرخٍ مزيل للاستقطاب. يرفع خطر فرط بوتاسيوم الدم الشديد وفرط الحرارة الخبيث (MH)."
+    },
+
+    clinicalDetails: {
+      administration: "يُعطى وريدياً سريعا مع الجاهزية للتنبيب والتهوية.",
+      warnings: ["فرط بوتاسيوم الدم", "فرط الحرارة الخبيث", "بطء القلب"],
+      contraindications: ["خطر فرط بوتاسيوم الدم", "القابلية لفرط الحرارة الخبيث"],
+      reversal: "لا يوجد مضاد؛ ينتهي تأثيره تلقائياً."
+    },
+
+    dilutions: [{ instructions: "يُستخدم وفق تركيبة المستحضر." }],
+
+    references: [{ source: "Miller's Anesthesia", topic: "Depolarizing Neuromuscular Blockade" }]
+  },
+
+  // ==========================================================
+  // 8. EPHEDRINE
+  // ==========================================================
+  {
+    id: "ephedrine",
+    name: "Ephedrine",
+    arabicName: "إيفيدرين",
+    category: "Vasopressor",
+
+    searchKeywords: ["ephedrine", "إيفيدرين", "انخفاض ضغط الدم"],
+
+    indications: [
+      {
+        id: "hypotension",
+        title: "انخفاض ضغط الدم المرتبط بالتخدير",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "fixed_mg",
+          fixedDoseValue: 5,
+          doseMin: 5,
+          doseMax: 10,
+          unitLabel: "mg"
+        }
+      }
+    ],
+
+    concentrationConfig: {
+      defaultUnit: "mg/mL",
+      availableConcentrations: [
+        { value: 5, label: "5 mg/mL", isDefault: true },
+        { value: 30, label: "30 mg/mL", isDefault: false },
+        { value: 50, label: "50 mg/mL", isDefault: false }
+      ],
+      customAllowed: true,
+      minCustomConcentration: 0.1,
+      maxCustomConcentration: 100
+    },
+
+    pharmacokinetics: { onset: "1–2 دقيقة IV", duration: "10–60 دقيقة" },
+
+    safetyProfile: {
+      isHighAlert: true,
+      safetyNotes: "دواء محاكي للودي. قد يسبب تسرع القلب واضطرابات النظم."
+    },
+
+    clinicalDetails: {
+      administration: "تُعطى الجرعة الوريدية تدريجياً حسب ضغط الدم والنبض.",
+      warnings: ["تسرع القلب", "ارتفاع ضغط الدم"],
+      contraindications: ["فرط الحساسية المعروف"],
+      reversal: "لا يوجد مضاد نوعي."
+    },
+
+    dilutions: [{ instructions: "يُخفف إلى تركيز عملي (مثلاً 5 mg/mL) قبل الحقن." }],
+
+    references: [{ source: "Miller's Anesthesia", topic: "Vasopressors" }]
+  },
+
+  // ==========================================================
+  // 9. NEOSTIGMINE (Corrected Category)
+  // ==========================================================
+  {
+    id: "neostigmine",
+    name: "Neostigmine",
+    arabicName: "نيوستغمين",
+    category: "Reversal", // Corrected from Muscle Relaxant
+
+    searchKeywords: ["neostigmine", "prostigmin", "نيوستغمين", "عكس المرخيات", "reversal"],
+
+    indications: [
+      {
+        id: "reversal",
+        title: "عكس الحصر العصبي العضلي غير مزيل الاستقطاب",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 0.03,
+          doseMax: 0.07,
+          maxDoseLimit: 5, // Maximum Dose Limit 5 mg
+          unitLabel: "mg/kg"
+        }
+      }
+    ],
+
+    concentrationConfig: {
+      defaultUnit: "mg/mL",
+      availableConcentrations: [
+        { value: 0.5, label: "0.5 mg/mL", isDefault: true },
+        { value: 2.5, label: "2.5 mg/mL", isDefault: false }
+      ],
+      customAllowed: true,
+      minCustomConcentration: 0.1,
+      maxCustomConcentration: 5
+    },
+
+    pharmacokinetics: { onset: "3–10 دقائق", duration: "40–60 دقيقة" },
+
+    safetyProfile: {
+      isHighAlert: true,
+      safetyNotes: "دواء لعكس المرخيات. يُعطى دائماً مع مضاد مسكاريني (أتروبين أو غليكوبيرولات) لتفادي بطء القلب الشديد. الحد الأقصى 5 ملغم."
+    },
+
+    clinicalDetails: {
+      administration: "يُعطى وريدياً مع الأتروبين عند وجود استجابة عضلية أوليّة.",
+      warnings: ["بطء القلب الشديد", "تشنج قصبي", "زيادة الإفرازات"],
+      contraindications: ["الانسداد الميكانيكي للأمعاء أو المسالك البولية"],
+      reversal: "هو دواء عكسي بذاته."
+    },
+
+    dilutions: [{ instructions: "يُعطى وفق تركيز الأمبول والبروتوكول المحلي." }],
+
+    references: [{ source: "Miller's Anesthesia", topic: "Reversal of Neuromuscular Block" }]
+  },
+
+  // ==========================================================
+  // 10. MIDAZOLAM
+  // ==========================================================
+  {
+    id: "midazolam",
+    name: "Midazolam",
+    arabicName: "ميدازولام",
+    category: "Sedative",
+
+    searchKeywords: ["midazolam", "versed", "dormicum", "ميدازولام", "تهدئة"],
+
+    indications: [
+      {
+        id: "sedation",
+        title: "التهدئة الوريدية",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "mg/kg",
+          doseMin: 0.01,
+          doseMax: 0.05,
+          unitLabel: "mg/kg"
+        }
+      }
+    ],
+
+    concentrationConfig: {
+      defaultUnit: "mg/mL",
+      availableConcentrations: [
+        { value: 1, label: "1 mg/mL", isDefault: true },
+        { value: 5, label: "5 mg/mL", isDefault: false }
+      ],
+      customAllowed: true,
+      minCustomConcentration: 0.1,
+      maxCustomConcentration: 10
+    },
+
+    pharmacokinetics: { onset: "1–3 دقائق", duration: "30–80 دقيقة" },
+
+    safetyProfile: {
+      isHighAlert: true,
+      safetyNotes: "قد يسبب تثبيط التنفس، ويزداد الخطر عند مشاركته مع الأفيونيات."
+    },
+
+    clinicalDetails: {
+      administration: "يُعطى ببطء مع معايرة الجرعة للوصول للتهدئة المطلوبة.",
+      warnings: ["تثبيط التنفس", "انخفاض ضغط الدم"],
+      contraindications: ["فرط الحساسية للبنزوديازيبينات"],
+      reversal: "يُعكس بـ Flumazenil."
+    },
+
+    dilutions: [{ instructions: "يمكن تخفيفه بمحاليل وريدية متوافقة." }],
+
+    references: [{ source: "Miller's Anesthesia", topic: "Benzodiazepines" }]
+  },
+
+  // ==========================================================
+  // 11. EPINEPHRINE / ADRENALINE (Added mcg/min Infusion Support)
+  // ==========================================================
+  {
+    id: "epinephrine",
+    name: "Epinephrine",
+    arabicName: "إبينفرين / أدرينالين",
+    category: "Vasopressor",
+
+    searchKeywords: ["epinephrine", "adrenaline", "أدرينالين", "إبينفرين", "التأق"],
+
+    indications: [
+      {
+        id: "anaphylaxis",
+        title: "التأق / الحساسية المفرطة",
+        route: "عضلي IM",
+        doseConfig: {
+          doseType: "fixed_mg",
+          fixedDoseValue: 0.5,
+          doseMin: 0.3,
+          doseMax: 0.5,
+          unitLabel: "mg"
+        }
       },
       {
-        id: 'post_cardiotomy_shock',
-        title: 'الصدمة الوعائية بعد جراحة القلب (Post-Cardiotomy Vasodilatory Shock)',
-        doseMin: 0.6,
-        doseMax: 6.0,
-        doseUnitKey: 'units_hr',
-        unitLabel: 'units/hr',
-        notes: 'تُعادل (0.01 - 0.1 units/min) وتُدرج حسب استجابة ضغط الدم الشرياني.'
-      }
-    ],
-    clinicalSafetyNotes: 'دواء عالي الخطورة. ينبه مستقبلات V1 المباشرة بشكل مستقل عن المستقبلات الأدرينالجية. يُستخدم عادة كعقار مكمل لتقليل جرعات النورأدرينالين. قد يسبب انقباضاً شديداً للأوعية التاجية والمعوية عند الجرعات العالية.',
-    reference: 'US FDA Labeling: Vasostrict (Vasopressin Injection) & Surviving Sepsis Campaign Guidelines'
-  },
-  {
-    id: 'insulin',
-    name: 'Regular Insulin (Actrapid / Humulin R)',
-    arabicName: 'إنسولين منتظم (أكتريبيد)',
-    category: 'Hormone / Glycemic Control',
-    isHighAlert: true,
-    defaultDoseUnitKey: 'units_hr',
-    supportedDoseUnitKeys: ['units_hr', 'units_kg_hr'],
-    defaultConcentrationUnitKey: 'units/mL',
-    standardConcentrations: [
-      { label: '50 units / 50 mL (1.0 unit/mL)', value: 1.0, unitKey: 'units/mL' },
-      { label: '100 units / 100 mL (1.0 unit/mL)', value: 1.0, unitKey: 'units/mL' }
-    ],
-    indications: [
-      {
-        id: 'glycemic_control_icu',
-        title: 'ضبط السكر في العناية والعمليات (Glycemic Control Protocol)',
-        doseMin: 0.5,
-        doseMax: 10.0,
-        doseUnitKey: 'units_hr',
-        unitLabel: 'units/hr',
-        notes: 'تعتمد الجرعة بشكل مطلق على البروتوكول المحلي للمستشفى والمتابعة الساعية لقراءات سكر الدم الشرياني/الوريدي.'
+        id: "cardiac_arrest",
+        title: "توقف القلب عند البالغين (ACLS)",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "fixed_mg",
+          fixedDoseValue: 1,
+          doseMin: 1,
+          doseMax: 1,
+          unitLabel: "mg"
+        }
       },
       {
-        id: 'dka_protocol',
-        title: 'بروتوكول الحماض الكيتوني السكري (DKA Protocol)',
-        doseMin: 0.05,
-        doseMax: 0.1,
-        doseUnitKey: 'units_kg_hr',
-        unitLabel: 'units/kg/hr',
-        notes: 'تُعطى عادة بجرعة 0.1 units/kg/hr (أو 0.05 units/kg/hr إذا سُبقت بجرعة تحميل). تحذير: هذه الحاسبة لا تستبدل بروتوكول متابعة الجلوكوز والبوتاسيوم المعتمد رسمياً في المنشأة.'
+        id: "hypotension_infusion",
+        title: "تسريب مقبض وعائي (Infusion)",
+        route: "تسريب وريدي IV Infusion",
+        doseConfig: {
+          doseType: "mcg/kg/min",
+          doseMin: 0.01,
+          doseMax: 0.5,
+          unitLabel: "mcg/kg/min"
+        }
       }
     ],
-    clinicalSafetyNotes: 'دواء عالي الخطورة جداً (TOP HIGH-ALERT). يتطلب تدقيقاً واستلاماً مزدوجاً مستقلاً (Independent Double-Check). يرفع خطر هبوط السكر الحاد المميت (Severe Hypoglycemia) وهبوط البوتاسيوم بالدم (Hypokalemia).',
-    reference: 'US FDA Labeling: Humulin R / Actrapid, ISMP Guidelines & ADA Standards of Care'
+
+    concentrationConfig: {
+      defaultUnit: "mg/mL",
+      availableConcentrations: [
+        { value: 1, label: "1 mg/mL (1:1000)", isDefault: true },
+        { value: 0.1, label: "0.1 mg/mL (1:10,000)", isDefault: false }
+      ],
+      customAllowed: true,
+      minCustomConcentration: 0.001,
+      maxCustomConcentration: 1
+    },
+
+    pharmacokinetics: { onset: "سريع", duration: "5–10 دقائق IV" },
+
+    safetyProfile: {
+      isHighAlert: true,
+      safetyNotes: "دواء عالي الخطورة. تختلف التراكيز وطرق الإعطاء حسب الاستطباب (IM للتأق، IV سريح للإعاش، وInfusion للضغط)."
+    },
+
+    clinicalDetails: {
+      administration: "في التأق يُعطى عضلياً بالفخذ، وفي توقف القلب يُعطى وريدياً كل 3-5 دقائق.",
+      warnings: ["اضطرابات النظم", "ارتفاع ضغط الدم الشديد"],
+      contraindications: ["لا يوجد مانع مطلق في التأق أو توقف القلب المهدد للحياة."],
+      reversal: "لا يوجد مضاد نوعي."
+    },
+
+    dilutions: [{ instructions: "تحقق دائماً من تركيز الأمبول (1:1000 أم 1:10,000) قبل الإعطاء." }],
+
+    references: [{ source: "AHA ACLS Guidelines", topic: "Adult Cardiac Arrest" }]
   },
+
+  // ==========================================================
+  // 12. DEXAMETHASONE (Corrected Category)
+  // ==========================================================
   {
-    id: 'nitroglycerin',
-    name: 'Nitroglycerin (NTG / Glyceryl Trinitrate)',
-    arabicName: 'نيتروجليسرين',
-    category: 'Vasodilating Agent',
-    isHighAlert: true,
-    defaultDoseUnitKey: 'mcg_hr',
-    supportedDoseUnitKeys: ['mcg_hr', 'mcg_min', 'mcg_kg_min', 'mg_hr'],
-    defaultConcentrationUnitKey: 'mg/mL',
-    standardConcentrations: [
-      { label: '25 mg / 50 mL (0.5 mg/mL)', value: 0.5, unitKey: 'mg/mL' },
-      { label: '50 mg / 50 mL (1.0 mg/mL)', value: 1.0, unitKey: 'mg/mL' }
-    ],
+    id: "dexamethasone",
+    name: "Dexamethasone",
+    arabicName: "ديكساميثازون",
+    category: "Antiemetic", // Corrected from Induction
+
+    searchKeywords: ["dexamethasone", "decadron", "ديكساميثازون", "PONV", "مضاد قيء"],
+
     indications: [
       {
-        id: 'perioperative_hypertension_ischemia',
-        title: 'ارتفاع الضغط ونقص التروية القلبية (Perioperative Hypertension / Ischemia)',
-        doseMin: 300,
-        doseMax: 12000,
-        doseUnitKey: 'mcg_hr',
-        unitLabel: 'mcg/hr',
-        notes: 'تُعطى بجرعة زمنية ثابتة تُعادل (5 - 200 mcg/min). الضبط يعتمد على معدل `mcg/hr` المباشر (300 - 12,000 mcg/hr)؛ حيث إن الجرعات القائمة على الوزن غير معيارية في البالغين.'
+        id: "ponv",
+        title: "الوقاية من الغثيان والقيء بعد العملية (PONV)",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "fixed_mg",
+          fixedDoseValue: 4,
+          doseMin: 4,
+          doseMax: 8,
+          unitLabel: "mg"
+        }
+      },
+      {
+        id: "airway_edema",
+        title: "وذمة مجرى الهواء / مضاد التهاب",
+        route: "وريدي IV",
+        doseConfig: {
+          doseType: "fixed_mg",
+          fixedDoseValue: 8,
+          doseMin: 4,
+          doseMax: 10,
+          unitLabel: "mg"
+        }
       }
     ],
-    clinicalSafetyNotes: 'دواء عالي الخطورة. يتطلب أنابيب وسرنجات تسريب خاصة غير ممتصة للمادة (Non-PVC Tubing). يوسع الأوردة بجرعات منخفضة والشرايين بجرعات عالية. يسبب صداعاً وهبوطاً بالضغط وممنوع تماماً مع أدوية PDE-5 (مثل Sildenafil).',
-    reference: 'US FDA Labeling: Nitroglycerin Injection'
+
+    concentrationConfig: {
+      defaultUnit: "mg/mL",
+      availableConcentrations: [
+        { value: 4, label: "4 mg/mL", isDefault: true },
+        { value: 10, label: "10 mg/mL", isDefault: false }
+      ],
+      customAllowed: true,
+      minCustomConcentration: 0.1,
+      maxCustomConcentration: 40
+    },
+
+    pharmacokinetics: { onset: "خلال ساعات", duration: "عدة ساعات" },
+
+    safetyProfile: {
+      isHighAlert: false,
+      safetyNotes: "قد يسبب ارتفاع سكر الدم المؤقت لدى مرضى السكري."
+    },
+
+    clinicalDetails: {
+      administration: "يُعطى وريدياً عند تحريض التخدير لتدبير PONV.",
+      warnings: ["ارتفاع سكر الدم"],
+      contraindications: ["فرط الحساسية المعروف للديكساميثازون"],
+      reversal: "لا يوجد مضاد نوعي."
+    },
+
+    dilutions: [{ instructions: "يُعطى بشكل مباشر أو مخفف بمحلول وريدي." }],
+
+    references: [{ source: "Miller's Anesthesia", topic: "PONV Guidelines" }]
   }
+
 ];
