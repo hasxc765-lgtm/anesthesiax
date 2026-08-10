@@ -3,22 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AnesthesiaX</title>
-
-  <!-- أداة الفحص المباشر للهاتف (Mobile Console) -->
-  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-  <script>eruda.init();</script>
-
-  <!-- Tailwind CSS -->
+  <title>AnesthesiaX - System Diagnostic</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800">
+<body class="bg-slate-900 text-white p-4 font-mono dir-ltr text-left">
+  
+  <div class="max-w-md mx-auto space-y-3">
+    <h2 class="text-base font-bold text-yellow-400 border-b border-slate-700 pb-2">
+      🔍 فحص سلامة مسارات ملفات التطبيق:
+    </h2>
+    
+    <div id="diagnostic-results" class="space-y-1.5 text-xs">
+      <div class="text-slate-400">جاري فحص اتصال الملفات...</div>
+    </div>
+  </div>
 
-  <!-- الحاوية الرئيسية للتطبيق -->
-  <div id="app"></div>
+  <script>
+    const filesToTest = [
+      './app.js',
+      './js/state/store.js',
+      './js/components/navigation.js',
+      './js/components/doseView.js',
+      './js/components/drugCenterView.js',
+      './js/components/airwayView.js',
+      './js/components/fluidView.js',
+      './js/components/regionalView.js',
+      './js/components/infusionView.js'
+    ];
 
-  <!-- استدعاء ملف app.js بنظام Modules -->
-  <script type="module" src="./app.js"></script>
+    async function runDiagnostics() {
+      const container = document.getElementById('diagnostic-results');
+      container.innerHTML = '';
 
+      for (const file of filesToTest) {
+        try {
+          const res = await fetch(file, { method: 'HEAD' });
+          if (res.ok) {
+            container.innerHTML += `
+              <div class="p-2 bg-slate-800 border border-emerald-500/30 rounded-lg text-emerald-400 flex justify-between items-center">
+                <span>✅ ${file}</span>
+                <span class="text-[10px] bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">FOUND</span>
+              </div>`;
+          } else {
+            container.innerHTML += `
+              <div class="p-2 bg-rose-950/80 border border-rose-500 rounded-lg text-rose-300 font-bold flex justify-between items-center">
+                <span>❌ ${file}</span>
+                <span class="text-[10px] bg-rose-900 px-1.5 py-0.5 rounded border border-rose-700 text-rose-100">404 NOT FOUND</span>
+              </div>`;
+          }
+        } catch (err) {
+          container.innerHTML += `
+            <div class="p-2 bg-rose-950/80 border border-rose-500 rounded-lg text-rose-300 font-bold">
+              ❌ ${file} (Fetch Error)
+            </div>`;
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', runDiagnostics);
+  </script>
 </body>
 </html>
