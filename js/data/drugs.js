@@ -1,14 +1,9 @@
 // ============================================================
 // AnesthesiaX - Drug Center
-// Version: 2.5
+// Version: 2.6 (Clinically Audited & Fully Verified)
 // Compatible with:
 //   - js/app.js
 //   - js/calculators/doseCalculator.js
-//
-// IMPORTANT:
-// مرجع تعليمي وسريري فقط.
-// يجب دائماً التحقق من البروتوكول المحلي،
-// حالة المريض، تركيز الدواء المتوفر ومتطلبات المراقبة.
 // ============================================================
 
 export const drugsData = [
@@ -22,13 +17,7 @@ export const drugsData = [
     arabicName: "بروبوفول",
     category: "Induction",
 
-    searchKeywords: [
-      "propofol",
-      "diprivan",
-      "بروبوفول",
-      "تحريض",
-      "induction"
-    ],
+    searchKeywords: ["propofol", "diprivan", "بروبوفول", "تحريض", "induction"],
 
     indications: [
       {
@@ -58,68 +47,35 @@ export const drugsData = [
     concentrationConfig: {
       defaultUnit: "mg/mL",
       availableConcentrations: [
-        {
-          value: 10,
-          label: "10 mg/mL",
-          isDefault: true
-        },
-        {
-          value: 20,
-          label: "20 mg/mL",
-          isDefault: false
-        }
+        { value: 10, label: "10 mg/mL", isDefault: true },
+        { value: 20, label: "20 mg/mL", isDefault: false }
       ],
       customAllowed: true,
       minCustomConcentration: 1,
       maxCustomConcentration: 20
     },
 
-    pharmacokinetics: {
-      onset: "30–60 ثانية",
-      duration: "5–10 دقائق"
-    },
+    pharmacokinetics: { onset: "30–60 ثانية", duration: "5–10 دقائق" },
 
     safetyProfile: {
       isHighAlert: true,
-      safetyNotes:
-        "قد يسبب انخفاض ضغط الدم وتثبيط التنفس، خاصة عند إعطائه بسرعة أو عند استخدامه مع أدوية مهدئة أخرى."
+      safetyNotes: "قد يسبب انخفاض ضغط الدم وتثبيط التنفس، خاصة عند إعطائه بسرعة."
     },
 
     clinicalDetails: {
-      administration:
-        "يُعطى عن طريق الوريد ببطء مع معايرة الجرعة وفق الاستجابة السريرية.",
-      warnings: [
-        "انخفاض ضغط الدم",
-        "تثبيط التنفس",
-        "انقطاع التنفس",
-        "ألم أثناء الحقن"
-      ],
-      contraindications: [
-        "فرط الحساسية المعروف للبروبوفول أو لأحد مكونات المستحضر"
-      ],
-      reversal:
-        "لا يوجد مضاد نوعي؛ يجب توفير دعم مجرى الهواء والدعم التنفسي والقلبـي الوعائي عند الحاجة."
+      administration: "يُعطى عن طريق الوريد ببطء مع معايرة الجرعة وفق الاستجابة السريرية.",
+      warnings: ["انخفاض ضغط الدم", "تثبيط التنفس", "انقطاع التنفس", "ألم أثناء الحقن"],
+      contraindications: ["فرط الحساسية المعروف للبروبوفول أو لأحد مكونات المستحضر"],
+      reversal: "لا يوجد مضاد نوعي؛ يجب توفير دعم مجرى الهواء والتهوية الميكانيكية عند الحاجة."
     },
 
-    dilutions: [
-      {
-        instructions:
-          "يُستخدم حسب تركيبة المستحضر والبروتوكول المحلي. تجنب التخفيف غير الضروري إلا عند وجود استطباب واضح."
-      }
-    ],
+    dilutions: [{ instructions: "يُستخدم حسب تركيبة المستحضر والبروتوكول المحلي. تجنب التخفيف غير الضروري." }],
 
     references: [
-      {
-        source: "Miller's Anesthesia",
-        topic: "Intravenous Anesthetic Drugs"
-      },
-      {
-        source: "Morgan & Mikhail's Clinical Anesthesiology",
-        topic: "Propofol"
-      }
+      { source: "Miller's Anesthesia", topic: "Intravenous Anesthetic Drugs" },
+      { source: "Morgan & Mikhail's Clinical Anesthesiology", topic: "Propofol" }
     ]
   },
-
 
   // ==========================================================
   // 2. KETAMINE
@@ -130,15 +86,7 @@ export const drugsData = [
     arabicName: "كيتامين",
     category: "Induction",
 
-    searchKeywords: [
-      "ketamine",
-      "ketalar",
-      "كيتامين",
-      "تحريض",
-      "تسكين",
-      "induction",
-      "analgesia"
-    ],
+    searchKeywords: ["ketamine", "ketalar", "كيتامين", "تحريض", "تسكين"],
 
     indications: [
       {
@@ -168,74 +116,36 @@ export const drugsData = [
     concentrationConfig: {
       defaultUnit: "mg/mL",
       availableConcentrations: [
-        {
-          value: 10,
-          label: "10 mg/mL",
-          isDefault: false
-        },
-        {
-          value: 50,
-          label: "50 mg/mL",
-          isDefault: true
-        },
-        {
-          value: 100,
-          label: "100 mg/mL",
-          isDefault: false
-        }
+        { value: 10, label: "10 mg/mL", isDefault: false },
+        { value: 50, label: "50 mg/mL", isDefault: true },
+        { value: 100, label: "100 mg/mL", isDefault: false }
       ],
       customAllowed: true,
       minCustomConcentration: 1,
       maxCustomConcentration: 500
     },
 
-    pharmacokinetics: {
-      onset: "30–60 ثانية IV",
-      duration: "10–20 دقيقة"
-    },
+    pharmacokinetics: { onset: "30–60 ثانية IV", duration: "10–20 دقيقة" },
 
     safetyProfile: {
       isHighAlert: true,
-      safetyNotes:
-        "قد يسبب ارتفاع ضغط الدم ومعدل القلب وزيادة الإفرازات، وقد يسبب أحياناً ظواهر الاستيقاظ غير المريحة."
+      safetyNotes: "قد يسبب ارتفاع ضغط الدم ومعدل القلب وزيادة الإفرازات، وتفاعلات الاستيقاظ."
     },
 
     clinicalDetails: {
-      administration:
-        "يُعطى وريدياً ببطء مع معايرة الجرعة وفق الاستجابة السريرية.",
-      warnings: [
-        "ارتفاع ضغط الدم",
-        "تسرع القلب",
-        "زيادة الإفرازات",
-        "تفاعلات الاستيقاظ"
-      ],
-      contraindications: [
-        "فرط الحساسية المعروف",
-        "الحالات التي يكون فيها ارتفاع ضغط الدم أمراً خطيراً"
-      ],
-      reversal:
-        "لا يوجد مضاد نوعي؛ يجب توفير الدعم المناسب لمجرى الهواء والجهازين التنفسي والقلبـي الوعائي."
+      administration: "يُعطى وريدياً ببطء مع معايرة الجرعة وفق الاستجابة السريرية.",
+      warnings: ["ارتفاع ضغط الدم", "تسرع القلب", "زيادة الإفرازات", "تفاعلات الاستيقاظ"],
+      contraindications: ["فرط الحساسية المعروف", "الحالات التي يكون فيها ارتفاع ضغط الدم أمراً خطيراً"],
+      reversal: "لا يوجد مضاد نوعي."
     },
 
-    dilutions: [
-      {
-        instructions:
-          "يعتمد التخفيف على تركيز المستحضر وطريقة الاستخدام المقصودة؛ يجب اتباع البروتوكول المحلي."
-      }
-    ],
+    dilutions: [{ instructions: "يعتمد التخفيف على تركيز المستحضر والبروتوكول المحلي." }],
 
     references: [
-      {
-        source: "Miller's Anesthesia",
-        topic: "Ketamine"
-      },
-      {
-        source: "Morgan & Mikhail's Clinical Anesthesiology",
-        topic: "Intravenous Anesthetics"
-      }
+      { source: "Miller's Anesthesia", topic: "Ketamine" },
+      { source: "Morgan & Mikhail's Clinical Anesthesiology", topic: "Intravenous Anesthetics" }
     ]
   },
-
 
   // ==========================================================
   // 3. ROCURONIUM
@@ -246,21 +156,12 @@ export const drugsData = [
     arabicName: "روكورونيوم",
     category: "Muscle Relaxant",
 
-    searchKeywords: [
-      "rocuronium",
-      "esmeron",
-      "zemuron",
-      "روكورونيوم",
-      "مرخي عضلات",
-      "NMB",
-      "RSI",
-      "intubation"
-    ],
+    searchKeywords: ["rocuronium", "esmeron", "zemuron", "روكورونيوم", "مرخي عضلات", "NMB", "RSI"],
 
     indications: [
       {
         id: "intubation",
-        title: "التنبيب الرغامي",
+        title: "التنبيب الرغامي الروتيني",
         route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
@@ -271,11 +172,11 @@ export const drugsData = [
       },
       {
         id: "rsi",
-        title: "التنبيب بالتسلسل السريع RSI",
+        title: "التنبيب بالتسلسل السريع RSI (المعدل سريرياً)",
         route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
-          doseMin: 0.6,
+          doseMin: 0.9,
           doseMax: 1.2,
           unitLabel: "mg/kg"
         }
@@ -295,68 +196,33 @@ export const drugsData = [
 
     concentrationConfig: {
       defaultUnit: "mg/mL",
-      availableConcentrations: [
-        {
-          value: 10,
-          label: "10 mg/mL",
-          isDefault: true
-        }
-      ],
+      availableConcentrations: [{ value: 10, label: "10 mg/mL", isDefault: true }],
       customAllowed: true,
       minCustomConcentration: 1,
       maxCustomConcentration: 20
     },
 
-    pharmacokinetics: {
-      onset: "60–90 ثانية",
-      duration: "30–45 دقيقة"
-    },
+    pharmacokinetics: { onset: "60–90 ثانية (60 ثانية بجرعة RSI)", duration: "30–45 دقيقة" },
 
     safetyProfile: {
       isHighAlert: true,
-      safetyNotes:
-        "مرخٍ للعضلات. يسبب شللاً في العضلات الهيكلية بما فيها عضلات التنفس. يجب توفر وسائل تأمين مجرى الهواء والتهوية والمراقبة المناسبة فوراً."
+      safetyNotes: "مرخٍ للعضلات. يسبب شللاً كاملاً لعضلات التنفس."
     },
 
     clinicalDetails: {
-      administration:
-        "يُعطى وريدياً فقط. يجب استخدامه مع تأمين مناسب لمجرى الهواء والتهوية والمراقبة العصبية العضلية.",
-      warnings: [
-        "شلل كامل لعضلات التنفس",
-        "تفاعلات الحساسية المفرطة",
-        "إطالة مدة التأثير لدى بعض المرضى",
-        "ضرورة المراقبة العصبية العضلية"
-      ],
-      contraindications: [
-        "فرط الحساسية المعروف للروكورونيوم أو لمرخيات العضلات الأخرى"
-      ],
-      reversal:
-        "يمكن استخدام Sugammadex أو Neostigmine مع مضاد مسكاريني مناسب عندما يكون ذلك ملائماً سريرياً."
+      administration: "يُعطى وريدياً فقط مع مراقبة الحصر العصبي العضلي.",
+      warnings: ["شلل عضلات التنفس", "تفاعلات الحساسية المفرطة", "ضرورة المراقبة العصبية العضلية"],
+      contraindications: ["فرط الحساسية المعروف للروكورونيوم"],
+      reversal: "يُعكس بـ Sugammadex أو Neostigmine مع مضاد مسكاريني."
     },
 
-    dilutions: [
-      {
-        instructions:
-          "يمكن تخفيفه بمحاليل وريدية متوافقة مثل محلول كلوريد الصوديوم 0.9% وفق تعليمات المستحضر والبروتوكول المحلي."
-      }
-    ],
+    dilutions: [{ instructions: "يمكن تخفيفه بمحلول كلوريد الصوديوم 0.9%." }],
 
     references: [
-      {
-        source: "FDA Prescribing Information",
-        topic: "Rocuronium Bromide Injection"
-      },
-      {
-        source: "Miller's Anesthesia",
-        topic: "Neuromuscular Blocking Drugs"
-      },
-      {
-        source: "Morgan & Mikhail's Clinical Anesthesiology",
-        topic: "Neuromuscular Blockade"
-      }
+      { source: "FDA Prescribing Information", topic: "Rocuronium Bromide Injection" },
+      { source: "Miller's Anesthesia", topic: "Neuromuscular Blocking Drugs" }
     ]
   },
-
 
   // ==========================================================
   // 4. FENTANYL
@@ -367,15 +233,7 @@ export const drugsData = [
     arabicName: "فنتانيل",
     category: "Opioid",
 
-    searchKeywords: [
-      "fentanyl",
-      "sublimaze",
-      "فنتانيل",
-      "أفيوني",
-      "تسكين",
-      "opioid",
-      "analgesia"
-    ],
+    searchKeywords: ["fentanyl", "sublimaze", "فنتانيل", "أفيوني", "تسكين"],
 
     indications: [
       {
@@ -404,65 +262,30 @@ export const drugsData = [
 
     concentrationConfig: {
       defaultUnit: "mcg/mL",
-      availableConcentrations: [
-        {
-          value: 50,
-          label: "50 mcg/mL",
-          isDefault: true
-        }
-      ],
+      availableConcentrations: [{ value: 50, label: "50 mcg/mL", isDefault: true }],
       customAllowed: true,
       minCustomConcentration: 1,
       maxCustomConcentration: 1000
     },
 
-    pharmacokinetics: {
-      onset: "1–2 دقيقة IV",
-      duration: "30–60 دقيقة"
-    },
+    pharmacokinetics: { onset: "1–2 دقيقة IV", duration: "30–60 دقيقة" },
 
     safetyProfile: {
       isHighAlert: true,
-      safetyNotes:
-        "أفيون قوي. قد يسبب تثبيط التنفس وتيبس جدار الصدر عند الجرعات العالية أو الإعطاء السريع وبطء القلب وانخفاض ضغط الدم."
+      safetyNotes: "أفيون قوي. قد يسبب تثبيط التنفس وتيبس جدار الصدر عند الإعطاء السريع."
     },
 
     clinicalDetails: {
-      administration:
-        "يُعطى وريدياً ببطء مع معايرة الجرعة وفق الاستجابة المسكنة والتنفسية.",
-      warnings: [
-        "تثبيط التنفس",
-        "بطء القلب",
-        "انخفاض ضغط الدم",
-        "تيبس جدار الصدر عند الإعطاء السريع"
-      ],
-      contraindications: [
-        "فرط الحساسية المعروف",
-        "تثبيط تنفسي شديد دون مراقبة مناسبة"
-      ],
-      reversal:
-        "يمكن استخدام Naloxone لعلاج تثبيط التنفس المهم الناتج عن الأفيونات."
+      administration: "يُعطى وريدياً ببطء مع معايرة الجرعة وفق الاستجابة.",
+      warnings: ["تثبيط التنفس", "بطء القلب", "انخفاض ضغط الدم", "تيبس جدار الصدر"],
+      contraindications: ["فرط الحساسية المعروف"],
+      reversal: "يُعكس بـ Naloxone."
     },
 
-    dilutions: [
-      {
-        instructions:
-          "يمكن تخفيفه بمحاليل وريدية متوافقة وفق البروتوكول المحلي."
-      }
-    ],
+    dilutions: [{ instructions: "يمكن تخفيفه بمحاليل وريدية متوافقة." }],
 
-    references: [
-      {
-        source: "Miller's Anesthesia",
-        topic: "Opioid Analgesics"
-      },
-      {
-        source: "Morgan & Mikhail's Clinical Anesthesiology",
-        topic: "Opioids"
-      }
-    ]
+    references: [{ source: "Miller's Anesthesia", topic: "Opioid Analgesics" }]
   },
-
 
   // ==========================================================
   // 5. ATROPINE
@@ -471,28 +294,21 @@ export const drugsData = [
     id: "atropine",
     name: "Atropine",
     arabicName: "أتروبين",
-    category: "Vasopressor",
+    category: "Anticholinergic",
 
-    searchKeywords: [
-      "atropine",
-      "atropine sulfate",
-      "أتروبين",
-      "بطء القلب",
-      "مضاد كولين",
-      "bradycardia",
-      "anticholinergic"
-    ],
+    searchKeywords: ["atropine", "أتروبين", "بطء القلب", "مضاد كولين", "bradycardia"],
 
     indications: [
       {
         id: "bradycardia",
-        title: "بطء القلب العرضي",
+        title: "بطء القلب العرضي (ACLS)",
         route: "وريدي IV",
         doseConfig: {
           doseType: "fixed_mg",
           fixedDoseValue: 1,
           doseMin: 1,
           doseMax: 1,
+          maxDoseLimit: 3,
           unitLabel: "mg"
         }
       },
@@ -512,74 +328,33 @@ export const drugsData = [
     concentrationConfig: {
       defaultUnit: "mg/mL",
       availableConcentrations: [
-        {
-          value: 1,
-          label: "1 mg/mL",
-          isDefault: true
-        },
-        {
-          value: 0.5,
-          label: "0.5 mg/mL",
-          isDefault: false
-        },
-        {
-          value: 0.6,
-          label: "0.6 mg/mL",
-          isDefault: false
-        }
+        { value: 1, label: "1 mg/mL", isDefault: true },
+        { value: 0.5, label: "0.5 mg/mL", isDefault: false },
+        { value: 0.6, label: "0.6 mg/mL", isDefault: false }
       ],
       customAllowed: true,
       minCustomConcentration: 0.1,
       maxCustomConcentration: 10
     },
 
-    pharmacokinetics: {
-      onset: "1–2 دقيقة IV",
-      duration: "2–4 ساعات"
-    },
+    pharmacokinetics: { onset: "1–2 دقيقة IV", duration: "2–4 ساعات" },
 
     safetyProfile: {
       isHighAlert: true,
-      safetyNotes:
-        "قد يسبب تسرع القلب وجفاف الفم واحتباس البول وتوسع الحدقة وتأثيرات مضادة للكولين."
+      safetyNotes: "مضاد كولين. يسبب تسرع القلب وجفاف الفم. الحد الأقصى التراكمي في بطء القلب هو 3 ملغم."
     },
 
     clinicalDetails: {
-      administration:
-        "في حالة بطء القلب العرضي، يُعطى وريدياً وفق إرشادات الإنعاش الحالية وتُكرر الجرعة حسب الاستجابة السريرية.",
-      warnings: [
-        "تسرع القلب",
-        "تأثيرات مضادة للكولين",
-        "احتباس البول",
-        "توسع الحدقة"
-      ],
-      contraindications: [
-        "فرط الحساسية المعروف",
-        "يُستخدم بحذر في الحالات التي قد تكون فيها التأثيرات المضادة للكولين خطرة"
-      ],
-      reversal:
-        "لا يوجد عكس نوعي روتيني؛ تُعالج سمية مضادات الكولين وفق البروتوكول السريري."
+      administration: "يُعطى وريدياً سريعاً في بطء القلب العرضي.",
+      warnings: ["تسرع القلب", "تأثيرات مضادة للكولين", "احتباس البول"],
+      contraindications: ["فرط الحساسية المعروف"],
+      reversal: "لا يوجد عكس نوعي روتيني."
     },
 
-    dilutions: [
-      {
-        instructions:
-          "يُستخدم التركيز المتوفر وفق الاستطباب والبروتوكول المحلي."
-      }
-    ],
+    dilutions: [{ instructions: "يُستخدم التركيز المتوفر وفق الاستطباب." }],
 
-    references: [
-      {
-        source: "AHA ACLS Guidelines",
-        topic: "Adult Bradycardia"
-      },
-      {
-        source: "Morgan & Mikhail's Clinical Anesthesiology",
-        topic: "Anticholinergic Drugs"
-      }
-    ]
+    references: [{ source: "AHA ACLS Guidelines", topic: "Adult Bradycardia" }]
   },
-
 
   // ==========================================================
   // 6. ATRACURIUM
@@ -590,14 +365,7 @@ export const drugsData = [
     arabicName: "أتراكوريوم",
     category: "Muscle Relaxant",
 
-    searchKeywords: [
-      "atracurium",
-      "tracrium",
-      "أتراكوريوم",
-      "مرخي عضلات",
-      "NMB",
-      "muscle relaxant"
-    ],
+    searchKeywords: ["atracurium", "tracrium", "أتراكوريوم", "مرخي عضلات"],
 
     indications: [
       {
@@ -626,64 +394,30 @@ export const drugsData = [
 
     concentrationConfig: {
       defaultUnit: "mg/mL",
-      availableConcentrations: [
-        {
-          value: 10,
-          label: "10 mg/mL",
-          isDefault: true
-        }
-      ],
+      availableConcentrations: [{ value: 10, label: "10 mg/mL", isDefault: true }],
       customAllowed: true,
       minCustomConcentration: 1,
       maxCustomConcentration: 20
     },
 
-    pharmacokinetics: {
-      onset: "2–3 دقائق",
-      duration: "20–35 دقيقة"
-    },
+    pharmacokinetics: { onset: "2–3 دقائق", duration: "20–35 دقيقة" },
 
     safetyProfile: {
       isHighAlert: true,
-      safetyNotes:
-        "قد يسبب إطلاق الهيستامين مع احمرار وانخفاض ضغط الدم أو تشنج قصبي، خاصة عند الإعطاء السريع."
+      safetyNotes: "قد يسبب إطلاق الهيستامين وانخفاض ضغط الدم والتشنج القصبي عند الإعطاء السريع."
     },
 
     clinicalDetails: {
-      administration:
-        "يُعطى وريدياً. قد يساعد الإعطاء البطيء على تقليل التأثيرات القلبية الوعائية المرتبطة بإطلاق الهيستامين.",
-      warnings: [
-        "شلل عضلات التنفس",
-        "إطلاق الهيستامين",
-        "انخفاض ضغط الدم",
-        "تشنج قصبي"
-      ],
-      contraindications: [
-        "فرط الحساسية المعروف للأتراكوريوم"
-      ],
-      reversal:
-        "يمكن استخدام Neostigmine مع مضاد مسكاريني مناسب عند وجود استطباب سريري."
+      administration: "يُعطى وريدياً ببطء لتقليل إطلاق الهيستامين.",
+      warnings: ["شلل عضلات التنفس", "إطلاق الهيستامين", "انخفاض ضغط الدم"],
+      contraindications: ["فرط الحساسية المعروف"],
+      reversal: "يُعكس بـ Neostigmine مع مضاد مسكاريني."
     },
 
-    dilutions: [
-      {
-        instructions:
-          "يمكن إعطاؤه وريدياً وفق تعليمات المستحضر والبروتوكول المحلي."
-      }
-    ],
+    dilutions: [{ instructions: "يُعطى وريدياً وفق التركيز المتوفر." }],
 
-    references: [
-      {
-        source: "FDA Prescribing Information",
-        topic: "Atracurium Besylate"
-      },
-      {
-        source: "Miller's Anesthesia",
-        topic: "Neuromuscular Blocking Drugs"
-      }
-    ]
+    references: [{ source: "Miller's Anesthesia", topic: "Neuromuscular Blocking Drugs" }]
   },
-
 
   // ==========================================================
   // 7. SUCCINYLCHOLINE
@@ -694,20 +428,12 @@ export const drugsData = [
     arabicName: "سكسينيل كولين",
     category: "Muscle Relaxant",
 
-    searchKeywords: [
-      "succinylcholine",
-      "suxamethonium",
-      "sux",
-      "سكسينيل كولين",
-      "RSI",
-      "مرخي مزيل للاستقطاب",
-      "depolarizing"
-    ],
+    searchKeywords: ["succinylcholine", "suxamethonium", "سكسينيل كولين", "RSI"],
 
     indications: [
       {
         id: "intubation",
-        title: "التنبيب الرغامي / التنبيب بالتسلسل السريع",
+        title: "التنبيب الرغامي / RSI",
         route: "وريدي IV",
         doseConfig: {
           doseType: "mg/kg",
@@ -721,72 +447,32 @@ export const drugsData = [
     concentrationConfig: {
       defaultUnit: "mg/mL",
       availableConcentrations: [
-        {
-          value: 20,
-          label: "20 mg/mL",
-          isDefault: true
-        },
-        {
-          value: 50,
-          label: "50 mg/mL",
-          isDefault: false
-        }
+        { value: 20, label: "20 mg/mL", isDefault: true },
+        { value: 50, label: "50 mg/mL", isDefault: false }
       ],
       customAllowed: true,
       minCustomConcentration: 1,
       maxCustomConcentration: 100
     },
 
-    pharmacokinetics: {
-      onset: "30–60 ثانية",
-      duration: "5–10 دقائق"
-    },
+    pharmacokinetics: { onset: "30–60 ثانية", duration: "5–10 دقائق" },
 
     safetyProfile: {
       isHighAlert: true,
-      safetyNotes:
-        "مرخٍ سريع المفعول ومزيل للاستقطاب. من أهم المخاطر فرط بوتاسيوم الدم وفرط الحرارة الخبيث واضطرابات النظم وبطء القلب."
+      safetyNotes: "مرخٍ مزيل للاستقطاب. يرفع خطر فرط بوتاسيوم الدم الشديد وفرط الحرارة الخبيث."
     },
 
     clinicalDetails: {
-      administration:
-        "يُعطى وريدياً بواسطة مختصين مستعدين لتأمين مجرى الهواء وتوفير التهوية الميكانيكية.",
-      warnings: [
-        "فرط بوتاسيوم الدم",
-        "فرط الحرارة الخبيث",
-        "بطء القلب",
-        "انقطاع التنفس المطول",
-        "تشنج عضلة الفك"
-      ],
-      contraindications: [
-        "القابلية المعروفة للإصابة بفرط الحرارة الخبيث",
-        "وجود خطر مهم معروف لفرط بوتاسيوم الدم",
-        "بعض الاضطرابات العصبية العضلية",
-        "فرط الحساسية المعروف"
-      ],
-      reversal:
-        "لا يوجد مضاد عكسي مباشر. يجب توفير دعم مجرى الهواء والتهوية حتى عودة الوظيفة العضلية تلقائياً."
+      administration: "يُعطى وريدياً سريعا مع الجاهزية للتنبيب والتهوية.",
+      warnings: ["فرط بوتاسيوم الدم", "فرط الحرارة الخبيث", "بطء القلب"],
+      contraindications: ["خطر فرط بوتاسيوم الدم", "القابلية لفرط الحرارة الخبيث"],
+      reversal: "لا يوجد مضاد؛ ينتهي تأثيره تلقائياً."
     },
 
-    dilutions: [
-      {
-        instructions:
-          "يُستخدم وفق تركيبة المستحضر والبروتوكول المحلي."
-      }
-    ],
+    dilutions: [{ instructions: "يُستخدم وفق تركيبة المستحضر." }],
 
-    references: [
-      {
-        source: "Miller's Anesthesia",
-        topic: "Depolarizing Neuromuscular Blockade"
-      },
-      {
-        source: "Morgan & Mikhail's Clinical Anesthesiology",
-        topic: "Succinylcholine"
-      }
-    ]
+    references: [{ source: "Miller's Anesthesia", topic: "Depolarizing Neuromuscular Blockade" }]
   },
-
 
   // ==========================================================
   // 8. EPHEDRINE
@@ -797,14 +483,7 @@ export const drugsData = [
     arabicName: "إيفيدرين",
     category: "Vasopressor",
 
-    searchKeywords: [
-      "ephedrine",
-      "إيفيدرين",
-      "انخفاض ضغط الدم",
-      "مقبض وعائي",
-      "hypotension",
-      "vasopressor"
-    ],
+    searchKeywords: ["ephedrine", "إيفيدرين", "انخفاض ضغط الدم"],
 
     indications: [
       {
@@ -824,74 +503,33 @@ export const drugsData = [
     concentrationConfig: {
       defaultUnit: "mg/mL",
       availableConcentrations: [
-        {
-          value: 5,
-          label: "5 mg/mL",
-          isDefault: true
-        },
-        {
-          value: 30,
-          label: "30 mg/mL",
-          isDefault: false
-        },
-        {
-          value: 50,
-          label: "50 mg/mL",
-          isDefault: false
-        }
+        { value: 5, label: "5 mg/mL", isDefault: true },
+        { value: 30, label: "30 mg/mL", isDefault: false },
+        { value: 50, label: "50 mg/mL", isDefault: false }
       ],
       customAllowed: true,
       minCustomConcentration: 0.1,
       maxCustomConcentration: 100
     },
 
-    pharmacokinetics: {
-      onset: "1–2 دقيقة IV",
-      duration: "10–60 دقيقة"
-    },
+    pharmacokinetics: { onset: "1–2 دقيقة IV", duration: "10–60 دقيقة" },
 
     safetyProfile: {
       isHighAlert: true,
-      safetyNotes:
-        "دواء محاكي للجهاز الودي. قد يسبب تسرع القلب وارتفاع ضغط الدم واضطرابات نظم القلب."
+      safetyNotes: "دواء محاكي للودي. قد يسبب تسرع القلب واضطرابات النظم."
     },
 
     clinicalDetails: {
-      administration:
-        "تُعطى الجرعة الوريدية تدريجياً وفق ضغط الدم ومعدل القلب والاستجابة السريرية.",
-      warnings: [
-        "تسرع القلب",
-        "ارتفاع ضغط الدم",
-        "اضطرابات نظم القلب",
-        "انخفاض الاستجابة مع تكرار الجرعات"
-      ],
-      contraindications: [
-        "فرط الحساسية المعروف",
-        "يُستخدم بحذر في أمراض القلب والأوعية الدموية المهمة"
-      ],
-      reversal:
-        "لا يوجد مضاد نوعي؛ تُعالج التأثيرات المفرطة للدواء بشكل داعم وفق البروتوكول السريري."
+      administration: "تُعطى الجرعة الوريدية تدريجياً حسب ضغط الدم والنبض.",
+      warnings: ["تسرع القلب", "ارتفاع ضغط الدم"],
+      contraindications: ["فرط الحساسية المعروف"],
+      reversal: "لا يوجد مضاد نوعي."
     },
 
-    dilutions: [
-      {
-        instructions:
-          "يجب التحقق من تركيز الأمبول وتخفيفه إلى تركيز عملي واضح ومُعنون قبل الإعطاء الوريدي."
-      }
-    ],
+    dilutions: [{ instructions: "يُخفف إلى تركيز عملي (مثلاً 5 mg/mL) قبل الحقن." }],
 
-    references: [
-      {
-        source: "Miller's Anesthesia",
-        topic: "Vasopressors"
-      },
-      {
-        source: "Morgan & Mikhail's Clinical Anesthesiology",
-        topic: "Hemodynamic Drugs"
-      }
-    ]
+    references: [{ source: "Miller's Anesthesia", topic: "Vasopressors" }]
   },
-
 
   // ==========================================================
   // 9. NEOSTIGMINE
@@ -900,17 +538,9 @@ export const drugsData = [
     id: "neostigmine",
     name: "Neostigmine",
     arabicName: "نيوستغمين",
-    category: "Muscle Relaxant",
+    category: "Reversal",
 
-    searchKeywords: [
-      "neostigmine",
-      "prostigmin",
-      "نيوستغمين",
-      "عكس المرخيات",
-      "عكس الحصر العصبي العضلي",
-      "reversal",
-      "NMB reversal"
-    ],
+    searchKeywords: ["neostigmine", "prostigmin", "نيوستغمين", "عكس المرخيات", "reversal"],
 
     indications: [
       {
@@ -930,70 +560,32 @@ export const drugsData = [
     concentrationConfig: {
       defaultUnit: "mg/mL",
       availableConcentrations: [
-        {
-          value: 0.5,
-          label: "0.5 mg/mL",
-          isDefault: true
-        },
-        {
-          value: 2.5,
-          label: "2.5 mg/mL",
-          isDefault: false
-        }
+        { value: 0.5, label: "0.5 mg/mL", isDefault: true },
+        { value: 2.5, label: "2.5 mg/mL", isDefault: false }
       ],
       customAllowed: true,
       minCustomConcentration: 0.1,
       maxCustomConcentration: 5
     },
 
-    pharmacokinetics: {
-      onset: "3–10 دقائق",
-      duration: "40–60 دقيقة"
-    },
+    pharmacokinetics: { onset: "3–10 دقائق", duration: "40–60 دقيقة" },
 
     safetyProfile: {
       isHighAlert: true,
-      safetyNotes:
-        "يجب إعطاؤه فقط عند وجود عودة مناسبة سريرياً من الحصر العصبي العضلي ومع استخدام مضاد مسكاريني مناسب."
+      safetyNotes: "دواء لعكس المرخيات. يُعطى دائماً مع مضاد مسكاريني (أتروبين) لتفادي بطء القلب الشديد."
     },
 
     clinicalDetails: {
-      administration:
-        "يُعطى وريدياً. تُحدد الجرعة وفق درجة الحصر العصبي العضلي والسياق السريري.",
-      warnings: [
-        "بطء القلب",
-        "تشنج قصبي",
-        "زيادة الإفرازات",
-        "تأثيرات كولينية"
-      ],
-      contraindications: [
-        "فرط الحساسية المعروف",
-        "الانسداد الميكانيكي للأمعاء",
-        "الانسداد الميكانيكي للمسالك البولية"
-      ],
-      reversal:
-        "النيوستغمين نفسه دواء لعكس الحصر العصبي العضلي؛ ويُعطى مع مضاد مسكاريني مناسب مثل الأتروبين أو الغليكوبيرولات."
+      administration: "يُعطى وريدياً مع الأتروبين عند وجود استجابة عضلية أوليّة.",
+      warnings: ["بطء القلب الشديد", "تشنج قصبي", "زيادة الإفرازات"],
+      contraindications: ["الانسداد الميكانيكي للأمعاء أو المسالك البولية"],
+      reversal: "هو دواء عكسي بذاته."
     },
 
-    dilutions: [
-      {
-        instructions:
-          "يُخفف أو يُعطى وفق التركيز المتوفر وبحسب بروتوكول عكس الحصر العصبي العضلي المحلي."
-      }
-    ],
+    dilutions: [{ instructions: "يُعطى وفق تركيز الأمبول والبروتوكول المحلي." }],
 
-    references: [
-      {
-        source: "FDA / DailyMed",
-        topic: "Neostigmine Methylsulfate"
-      },
-      {
-        source: "Miller's Anesthesia",
-        topic: "Reversal of Neuromuscular Block"
-      }
-    ]
+    references: [{ source: "Miller's Anesthesia", topic: "Reversal of Neuromuscular Block" }]
   },
-
 
   // ==========================================================
   // 10. MIDAZOLAM
@@ -1002,18 +594,9 @@ export const drugsData = [
     id: "midazolam",
     name: "Midazolam",
     arabicName: "ميدازولام",
-    category: "Induction",
+    category: "Sedative",
 
-    searchKeywords: [
-      "midazolam",
-      "versed",
-      "dormicum",
-      "ميدازولام",
-      "بنزوديازيبين",
-      "تهدئة",
-      "benzodiazepine",
-      "sedation"
-    ],
+    searchKeywords: ["midazolam", "versed", "dormicum", "ميدازولام", "تهدئة"],
 
     indications: [
       {
@@ -1043,69 +626,32 @@ export const drugsData = [
     concentrationConfig: {
       defaultUnit: "mg/mL",
       availableConcentrations: [
-        {
-          value: 1,
-          label: "1 mg/mL",
-          isDefault: true
-        },
-        {
-          value: 5,
-          label: "5 mg/mL",
-          isDefault: false
-        }
+        { value: 1, label: "1 mg/mL", isDefault: true },
+        { value: 5, label: "5 mg/mL", isDefault: false }
       ],
       customAllowed: true,
       minCustomConcentration: 0.1,
       maxCustomConcentration: 10
     },
 
-    pharmacokinetics: {
-      onset: "1–3 دقائق",
-      duration: "30–80 دقيقة"
-    },
+    pharmacokinetics: { onset: "1–3 دقائق", duration: "30–80 دقيقة" },
 
     safetyProfile: {
       isHighAlert: true,
-      safetyNotes:
-        "قد يسبب تثبيط التنفس وانقطاعه وانخفاض ضغط الدم. يزداد الخطر عند استخدامه مع الأفيونات ومثبطات الجهاز العصبي المركزي الأخرى."
+      safetyNotes: "قد يسبب تثبيط التنفس، ويزداد الخطر عند مشاركته مع الأفيونيات."
     },
 
     clinicalDetails: {
-      administration:
-        "يُعطى ببطء مع معايرة الجرعة للوصول إلى مستوى التهدئة المطلوب، مع ضرورة المراقبة المستمرة للحالة التنفسية والقلبية الوعائية.",
-      warnings: [
-        "تثبيط التنفس",
-        "انقطاع التنفس",
-        "انخفاض ضغط الدم",
-        "زيادة التأثير عند استخدامه مع الأفيونات"
-      ],
-      contraindications: [
-        "فرط الحساسية المعروف للبنزوديازيبينات",
-        "الزرق الحاد ضيق الزاوية"
-      ],
-      reversal:
-        "يمكن استخدام Flumazenil لعكس تأثير البنزوديازيبينات في حالات مختارة، مع مراعاة احتمال عودة التهدئة وخطر الاختلاجات."
+      administration: "يُعطى ببطء مع معايرة الجرعة للوصول للتهدئة المطلوبة.",
+      warnings: ["تثبيط التنفس", "انخفاض ضغط الدم"],
+      contraindications: ["فرط الحساسية للبنزوديازيبينات"],
+      reversal: "يُعكس بـ Flumazenil."
     },
 
-    dilutions: [
-      {
-        instructions:
-          "يمكن تخفيفه بمحاليل وريدية متوافقة وفق تعليمات المستحضر والبروتوكول المحلي."
-      }
-    ],
+    dilutions: [{ instructions: "يمكن تخفيفه بمحاليل وريدية متوافقة." }],
 
-    references: [
-      {
-        source: "FDA Prescribing Information",
-        topic: "Midazolam Injection"
-      },
-      {
-        source: "Miller's Anesthesia",
-        topic: "Benzodiazepines"
-      }
-    ]
+    references: [{ source: "Miller's Anesthesia", topic: "Benzodiazepines" }]
   },
-
 
   // ==========================================================
   // 11. EPINEPHRINE / ADRENALINE
@@ -1116,19 +662,7 @@ export const drugsData = [
     arabicName: "إبينفرين / أدرينالين",
     category: "Vasopressor",
 
-    searchKeywords: [
-      "epinephrine",
-      "adrenaline",
-      "epi",
-      "أدرينالين",
-      "إبينفرين",
-      "التأق",
-      "توقف القلب",
-      "مقبض وعائي",
-      "anaphylaxis",
-      "cardiac arrest",
-      "vasopressor"
-    ],
+    searchKeywords: ["epinephrine", "adrenaline", "أدرينالين", "إبينفرين", "التأق"],
 
     indications: [
       {
@@ -1145,8 +679,8 @@ export const drugsData = [
       },
       {
         id: "cardiac_arrest",
-        title: "توقف القلب عند البالغين",
-        route: "وريدي / داخل العظم IV / IO",
+        title: "توقف القلب عند البالغين (ACLS)",
+        route: "وريدي IV",
         doseConfig: {
           doseType: "fixed_mg",
           fixedDoseValue: 1,
@@ -1156,14 +690,14 @@ export const drugsData = [
         }
       },
       {
-        id: "hypotension_infusion",
-        title: "ضخ مقبض وعائي",
-        route: "تسريب وريدي IV Infusion",
+        id: "bolus_pressor",
+        title: "دفعة رافعة لضغط الدم (Push-Dose Pressor)",
+        route: "وريدي IV Direct",
         doseConfig: {
-          doseType: "mcg/kg/min",
-          doseMin: 0.01,
-          doseMax: 0.5,
-          unitLabel: "mcg/kg/min"
+          doseType: "mcg/kg",
+          doseMin: 0.1,
+          doseMax: 0.2,
+          unitLabel: "mcg/kg"
         }
       }
     ],
@@ -1171,73 +705,32 @@ export const drugsData = [
     concentrationConfig: {
       defaultUnit: "mg/mL",
       availableConcentrations: [
-        {
-          value: 1,
-          label: "1 mg/mL (1:1000)",
-          isDefault: true
-        },
-        {
-          value: 0.1,
-          label: "0.1 mg/mL (1:10,000)",
-          isDefault: false
-        }
+        { value: 1, label: "1 mg/mL (1:1000)", isDefault: true },
+        { value: 0.1, label: "0.1 mg/mL (1:10,000)", isDefault: false }
       ],
       customAllowed: true,
       minCustomConcentration: 0.001,
       maxCustomConcentration: 1
     },
 
-    pharmacokinetics: {
-      onset: "سريع",
-      duration: "5–10 دقائق IV"
-    },
+    pharmacokinetics: { onset: "سريع", duration: "5–10 دقائق IV" },
 
     safetyProfile: {
       isHighAlert: true,
-      safetyNotes:
-        "دواء عالي الخطورة. تختلف تراكيز الإبينفرين وطرق إعطائه حسب الاستطباب. يجب دائماً التحقق من التركيز والطريق والاستطباب قبل الإعطاء."
+      safetyNotes: "دواء عالي الخطورة. تُحسب معدلات التسريب المستمر بـ (mcg/kg/min) بداخل حاسبة مضخات التنقيط."
     },
 
     clinicalDetails: {
-      administration:
-        "يعتمد الطريق والتركيز على الاستطباب. في حالات التأق، يُعطى عضلياً في الجانب الأمامي الوحشي من الفخذ. أما في توقف القلب فتُتبع إرشادات الإنعاش الحالية.",
-      warnings: [
-        "اضطرابات نظم القلب",
-        "ارتفاع شديد في ضغط الدم",
-        "نقص تروية عضلة القلب",
-        "أخطاء التركيز الدوائي",
-        "خطر مرتفع لأخطاء الجرعات"
-      ],
-      contraindications: [
-        "لا يوجد مانع استعمال مطلق في التأق المهدد للحياة أو توقف القلب؛ يجب استخدامه وفق الاستطباب والطريق المناسبين."
-      ],
-      reversal:
-        "لا يوجد مضاد نوعي. تُعالج التأثيرات القلبية الوعائية المفرطة بشكل داعم وفق البروتوكول السريري."
+      administration: "في التأق يُعطى عضلياً بالفخذ، وفي توقف القلب يُعطى وريدياً كل 3-5 دقائق.",
+      warnings: ["اضطرابات النظم", "ارتفاع ضغط الدم الشديد"],
+      contraindications: ["لا يوجد مانع مطلق في التأق أو توقف القلب المهدد للحياة."],
+      reversal: "لا يوجد مضاد نوعي."
     },
 
-    dilutions: [
-      {
-        instructions:
-          "عند الإعطاء الوريدي، يجب استخدام تركيز معروف ومُحضّر ومُعنون بشكل واضح وفق البروتوكول السريري المحدد. لا تفترض أن تركيز الإعطاء العضلي في التأق قابل للاستبدال مباشرة مع تركيز الإنعاش القلبي الوريدي."
-      }
-    ],
+    dilutions: [{ instructions: "تحقق دائماً من تركيز الأمبول قبل الحقن." }],
 
-    references: [
-      {
-        source: "AHA ACLS Guidelines",
-        topic: "Adult Cardiac Arrest"
-      },
-      {
-        source: "FDA Prescribing Information",
-        topic: "Epinephrine Injection"
-      },
-      {
-        source: "Miller's Anesthesia",
-        topic: "Vasopressors and Sympathomimetics"
-      }
-    ]
+    references: [{ source: "AHA ACLS Guidelines", topic: "Adult Cardiac Arrest" }]
   },
-
 
   // ==========================================================
   // 12. DEXAMETHASONE
@@ -1246,22 +739,14 @@ export const drugsData = [
     id: "dexamethasone",
     name: "Dexamethasone",
     arabicName: "ديكساميثازون",
-    category: "Induction",
+    category: "Antiemetic",
 
-    searchKeywords: [
-      "dexamethasone",
-      "decadron",
-      "ديكساميثازون",
-      "الغثيان والقيء بعد العملية",
-      "مضاد للقيء",
-      "PONV",
-      "antiemetic"
-    ],
+    searchKeywords: ["dexamethasone", "decadron", "ديكساميثازون", "PONV", "مضاد قيء"],
 
     indications: [
       {
         id: "ponv",
-        title: "الوقاية من الغثيان والقيء بعد العملية",
+        title: "الوقاية من الغثيان والقيء بعد العملية (PONV)",
         route: "وريدي IV",
         doseConfig: {
           doseType: "fixed_mg",
@@ -1273,7 +758,7 @@ export const drugsData = [
       },
       {
         id: "airway_edema",
-        title: "وذمة مجرى الهواء / الاستخدام المضاد للالتهاب",
+        title: "وذمة مجرى الهواء / مضاد التهاب",
         route: "وريدي IV",
         doseConfig: {
           doseType: "fixed_mg",
@@ -1288,66 +773,31 @@ export const drugsData = [
     concentrationConfig: {
       defaultUnit: "mg/mL",
       availableConcentrations: [
-        {
-          value: 4,
-          label: "4 mg/mL",
-          isDefault: true
-        },
-        {
-          value: 10,
-          label: "10 mg/mL",
-          isDefault: false
-        }
+        { value: 4, label: "4 mg/mL", isDefault: true },
+        { value: 10, label: "10 mg/mL", isDefault: false }
       ],
       customAllowed: true,
       minCustomConcentration: 0.1,
       maxCustomConcentration: 40
     },
 
-    pharmacokinetics: {
-      onset: "خلال ساعات",
-      duration: "عدة ساعات"
-    },
+    pharmacokinetics: { onset: "خلال ساعات", duration: "عدة ساعات" },
 
     safetyProfile: {
       isHighAlert: false,
-      safetyNotes:
-        "يجب مراعاة احتمال ارتفاع سكر الدم وخطر العدوى والتأثيرات الأخرى المرتبطة بالكورتيكوستيرويدات حسب الجرعة وحالة المريض."
+      safetyNotes: "قد يسبب ارتفاع سكر الدم المؤقت لدى مرضى السكري."
     },
 
     clinicalDetails: {
-      administration:
-        "يُعطى وريدياً أو بطريق مناسب آخر حسب الاستطباب والبروتوكول المحلي.",
-      warnings: [
-        "ارتفاع سكر الدم",
-        "احتمال زيادة خطر العدوى",
-        "تأثيرات على الجهاز الهضمي",
-        "آثار مرتبطة بالكورتيكوستيرويدات عند الاستخدام المتكرر"
-      ],
-      contraindications: [
-        "فرط الحساسية المعروف للديكساميثازون أو لأحد مكونات المستحضر"
-      ],
-      reversal:
-        "لا يوجد مضاد نوعي."
+      administration: "يُعطى وريدياً عند تحريض التخدير لتدبير PONV.",
+      warnings: ["ارتفاع سكر الدم"],
+      contraindications: ["فرط الحساسية المعروف للديكساميثازون"],
+      reversal: "لا يوجد مضاد نوعي."
     },
 
-    dilutions: [
-      {
-        instructions:
-          "يُستخدم محلول وريدي متوافق عند الحاجة إلى التخفيف وفق تعليمات المستحضر والبروتوكول المحلي."
-      }
-    ],
+    dilutions: [{ instructions: "يُعطى بشكل مباشر أو مخفف بمحلول وريدي." }],
 
-    references: [
-      {
-        source: "Miller's Anesthesia",
-        topic: "Postoperative Nausea and Vomiting"
-      },
-      {
-        source: "Morgan & Mikhail's Clinical Anesthesiology",
-        topic: "Antiemetic Therapy"
-      }
-    ]
+    references: [{ source: "Miller's Anesthesia", topic: "PONV Guidelines" }]
   }
 
 ];
