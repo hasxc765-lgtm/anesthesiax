@@ -1,5 +1,5 @@
 /**
- * Continuous Infusion Calculator Engine Core (Phase 6.3)
+ * Continuous Infusion Calculator Engine Core (Phase 6.3 - Fully Audited)
  * Data-Driven & Independent Calculation Engine
  * 
  * References:
@@ -14,9 +14,10 @@ export const SUPPORTED_DOSE_UNITS = {
   'mcg_kg_min': { label: 'mcg/kg/min', requiresWeight: true, timeFactor: 60, baseUnit: 'mcg' },
   'mcg_kg_hr':  { label: 'mcg/kg/hr',  requiresWeight: true, timeFactor: 1,  baseUnit: 'mcg' },
   'mg_kg_hr':   { label: 'mg/kg/hr',   requiresWeight: true, timeFactor: 1,  baseUnit: 'mg' },
-  'mcg_hr':     { label: 'mcg/hr',     requiresWeight: false, timeFactor: 1, baseUnit: 'mcg' },
-  'mg_hr':      { label: 'mg/hr',      requiresWeight: false, timeFactor: 1, baseUnit: 'mg' },
-  'units_hr':   { label: 'units/hr',   requiresWeight: false, timeFactor: 1, baseUnit: 'units' },
+  'mcg_min':    { label: 'mcg/min',    requiresWeight: false, timeFactor: 60, baseUnit: 'mcg' },
+  'mcg_hr':     { label: 'mcg/hr',     requiresWeight: false, timeFactor: 1,  baseUnit: 'mcg' },
+  'mg_hr':      { label: 'mg/hr',      requiresWeight: false, timeFactor: 1,  baseUnit: 'mg' },
+  'units_hr':   { label: 'units/hr',   requiresWeight: false, timeFactor: 1,  baseUnit: 'units' },
   'units_min':  { label: 'units/min',  requiresWeight: false, timeFactor: 60, baseUnit: 'units' },
   'units_kg_hr':{ label: 'units/kg/hr',requiresWeight: true, timeFactor: 1,  baseUnit: 'units' }
 };
@@ -29,17 +30,68 @@ export const SUPPORTED_CONCENTRATION_UNITS = {
 };
 
 /**
+ * دالة تحويل النطاق السريري للوحدة المحددة من المستخدم
+ */
+export function convertDoseRange(doseMin, doseMax, sourceUnitKey, targetUnitKey, weightKg = 70) {
+  const srcUnit = SUPPORTED_DOSE_UNITS[sourceUnitKey];
+  const tgtUnit = SUPPORTED_DOSE_UNITS[targetUnitKey];
+
+  if (!srcUnit || !tgtUnit) return { min: doseMin, max: doseMax };
+
+  const validWeight = (weightKg && Number.isFinite(weightKg) && weightKg > 0) ? weightKg : 70;
+
+  // 1. حساب المعدل الساعي الكلي للجرعة الأدنى والأعلى
+  let hourlyMin = doseMin * srcUnit.timeFactor;
+  let hourlyMax = doseMax * srcUnit.timeFactor;
+
+  if (srcUnit.requiresWeight) {
+    hourlyMin *= validWeight;
+    hourlyMax *= validWeight;
+  }
+
+  // توحيد الوحدات الأساسية بين (mg) و (mcg)
+  if (srcUnit.baseUnit === 'mg' && tgtUnit.baseUnit === 'mcg') {
+    hourlyMin *= 1000;
+    hourlyMax *= 1000;
+  } else if (srcUnit.baseUnit === 'mcg' && tgtUnit.baseUnit === 'mg') {
+    hourlyMin /= 1000;
+    hourlyMax /= 1000;
+  }
+
+  // 2. التحويل من المعدل الساعي الكلي إلى الوحدة المستهدفة
+  let convertedMin = hourlyMin / tgtUnit.timeFactor;
+  let convertedMax = hourlyMax / tgtUnit.timeFactor;
+
+  if (tgtUnit.requiresWeight) {
+    convertedMin /= validWeight;
+    convertedMax /= validWeight;
+  }
+
+  const formatNum = (val) => {
+    if (val < 0.01) return Number(val.toFixed(4));
+    if (val < 1) return Number(val.toFixed(3));
+    if (val < 10) return Number(val.toFixed(2));
+    return Number(val.toFixed(1));
+  };
+
+  return {
+    min: formatNum(convertedMin),
+    max: formatNum(convertedMax)
+  };
+}
+
+/**
  * دالة حساب معدل الضخ الأساسية (Data-Driven Infusion Rate Calculation)
  */
 export function calculateInfusionRate({
   drugId = null,
+  indicationId = null,
   patientWeight = null,
   doseValue = null,
   doseUnitKey = 'mcg_kg_min',
   concentrationValue = null,
   concentrationUnitKey = 'mcg/mL'
 }) {
-  // 1. الاستعلام الديناميكي والتحقق الصارم من وجود الدواء عند تمرير drugId
   let drugObj = null;
   let isHighAlert = false;
 
@@ -54,7 +106,6 @@ export function calculateInfusionRate({
     isHighAlert = Boolean(drugObj.isHighAlert);
   }
 
-  // 2. التحقق من وجود وإتاحة الوحدات المدخلة
   const doseUnitObj = SUPPORTED_DOSE_UNITS[doseUnitKey];
   if (!doseUnitObj) {
     return {
@@ -71,7 +122,6 @@ export function calculateInfusionRate({
     };
   }
 
-  // التحقق من أن الدواء المختار يدعم هذه الوحدة بداخل قاعدة البيانات
   if (drugObj && Array.isArray(drugObj.supportedDoseUnitKeys)) {
     if (!drugObj.supportedDoseUnitKeys.includes(doseUnitKey)) {
       return {
@@ -81,9 +131,8 @@ export function calculateInfusionRate({
     }
   }
 
-  // 3. التحقق الصارم من توافق فئات الوحدات (Strict Unit Compatibility)
-  const doseBase = doseUnitObj.baseUnit; // 'mcg' | 'mg' | 'units'
-  const concBase = concUnitObj.baseUnit; // 'mcg' | 'mg' | 'units'
+  const doseBase = doseUnitObj.baseUnit;
+  const concBase = concUnitObj.baseUnit;
 
   if (doseBase === 'units' && concBase !== 'units') {
     return {
@@ -99,7 +148,6 @@ export function calculateInfusionRate({
     };
   }
 
-  // 4. التحقق الرقمي والرياضي من القيم المدخلة
   const weight = parseFloat(patientWeight);
   const dose = parseFloat(doseValue);
   const conc = parseFloat(concentrationValue);
@@ -108,7 +156,7 @@ export function calculateInfusionRate({
     if (isNaN(weight) || weight <= 0 || weight > 300 || !Number.isFinite(weight)) {
       return {
         isValid: false,
-        error: "الجرعة المحددة تتطلب إدخال وزن صحيح للمريض (بالكجم)."
+        error: "الجرعة المحددة تتطلب إدخال وزن صحيح للمريض أكبر من 0 كجم."
       };
     }
   }
@@ -127,18 +175,39 @@ export function calculateInfusionRate({
     };
   }
 
-  // 5. حساب الجرعة الساعية الإجمالية (Total Hourly Dose)
+  // فحص الجرعة الزائدة وتحويل النطاق الآمن
+  let isOverdose = false;
+  let overdoseMessage = '';
+  let convertedRange = null;
+
+  if (drugObj && Array.isArray(drugObj.indications)) {
+    const selectedIndication = drugObj.indications.find(i => i.id === indicationId) || drugObj.indications[0];
+    if (selectedIndication) {
+      convertedRange = convertDoseRange(
+        selectedIndication.doseMin,
+        selectedIndication.doseMax,
+        selectedIndication.doseUnitKey,
+        doseUnitKey,
+        weight
+      );
+
+      if (dose > convertedRange.max) {
+        isOverdose = true;
+        overdoseMessage = `⚠️ تحذير جرعة زائدة: الجرعة المدخلة (${dose} ${doseUnitObj.label}) تتجاوز الحد الأقصى الموصى به (${convertedRange.max} ${doseUnitObj.label}).`;
+      }
+    }
+  }
+
   let totalHourlyDose = dose * doseUnitObj.timeFactor;
   if (doseUnitObj.requiresWeight) {
     totalHourlyDose *= weight;
   }
 
-  // 6. توحيد التراكيز حسابياً بين (mcg) و (mg)
   let effectiveConcInDoseBase = conc;
   if (doseBase === 'mcg' && concBase === 'mg') {
-    effectiveConcInDoseBase = conc * 1000; // 1 mg/mL = 1000 mcg/mL
+    effectiveConcInDoseBase = conc * 1000;
   } else if (doseBase === 'mg' && concBase === 'mcg') {
-    effectiveConcInDoseBase = conc / 1000; // 1 mcg/mL = 0.001 mg/mL
+    effectiveConcInDoseBase = conc / 1000;
   }
 
   if (isNaN(effectiveConcInDoseBase) || !Number.isFinite(effectiveConcInDoseBase) || effectiveConcInDoseBase <= 0) {
@@ -148,7 +217,6 @@ export function calculateInfusionRate({
     };
   }
 
-  // 7. حساب معدل الضخ بالساعة (mL/hr)
   const pumpRateMlHr = totalHourlyDose / effectiveConcInDoseBase;
 
   if (isNaN(pumpRateMlHr) || !Number.isFinite(pumpRateMlHr) || pumpRateMlHr <= 0) {
@@ -173,6 +241,9 @@ export function calculateInfusionRate({
     concentrationUnitLabel: concUnitObj.label,
     effectiveConcInDoseBase,
     pumpRateMlHr,
-    isHighAlert
+    isHighAlert,
+    isOverdose,
+    overdoseMessage,
+    convertedRange
   };
 }
