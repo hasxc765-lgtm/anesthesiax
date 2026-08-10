@@ -1,6 +1,6 @@
 /**
  * Main Application Entry Point (App.js)
- * Phase 6 Integration - Instant Execution Fix
+ * Robust & Auto-Diagnosing Version
  */
 
 import { store } from './js/state/store.js';
@@ -16,40 +16,52 @@ function renderApp() {
   const appContainer = document.getElementById('app');
   if (!appContainer) return;
 
-  const currentView = store.state.currentView || 'dose';
+  try {
+    const currentView = store?.state?.currentView || 'dose';
 
-  let viewHTML = '';
-  switch (currentView) {
-    case 'dose':
-      viewHTML = renderDoseView();
-      break;
-    case 'drugs':
-      viewHTML = renderDrugCenterView();
-      break;
-    case 'airway':
-      viewHTML = renderAirwayView();
-      break;
-    case 'fluid':
-      viewHTML = renderFluidView();
-      break;
-    case 'regional':
-      viewHTML = renderRegionalView();
-      break;
-    case 'infusion':
-      viewHTML = renderInfusionView();
-      break;
-    default:
-      viewHTML = renderDoseView();
+    let viewHTML = '';
+    switch (currentView) {
+      case 'dose':
+        viewHTML = renderDoseView();
+        break;
+      case 'drugs':
+        viewHTML = renderDrugCenterView();
+        break;
+      case 'airway':
+        viewHTML = renderAirwayView();
+        break;
+      case 'fluid':
+        viewHTML = renderFluidView();
+        break;
+      case 'regional':
+        viewHTML = renderRegionalView();
+        break;
+      case 'infusion':
+        viewHTML = renderInfusionView();
+        break;
+      default:
+        viewHTML = renderDoseView();
+    }
+
+    appContainer.innerHTML = `
+      ${renderNavigation()}
+      <main class="p-3 sm:p-4 pb-20">
+        ${viewHTML}
+      </main>
+    `;
+
+    attachNavigationEvents();
+  } catch (err) {
+    console.error('Render Error:', err);
+    appContainer.innerHTML = `
+      <div style="padding: 20px; color: #b91c1c; font-family: system-ui, sans-serif; text-align: center; dir: rtl;">
+        <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">⚠️ حدث خطأ في استدعاء إحدى الشاشات:</h3>
+        <div dir="ltr" style="background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 12px; font-family: monospace; font-size: 12px; text-align: left; overflow-x: auto; white-space: pre-wrap;">
+          ${err.stack || err.message || err}
+        </div>
+      </div>
+    `;
   }
-
-  appContainer.innerHTML = `
-    ${renderNavigation()}
-    <main class="p-3 sm:p-4 pb-20">
-      ${viewHTML}
-    </main>
-  `;
-
-  attachNavigationEvents();
 }
 
 function attachNavigationEvents() {
@@ -57,17 +69,24 @@ function attachNavigationEvents() {
   navButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
       const route = e.currentTarget.getAttribute('data-route');
-      if (route && store.state.currentView !== route) {
-        store.setState({ currentView: route });
+      if (route && store?.state?.currentView !== route) {
+        if (typeof store.setState === 'function') {
+          store.setState({ currentView: route });
+        } else if (store.state) {
+          store.state.currentView = route;
+          renderApp();
+        }
       }
     });
   });
 }
 
 // Subscribe to store changes to re-render
-store.subscribe(renderApp);
+if (store && typeof store.subscribe === 'function') {
+  store.subscribe(renderApp);
+}
 
-// التشغيل الفوري المباشر لتفادي إفلات حدث DOMContentLoaded في ES Modules
+// Immediate Execution
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', renderApp);
 } else {
