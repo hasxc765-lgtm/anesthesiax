@@ -1,29 +1,38 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <script>
-  window.addEventListener('error', function(e) {
-    document.body.innerHTML = '<div style="color:red; padding:20px; font-family:monospace; direction:ltr; text-align:left; background:#fff0f0;"><b>JS Error:</b><br>' + e.message + '<br><br><b>File:</b> ' + e.filename + '<br><b>Line:</b> ' + e.lineno + '</div>';
-  });
-</script>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AnesthesiaX - المنصة الحسابية الطبية للتخدير</title>
-  <!-- تحميل Tailwind CSS -->
+  <title>AnesthesiaX</title>
+
+  <!-- كاشف الأخطاء الشامل على الشاشة مباشرة -->
+  <script>
+    function showError(msg) {
+      var el = document.getElementById('debug-error') || document.createElement('div');
+      el.id = 'debug-error';
+      el.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#ffffff;color:#dc2626;padding:20px;z-index:99999;font-family:monospace;overflow:auto;direction:ltr;text-align:left;box-sizing:border-box;';
+      el.innerHTML = '<h3 style="margin-top:0;">⚠️ JavaScript Error:</h3><pre style="white-space:pre-wrap;word-break:break-all;">' + msg + '</pre>';
+      if (document.body) { document.body.appendChild(el); }
+      else { window.addEventListener('DOMContentLoaded', function() { document.body.appendChild(el); }); }
+    }
+    window.onerror = function(msg, url, line) {
+      showError(msg + '\n\nFile: ' + url + '\nLine: ' + line);
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+      showError('Unhandled Rejection: ' + (e.reason ? (e.reason.stack || e.reason) : e));
+    });
+  </script>
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- تحميل ملف التنسيقات الخاص بك -->
-  <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen p-3">
+<body class="bg-slate-100 min-h-screen text-slate-800">
 
-  <!-- حاوية شريط الملاحة والرأس (Navigation Bar) -->
-  <div id="app-nav"></div>
+  <!-- الحاوية الرئيسية للتطبيق -->
+  <div id="app"></div>
 
-  <!-- حاوية المحتوى التفاعلي (اللوحة الرئيسية / مركز الأدوية) -->
-  <div id="app-content"></div>
+  <!-- استدعاء ملف app.js بنظام Modules -->
+  <script type="module" src="./app.js"></script>
 
-  <!-- المحرك البرمجي الرئيسي -->
-  <script type="module" src="js/app.js"></script>
 </body>
 </html>
