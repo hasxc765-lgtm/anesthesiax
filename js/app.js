@@ -1,16 +1,16 @@
 /**
  * Main Application Entry Point (App.js)
- * Phase 6 Integration
+ * Phase 6 Integration - Corrected Paths
  */
 
-import { store } from './state/store.js';
-import { renderNavigation } from './components/navigation.js';
-import { renderDoseView } from './components/doseView.js';
-import { renderDrugCenterView } from './components/drugCenterView.js';
-import { renderAirwayView } from './components/airwayView.js';
-import { renderFluidView } from './components/fluidView.js';
-import { renderRegionalView } from './components/regionalView.js';
-import { renderInfusionView } from './components/infusionView.js';
+import { store } from './js/state/store.js';
+import { renderNavigation } from './js/components/navigation.js';
+import { renderDoseView } from './js/components/doseView.js';
+import { renderDrugCenterView } from './js/components/drugCenterView.js';
+import { renderAirwayView } from './js/components/airwayView.js';
+import { renderFluidView } from './js/components/fluidView.js';
+import { renderRegionalView } from './js/components/regionalView.js';
+import { renderInfusionView } from './js/components/infusionView.js';
 
 function renderApp() {
   const appContainer = document.getElementById('app');
