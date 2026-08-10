@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <script>
+  window.addEventListener('error', function(e) {
+    document.body.innerHTML = '<div style="color:red; padding:20px; font-family:monospace; direction:ltr; text-align:left; background:#fff0f0;"><b>JS Error:</b><br>' + e.message + '<br><br><b>File:</b> ' + e.filename + '<br><b>Line:</b> ' + e.lineno + '</div>';
+  });
+</script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AnesthesiaX - المنصة الحسابية الطبية للتخدير</title>
