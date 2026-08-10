@@ -1,44 +1,30 @@
-/**
- * Navigation Component (Phase 6 Integration)
- * شريط الملاحة الرئيسي للمنصة
- */
+export function renderNavigation(currentView) {
+  const isDashboard = currentView === 'dashboard';
+  let pageTitle = 'لوحة التحكم';
 
-import { store } from '../state/store.js';
-
-export function renderNavigation() {
-  const currentView = store.state.currentView || 'dose';
-
-  const navItems = [
-    { id: 'dose', label: 'لوحة التحكم', icon: '📊' },
-    { id: 'drugs', label: 'مركز الأدوية', icon: '💊' },
-    { id: 'airway', label: 'المجرى الهوائي', icon: '🫁' },
-    { id: 'fluid', label: 'السوائل والنزف', icon: '💧' },
-    { id: 'regional', label: 'التخدير المناطقي', icon: '⚡' },
-    { id: 'infusion', label: 'مضخات التنقيط', icon: '💉' }
-  ];
+  if (currentView === 'drugCenter') pageTitle = 'مركز الأدوية';
+  if (currentView === 'airway') pageTitle = 'المجرى الهوائي';
+  if (currentView === 'fluidAbl') pageTitle = 'السوائل والنزف المسموح';
+  if (currentView === 'regionalLast') pageTitle = 'التخدير المناطقي و LAST';
 
   return `
-    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm" dir="rtl">
-      <div class="max-w-2xl mx-auto px-2">
-        <div class="flex justify-between items-center h-14 overflow-x-auto no-scrollbar gap-1 py-1">
-          ${navItems.map(item => {
-            const isActive = currentView === item.id;
-            return `
-              <button 
-                data-route="${item.id}"
-                class="flex flex-col items-center justify-center min-w-[62px] px-1.5 py-1 rounded-xl transition-all ${
-                  isActive 
-                    ? 'bg-blue-600 text-white font-bold shadow-sm scale-[1.02]' 
-                    : 'text-slate-600 hover:bg-slate-100 font-medium'
-                }"
-              >
-                <span class="text-base leading-none mb-0.5">${item.icon}</span>
-                <span class="text-[10px] whitespace-nowrap leading-tight">${item.label}</span>
-              </button>
-            `;
-          }).join('')}
+    <header class="max-w-2xl mx-auto flex justify-between items-center py-3 border-b border-slate-200 mb-4" dir="rtl">
+      <div class="flex items-center gap-2">
+        ${!isDashboard ? `
+          <button id="btnBackToDashboard" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold transition flex items-center gap-1 border border-blue-200">
+            <span>➔</span> <span>الرئيسية</span>
+          </button>
+        ` : ''}
+        <div>
+          <h1 class="text-xl font-bold text-blue-600 flex items-center gap-1">
+            AnesthesiaX 💉
+          </h1>
+          <p class="text-[10px] text-slate-500">Professional Anesthesia Toolkit</p>
         </div>
       </div>
-    </nav>
+      <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded-lg border border-blue-200">
+        ${pageTitle}
+      </span>
+    </header>
   `;
 }
