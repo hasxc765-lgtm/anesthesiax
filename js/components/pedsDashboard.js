@@ -1,7 +1,7 @@
 /**
  * Pediatric Dashboard UI Component
- * AnesthesiaX — Phase 7.3 (Fully Audited & Isolated)
- * Version: 7.3-dashboard-strict-v2
+ * AnesthesiaX — Phase 7.5 (Fully Audited & Isolated)
+ * Version: 7.5-dashboard-strict-v3
  * 
  * Dependencies:
  * - ../data/pedsData.js
@@ -42,17 +42,17 @@ export class PedsDashboard {
             <div>
               <label class="block text-sm font-semibold mb-1">الوزن (Weight in kg):</label>
               <input type="number" id="peds-weight-input" step="0.1" min="0.3" max="150" value="${this.state.weightKg}" 
-                class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white" placeholder="أدخل الوزن بالكجم" />
+                class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white font-bold text-blue-900" placeholder="أدخل الوزن بالكجم" />
             </div>
             <div>
               <label class="block text-sm font-semibold mb-1">العمر بالسنين (Age in years):</label>
               <input type="number" id="peds-age-input" step="0.1" min="0" max="18" value="${this.state.ageYears}" 
-                class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white" placeholder="أدخل العمر بالسنوات" />
+                class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white font-bold text-blue-900" placeholder="أدخل العمر بالسنوات" />
             </div>
           </div>
         </div>
 
-        <!-- GRID OF 3 MAIN CLINICAL CARDS -->
+        <!-- GRID OF MAIN CLINICAL CARDS -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           <!-- CARD 1: AIRWAY & ETT -->
@@ -87,7 +87,7 @@ export class PedsDashboard {
                   </div>
                   <div>
                     <label class="block text-xs font-bold mb-1">التركيز المتاح (Concentration):</label>
-                    <select id="peds-concentration-select" class="w-full p-2 border rounded bg-white"></select>
+                    <select id="peds-concentration-select" dir="ltr" class="w-full p-2 border rounded bg-white text-left"></select>
                   </div>
                 </div>
               </div>
@@ -118,6 +118,12 @@ export class PedsDashboard {
     const currentDrug = pedsData.emergencyDrugs.find(d => d.id === this.state.selectedDrugId);
     if (!currentDrug) return;
 
+    // 🔧 إصلاح المزامنة: التأكد من أن الاستطباب الحالي ينتمي للدواء المختار
+    const indExists = currentDrug.indications.some(i => i.id === this.state.selectedIndicationId);
+    if (!indExists && currentDrug.indications.length > 0) {
+      this.state.selectedIndicationId = currentDrug.indications[0].id;
+    }
+
     indicationSelect.innerHTML = currentDrug.indications.map(i => `
       <option value="${i.id}" ${i.id === this.state.selectedIndicationId ? 'selected' : ''}>${i.title}</option>
     `).join('');
@@ -127,14 +133,20 @@ export class PedsDashboard {
 
     if (currentIndication) {
       if (currentIndication.concentrationOptions && currentIndication.concentrationOptions.length > 0) {
+        // 🔧 إصلاح المزامنة: التأكد من أن التركيز المختار ينتمي للاستطباب الحالي
+        const concExists = currentIndication.concentrationOptions.some(c => c.mgPerMl === this.state.selectedConcentrationMgPerMl);
+        if (!concExists) {
+          this.state.selectedConcentrationMgPerMl = currentIndication.concentrationOptions[0].mgPerMl;
+        }
+
         optionsHtml = currentIndication.concentrationOptions.map(c => `
-          <option value="${c.mgPerMl}">${c.label}</option>
+          <option value="${c.mgPerMl}" ${c.mgPerMl === this.state.selectedConcentrationMgPerMl ? 'selected' : ''}>${c.label}</option>
         `).join('');
-        this.state.selectedConcentrationMgPerMl = currentIndication.concentrationOptions[0].mgPerMl;
       } else if (currentIndication.concentration) {
         const c = currentIndication.concentration;
-        optionsHtml = `<option value="${c.mgPerMl || c.saltMgPerMl}">${c.label}</option>`;
-        this.state.selectedConcentrationMgPerMl = c.mgPerMl || c.saltMgPerMl;
+        const concVal = c.mgPerMl || c.saltMgPerMl;
+        optionsHtml = `<option value="${concVal}">${c.label}</option>`;
+        this.state.selectedConcentrationMgPerMl = concVal;
       } else {
         optionsHtml = `<option value="">تركيز قياسي</option>`;
         this.state.selectedConcentrationMgPerMl = null;
@@ -173,15 +185,15 @@ export class PedsDashboard {
       <div class="space-y-3 text-sm">
         <div class="p-2 bg-gray-50 rounded border flex justify-between items-center">
           <span class="font-bold text-gray-700">الأنبوب بدون كاف (Uncuffed):</span>
-          <span class="text-blue-700 font-extrabold text-base">${airway.uncuffedSizeMm} mm</span>
+          <span class="text-blue-700 font-extrabold text-base" dir="ltr">${airway.uncuffedSizeMm} mm</span>
         </div>
         <div class="p-2 bg-gray-50 rounded border flex justify-between items-center">
           <span class="font-bold text-gray-700">الأنبوب مع كاف (Cuffed):</span>
-          <span class="text-blue-700 font-extrabold text-base">${airway.cuffedSizeMm ? airway.cuffedSizeMm + " mm" : "غير موصى به"}</span>
+          <span class="text-blue-700 font-extrabold text-base" dir="ltr">${airway.cuffedSizeMm ? airway.cuffedSizeMm + " mm" : "غير موصى به"}</span>
         </div>
         <div class="p-2 bg-gray-50 rounded border flex justify-between items-center">
           <span class="font-bold text-gray-700">عمق الفم التقديري (Oral Depth):</span>
-          <span class="text-gray-900 font-bold">${airway.estimatedOralDepthCm} cm</span>
+          <span class="text-gray-900 font-bold" dir="ltr">${airway.estimatedOralDepthCm} cm</span>
         </div>
         <div class="p-2 bg-gray-50 rounded border flex justify-between items-center">
           <span class="font-bold text-gray-700">شفرة المنظار (Blade Size):</span>
@@ -206,14 +218,14 @@ export class PedsDashboard {
         <div class="p-3 bg-blue-50/60 border border-blue-100 rounded-lg grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
           <div class="bg-white p-2 rounded border">
             <div class="text-xs text-gray-500">الجرعة المحسوبة (Applied Dose)</div>
-            <div class="text-lg font-black text-blue-900">${drug.appliedDose} ${drug.doseUnit}</div>
-            ${drug.minDose && drug.maxDose ? `<div class="text-[11px] text-gray-600 mt-1">النطاق الموصى به: ${drug.minDose}–${drug.maxDose} ${drug.doseUnit}</div>` : ''}
-            ${drug.isCapped ? `<span class="text-[10px] bg-red-100 text-red-700 px-1 rounded block mt-1">تم تطبيق السقف الأقصى</span>` : ''}
-            ${drug.isMinEnforced ? `<span class="text-[10px] bg-amber-100 text-amber-800 px-1 rounded block mt-1">تم تطبيق الحد الأدنى</span>` : ''}
+            <div class="text-lg font-black text-blue-900" dir="ltr">${drug.appliedDose} ${drug.doseUnit}</div>
+            ${drug.minDose && drug.maxDose ? `<div class="text-[11px] text-gray-600 mt-1" dir="ltr">النطاق الموصى به: ${drug.minDose}–${drug.maxDose} ${drug.doseUnit}</div>` : ''}
+            ${drug.isCapped ? `<span class="text-[10px] bg-red-100 text-red-700 px-1 rounded block mt-1 font-bold">تم تطبيق السقف الأقصى</span>` : ''}
+            ${drug.isMinEnforced ? `<span class="text-[10px] bg-amber-100 text-amber-800 px-1 rounded block mt-1 font-bold">تم تطبيق الحد الأدنى</span>` : ''}
           </div>
           <div class="bg-white p-2 rounded border">
             <div class="text-xs text-gray-500">الحجم المطلوب (Volume mL)</div>
-            <div class="text-lg font-black text-green-700">${drug.calculatedVolumeMl !== null ? drug.calculatedVolumeMl + ' mL' : 'غير متوفر'}</div>
+            <div class="text-lg font-black text-green-700" dir="ltr">${drug.calculatedVolumeMl !== null ? drug.calculatedVolumeMl + ' mL' : 'غير متوفر'}</div>
           </div>
           <div class="bg-white p-2 rounded border">
             <div class="text-xs text-gray-500">طريق الإعطاء (Route)</div>
@@ -223,13 +235,13 @@ export class PedsDashboard {
 
         ${drug.elementalCalciumInfo ? `
           <div class="p-2 bg-indigo-50 border border-indigo-200 rounded text-xs text-indigo-900">
-            <strong>تفاصيل الكالسيوم الفعال (Elemental Ca):</strong> يعطي المريض ${drug.elementalCalciumInfo.deliveredElementalCaMg} mg من الكالسيوم الصافي (${drug.elementalCalciumInfo.elementalCaMgPerMl} mg/mL elemental Ca).
+            <strong>تفاصيل الكالسيوم الفعال (Elemental Ca):</strong> يعطي المريض <span dir="ltr">${drug.elementalCalciumInfo.deliveredElementalCaMg} mg</span> من الكالسيوم الصافي (<span dir="ltr">${drug.elementalCalciumInfo.elementalCaMgPerMl} mg/mL</span> elemental Ca).
           </div>
         ` : ''}
 
         ${drug.safetyAlerts.length > 0 ? `
-          <div class="p-3 bg-red-50 border-r-4 border-red-500 text-red-800 text-xs rounded space-y-1">
-            ${drug.safetyAlerts.map(a => `<p class="font-medium">• ${a}</p>`).join('')}
+          <div class="p-3 bg-red-50 border-r-4 border-red-500 text-red-900 text-xs rounded space-y-1 font-semibold">
+            ${drug.safetyAlerts.map(a => `<p>• ${a}</p>`).join('')}
           </div>
         ` : ''}
       </div>
@@ -246,11 +258,11 @@ export class PedsDashboard {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="p-3 bg-gray-50 rounded border text-center">
             <span class="text-xs text-gray-500 block">معدل التسريب الساعي (Hourly Rate)</span>
-            <span class="text-xl font-black text-blue-800">${fluids.hourlyRateMlHr} mL/hr</span>
+            <span class="text-xl font-black text-blue-800" dir="ltr">${fluids.hourlyRateMlHr} mL/hr</span>
           </div>
           <div class="p-3 bg-gray-50 rounded border text-center">
             <span class="text-xs text-gray-500 block">المجموع اليومي المقدر (24h Total)</span>
-            <span class="text-xl font-black text-blue-800">${fluids.dailyVolumeMl24h} mL/24h</span>
+            <span class="text-xl font-black text-blue-800" dir="ltr">${fluids.dailyVolumeMl24h} mL/24h</span>
           </div>
         </div>
 
