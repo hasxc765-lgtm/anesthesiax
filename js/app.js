@@ -17,20 +17,12 @@ import { PedsDashboard } from './components/pedsDashboard.js';
 
 function init() {
   window.navigateTo = (viewName) => {
-    if (store && typeof store.setView === 'function') {
-      store.setView(viewName);
-    } else if (store && store.state) {
-      store.state.currentView = viewName;
-    }
+    store.setView(viewName);
     render();
   };
 
   window.setCategory = (category) => {
-    if (store && typeof store.setCategory === 'function') {
-      store.setCategory(category);
-    } else if (store && store.state) {
-      store.state.currentCategory = category;
-    }
+    store.setCategory(category);
     renderCardsOnly();
   };
 
@@ -39,30 +31,18 @@ function init() {
     if (weightInput) {
       weightInput.value = '';
     }
-    if (store && typeof store.setWeight === 'function') {
-      store.setWeight(0);
-    } else if (store && store.state) {
-      store.state.patientWeight = 0;
-    }
+    store.setWeight(0);
     renderCardsOnly();
   };
 
   window.handleIndicationChange = (drugId, indicationId) => {
-    if (store && typeof store.setSelectedIndication === 'function') {
-      store.setSelectedIndication(drugId, indicationId);
-    } else if (store && store.state) {
-      store.state.selectedIndications[drugId] = indicationId;
-    }
+    store.setSelectedIndication(drugId, indicationId);
     renderCardsOnly();
   };
 
   window.handleConcChange = (drugId, value) => {
-    if (store && typeof store.setSelectedConcentration === 'function') {
-      store.setSelectedConcentration(drugId, value);
-    } else if (store && store.state) {
-      store.state.selectedConcentrations[drugId] = value;
-    }
-    if (value !== 'custom' && store && store.state && store.state.customConcentrations) {
+    store.setSelectedConcentration(drugId, value);
+    if (value !== 'custom') {
       delete store.state.customConcentrations[drugId];
     }
     renderCardsOnly();
@@ -71,12 +51,8 @@ function init() {
   window.handleCustomConcInput = (drugId, value) => {
     const numericValue = parseFloat(value);
     if (Number.isFinite(numericValue) && numericValue > 0) {
-      if (store && typeof store.setCustomConcentration === 'function') {
-        store.setCustomConcentration(drugId, numericValue);
-      } else if (store && store.state) {
-        store.state.customConcentrations[drugId] = numericValue;
-      }
-    } else if (store && store.state && store.state.customConcentrations) {
+      store.setCustomConcentration(drugId, numericValue);
+    } else {
       delete store.state.customConcentrations[drugId];
     }
     renderCardsOnly();
@@ -100,41 +76,30 @@ function render() {
   const navContainer = document.getElementById('app-nav');
   const contentContainer = document.getElementById('app-content');
 
-  const currentView = (store && store.state && store.state.currentView) ? store.state.currentView : 'dashboard';
-
-  if (navContainer && typeof renderNavigation === 'function') {
-    try {
-      navContainer.innerHTML = renderNavigation(currentView);
-      const backBtn = document.getElementById('btnBackToDashboard');
-      if (backBtn) {
-        backBtn.addEventListener('click', () => window.navigateTo('dashboard'));
-      }
-    } catch (e) {
-      console.error('Error rendering navigation:', e);
+  if (navContainer) {
+    navContainer.innerHTML = renderNavigation(store.state.currentView);
+    const backBtn = document.getElementById('btnBackToDashboard');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => window.navigateTo('dashboard'));
     }
   }
 
   if (!contentContainer) return;
 
-  try {
-    if (currentView === 'drugCenter') {
-      renderDrugCenterLayout(contentContainer);
-    } else if (currentView === 'airway') {
-      renderAirwayLayout(contentContainer);
-    } else if (currentView === 'fluidAbl') {
-      renderFluidLayout(contentContainer);
-    } else if (currentView === 'regionalLast') {
-      renderRegionalLayout(contentContainer);
-    } else if (currentView === 'infusionTci') {
-      renderInfusionLayout(contentContainer);
-    } else if (currentView === 'pediatric') {
-      renderPediatricLayout(contentContainer);
-    } else {
-      renderDashboardView(contentContainer);
-    }
-  } catch (error) {
-    console.error('Render view error:', error);
+  if (store.state.currentView === 'dashboard') {
     renderDashboardView(contentContainer);
+  } else if (store.state.currentView === 'drugCenter') {
+    renderDrugCenterLayout(contentContainer);
+  } else if (store.state.currentView === 'airway') {
+    renderAirwayLayout(contentContainer);
+  } else if (store.state.currentView === 'fluidAbl') {
+    renderFluidLayout(contentContainer);
+  } else if (store.state.currentView === 'regionalLast') {
+    renderRegionalLayout(contentContainer);
+  } else if (store.state.currentView === 'infusionTci') {
+    renderInfusionLayout(contentContainer);
+  } else if (store.state.currentView === 'pediatric') {
+    renderPediatricLayout(contentContainer);
   }
 }
 
@@ -190,13 +155,35 @@ function renderDashboardView(container) {
   `;
 
   // Dynamic Routing Bindings
-  const toolIds = ['drugCenter', 'airway', 'fluidAbl', 'regionalLast', 'infusionTci', 'pediatric'];
-  toolIds.forEach(id => {
-    const card = container.querySelector(`[data-tool-id="${id}"]`);
-    if (card) {
-      card.addEventListener('click', () => window.navigateTo(id));
-    }
-  });
+  const drugCenterCard = container.querySelector('[data-tool-id="drugCenter"]');
+  if (drugCenterCard) {
+    drugCenterCard.addEventListener('click', () => window.navigateTo('drugCenter'));
+  }
+
+  const airwayCard = container.querySelector('[data-tool-id="airway"]');
+  if (airwayCard) {
+    airwayCard.addEventListener('click', () => window.navigateTo('airway'));
+  }
+
+  const fluidAblCard = container.querySelector('[data-tool-id="fluidAbl"]');
+  if (fluidAblCard) {
+    fluidAblCard.addEventListener('click', () => window.navigateTo('fluidAbl'));
+  }
+
+  const regionalLastCard = container.querySelector('[data-tool-id="regionalLast"]');
+  if (regionalLastCard) {
+    regionalLastCard.addEventListener('click', () => window.navigateTo('regionalLast'));
+  }
+
+  const infusionTciCard = container.querySelector('[data-tool-id="infusionTci"]');
+  if (infusionTciCard) {
+    infusionTciCard.addEventListener('click', () => window.navigateTo('infusionTci'));
+  }
+
+  const pediatricCard = container.querySelector('[data-tool-id="pediatric"]');
+  if (pediatricCard) {
+    pediatricCard.addEventListener('click', () => window.navigateTo('pediatric'));
+  }
 }
 
 // =========================================================
@@ -204,32 +191,24 @@ function renderDashboardView(container) {
 // =========================================================
 
 function renderPediatricLayout(container) {
-  if (typeof PedsDashboard === 'function') {
-    const pedsApp = new PedsDashboard('app-content');
-    pedsApp.init();
-  } else {
-    container.innerHTML = `<div class="p-4 text-center text-rose-600 font-bold">⚠️ تعذر تحميل وحدة الأطفال</div>`;
-  }
+  const pedsApp = new PedsDashboard('app-content');
+  pedsApp.init();
 }
 
 // =========================================================
-// CONTINUOUS INFUSION CALCULATOR LAYOUT
+// CONTINUOUS INFUSION CALCULATOR LAYOUT (Phase 6)
 // =========================================================
 
 function renderInfusionLayout(container) {
-  if (typeof renderInfusionView === 'function') {
-    container.innerHTML = renderInfusionView();
-  }
+  container.innerHTML = renderInfusionView();
 }
 
 // =========================================================
-// REGIONAL ANESTHESIA & LAST LAYOUT
+// REGIONAL ANESTHESIA & LAST LAYOUT (Phase 5)
 // =========================================================
 
 function renderRegionalLayout(container) {
-  if (typeof renderRegionalView === 'function') {
-    container.innerHTML = renderRegionalView();
-  }
+  container.innerHTML = renderRegionalView();
 
   const weightInput = document.getElementById('regionalWeightInput');
   const drugSelect = document.getElementById('regionalDrugSelect');
@@ -241,23 +220,21 @@ function renderRegionalLayout(container) {
     const regResultsContainer = document.getElementById('regionalResultsContainer');
     const lastContainer = document.getElementById('lastEmergencyContainer');
 
-    const drugKey = (store && store.state && store.state.regionalDrug) || 'bupivacaine';
-    const drugObj = (localAnestheticsDB && localAnestheticsDB[drugKey]) ? localAnestheticsDB[drugKey] : localAnestheticsDB?.bupivacaine;
+    const drugKey = store.state.regionalDrug || 'bupivacaine';
+    const drugObj = localAnestheticsDB[drugKey] || localAnestheticsDB.bupivacaine;
 
-    if (typeof calculateRegionalParams === 'function') {
-      const res = calculateRegionalParams({
-        weightKg: store.state.patientWeight || 0,
-        drugKey: store.state.regionalDrug,
-        withEpinephrine: store.state.regionalWithEpi,
-        concentrationMgMl: store.state.regionalConc || (drugObj ? drugObj.defaultConcentrationMgMl : 0)
-      });
+    const res = calculateRegionalParams({
+      weightKg: store.state.patientWeight,
+      drugKey: store.state.regionalDrug,
+      withEpinephrine: store.state.regionalWithEpi,
+      concentrationMgMl: store.state.regionalConc || drugObj.defaultConcentrationMgMl
+    });
 
-      if (regResultsContainer && typeof renderRegionalResultsHTML === 'function') {
-        regResultsContainer.innerHTML = renderRegionalResultsHTML(res);
-      }
-      if (lastContainer && typeof renderLastEmergencyHTML === 'function') {
-        lastContainer.innerHTML = renderLastEmergencyHTML(res);
-      }
+    if (regResultsContainer) {
+      regResultsContainer.innerHTML = renderRegionalResultsHTML(res);
+    }
+    if (lastContainer) {
+      lastContainer.innerHTML = renderLastEmergencyHTML(res);
     }
   };
 
@@ -271,7 +248,7 @@ function renderRegionalLayout(container) {
   if (drugSelect) {
     drugSelect.addEventListener('change', (e) => {
       store.state.regionalDrug = e.target.value;
-      const drugObj = localAnestheticsDB ? localAnestheticsDB[e.target.value] : null;
+      const drugObj = localAnestheticsDB[e.target.value];
       store.state.regionalConc = drugObj ? drugObj.defaultConcentrationMgMl : 0;
       renderRegionalLayout(container);
     });
@@ -304,9 +281,7 @@ function renderRegionalLayout(container) {
 // =========================================================
 
 function renderAirwayLayout(container) {
-  if (typeof renderAirwayView === 'function') {
-    container.innerHTML = renderAirwayView();
-  }
+  container.innerHTML = renderAirwayView();
 
   const ageInput = document.getElementById('airwayAgeInput');
   const weightInput = document.getElementById('airwayWeightInput');
@@ -315,7 +290,7 @@ function renderAirwayLayout(container) {
 
   const updateResults = () => {
     const resultsContainer = document.getElementById('airwayResultsContainer');
-    if (resultsContainer && typeof calculateAirwayParams === 'function' && typeof renderAirwayResultsHTML === 'function') {
+    if (resultsContainer) {
       const res = calculateAirwayParams(store.state.patientAge, store.state.patientWeight, store.state.patientGender);
       resultsContainer.innerHTML = renderAirwayResultsHTML(res);
     }
@@ -355,9 +330,7 @@ function renderAirwayLayout(container) {
 // =========================================================
 
 function renderFluidLayout(container) {
-  if (typeof renderFluidView === 'function') {
-    container.innerHTML = renderFluidView();
-  }
+  container.innerHTML = renderFluidView();
 
   const weightInput = document.getElementById('fluidWeightInput');
   const fastingInput = document.getElementById('fluidFastingInput');
@@ -371,7 +344,7 @@ function renderFluidLayout(container) {
 
   const updateResults = () => {
     const resultsContainer = document.getElementById('fluidResultsContainer');
-    if (resultsContainer && typeof calculateFluidParams === 'function' && typeof renderFluidResultsHTML === 'function') {
+    if (resultsContainer) {
       const res = calculateFluidParams({
         weightKg: store.state.patientWeight,
         fastingHours: store.state.fastingHours,
@@ -455,8 +428,8 @@ function renderFluidLayout(container) {
 // =========================================================
 
 function renderDrugCenterLayout(container) {
-  const savedWeight = (store && store.state && store.state.patientWeight) ? store.state.patientWeight : '';
-  const savedSearch = (store && store.state && store.state.searchQuery) ? store.state.searchQuery : '';
+  const savedWeight = store.state.patientWeight || '';
+  const savedSearch = store.state.searchQuery || '';
 
   container.innerHTML = `
     <div class="max-w-2xl mx-auto space-y-3" dir="rtl">
@@ -501,7 +474,7 @@ function renderDrugCenterLayout(container) {
             <button 
               onclick="setCategory('${cat}')" 
               data-cat="${cat}" 
-              class="cat-btn px-3 py-1.5 rounded-lg border text-xs font-semibold whitespace-nowrap transition ${(store && store.state && store.state.currentCategory === cat) ? 'bg-blue-600 text-white border-blue-600 active' : 'bg-white text-slate-700 border-slate-200'}"
+              class="cat-btn px-3 py-1.5 rounded-lg border text-xs font-semibold whitespace-nowrap transition ${store.state.currentCategory === cat ? 'bg-blue-600 text-white border-blue-600 active' : 'bg-white text-slate-700 border-slate-200'}"
             >
               ${cat === 'All' ? 'الكل' : cat}
             </button>
@@ -540,11 +513,6 @@ function renderDrugCenterLayout(container) {
 function renderCardsOnly() {
   const container = document.getElementById('drugsCardsContainer');
   if (!container) return;
-
-  if (!Array.isArray(drugsData)) {
-    container.innerHTML = `<div class="text-center py-8 text-rose-500 font-semibold">⚠️ بيانات الأدوية غير متوفرة</div>`;
-    return;
-  }
 
   const weight = store.state.patientWeight || 0;
   const searchValue = (store.state.searchQuery || '').toLowerCase().trim();
@@ -612,7 +580,7 @@ function renderDrugCard(drug, weight) {
 
   let calculationHTML = '';
 
-  if (weight > 0 && typeof calculateDose === 'function') {
+  if (weight > 0) {
     const result = calculateDose(
       weight,
       activeIndication,
@@ -622,7 +590,7 @@ function renderDrugCard(drug, weight) {
       isCustom
     );
 
-    if (result && result.isValid) {
+    if (result.isValid) {
       const doseRange = result.isFixed && result.doseMin === result.doseMax
         ? `${result.doseMin} ${result.doseUnit}`
         : `${result.doseMin} - ${result.doseMax} ${result.doseUnit}`;
@@ -655,7 +623,7 @@ function renderDrugCard(drug, weight) {
           ` : ''}
         </div>
       `;
-    } else if (result && result.error) {
+    } else {
       calculationHTML = `
         <div class="mt-2 text-xs text-rose-600 font-semibold p-2.5 bg-rose-50 border border-rose-200 rounded-lg">
           ⚠️ ${result.error}
@@ -820,8 +788,4 @@ function renderDrugCard(drug, weight) {
   `;
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+document.addEventListener('DOMContentLoaded', init);
