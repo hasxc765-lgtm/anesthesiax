@@ -191,7 +191,7 @@ function renderDashboardView(container) {
 // =========================================================
 
 function renderPediatricLayout(container) {
-  const pedsApp = new PedsDashboard(container);
+  const pedsApp = new PedsDashboard('app-content');
   pedsApp.init();
 }
 
