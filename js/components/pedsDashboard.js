@@ -8,8 +8,8 @@
  * - ../calculators/pedsCalculator.js
  */
 
-import { pedsData } from "../data/pedsData.js";
-import { PedsCalculator } from "../calculators/pedsCalculator.js";
+import pedsData from "../data/pedsData.js";
+import PedsCalculator from "../calculators/pedsCalculator.js";
 
 export class PedsDashboard {
   constructor(containerId) {
@@ -31,8 +31,10 @@ export class PedsDashboard {
   }
 
   renderSkeleton() {
+    const emergencyDrugsList = (pedsData && Array.isArray(pedsData.emergencyDrugs)) ? pedsData.emergencyDrugs : [];
+
     this.container.innerHTML = `
-      <div class="peds-dashboard space-y-6 text-gray-800 dir-rtl text-right">
+      <div class="peds-dashboard space-y-6 text-gray-800 dir-rtl text-right max-w-2xl mx-auto">
         <!-- GLOBAL INPUT PATIENT PANEL -->
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm">
           <h2 class="text-lg font-bold text-blue-900 mb-3 flex items-center gap-2">
@@ -76,7 +78,7 @@ export class PedsDashboard {
                   <div>
                     <label class="block text-xs font-bold mb-1">اختر الدواء (Select Drug):</label>
                     <select id="peds-drug-select" class="w-full p-2 border rounded bg-white">
-                      ${pedsData.emergencyDrugs.map(d => `
+                      ${emergencyDrugsList.map(d => `
                         <option value="${d.id}" ${d.id === this.state.selectedDrugId ? 'selected' : ''}>${d.name} (${d.arabicName})</option>
                       `).join('')}
                     </select>
@@ -113,12 +115,11 @@ export class PedsDashboard {
   updateDynamicSelectors() {
     const indicationSelect = document.getElementById("peds-indication-select");
     const concentrationSelect = document.getElementById("peds-concentration-select");
-    if (!indicationSelect || !concentrationSelect) return;
+    if (!indicationSelect || !concentrationSelect || !pedsData || !Array.isArray(pedsData.emergencyDrugs)) return;
 
     const currentDrug = pedsData.emergencyDrugs.find(d => d.id === this.state.selectedDrugId);
     if (!currentDrug) return;
 
-    // 🔧 إصلاح المزامنة: التأكد من أن الاستطباب الحالي ينتمي للدواء المختار
     const indExists = currentDrug.indications.some(i => i.id === this.state.selectedIndicationId);
     if (!indExists && currentDrug.indications.length > 0) {
       this.state.selectedIndicationId = currentDrug.indications[0].id;
@@ -133,7 +134,6 @@ export class PedsDashboard {
 
     if (currentIndication) {
       if (currentIndication.concentrationOptions && currentIndication.concentrationOptions.length > 0) {
-        // 🔧 إصلاح المزامنة: التأكد من أن التركيز المختار ينتمي للاستطباب الحالي
         const concExists = currentIndication.concentrationOptions.some(c => c.mgPerMl === this.state.selectedConcentrationMgPerMl);
         if (!concExists) {
           this.state.selectedConcentrationMgPerMl = currentIndication.concentrationOptions[0].mgPerMl;
@@ -161,15 +161,17 @@ export class PedsDashboard {
     const drugContainer = document.getElementById("peds-drug-results");
     const fluidsContainer = document.getElementById("peds-fluids-results");
 
-    const airway = PedsCalculator.calculateAirway(this.state.weightKg, this.state.ageYears);
-    const drug = PedsCalculator.calculateDrugDose(
+    if (typeof PedsCalculator === 'undefined') return;
+
+    const airway = PedsCalculator.calculateAirway ? PedsCalculator.calculateAirway(this.state.weightKg, this.state.ageYears) : { success: false, errors: ['الدالة غير متوفرة'] };
+    const drug = PedsCalculator.calculateDrugDose ? PedsCalculator.calculateDrugDose(
       this.state.selectedDrugId,
       this.state.selectedIndicationId,
       this.state.weightKg,
       this.state.ageYears,
       this.state.selectedConcentrationMgPerMl
-    );
-    const fluids = PedsCalculator.calculateMaintenanceFluids(this.state.weightKg, this.state.ageYears * 365.25);
+    ) : { success: false, errors: ['الدالة غير متوفرة'] };
+    const fluids = PedsCalculator.calculateMaintenanceFluids ? PedsCalculator.calculateMaintenanceFluids(this.state.weightKg, this.state.ageYears * 365.25) : { success: false, errors: ['الدالة غير متوفرة'] };
 
     if (airwayContainer) airwayContainer.innerHTML = this.renderAirwayContent(airway);
     if (drugContainer) drugContainer.innerHTML = this.renderDrugContent(drug);
@@ -199,7 +201,7 @@ export class PedsDashboard {
           <span class="font-bold text-gray-700">شفرة المنظار (Blade Size):</span>
           <span class="text-gray-900 font-bold">${airway.blade}</span>
         </div>
-        ${airway.warnings.length > 0 ? `
+        ${airway.warnings && airway.warnings.length > 0 ? `
           <div class="p-2 bg-yellow-50 border-r-4 border-yellow-400 text-yellow-800 text-xs rounded space-y-1">
             ${airway.warnings.map(w => `<p>• ${w}</p>`).join("")}
           </div>
@@ -239,7 +241,7 @@ export class PedsDashboard {
           </div>
         ` : ''}
 
-        ${drug.safetyAlerts.length > 0 ? `
+        ${drug.safetyAlerts && drug.safetyAlerts.length > 0 ? `
           <div class="p-3 bg-red-50 border-r-4 border-red-500 text-red-900 text-xs rounded space-y-1 font-semibold">
             ${drug.safetyAlerts.map(a => `<p>• ${a}</p>`).join('')}
           </div>
@@ -272,7 +274,7 @@ export class PedsDashboard {
           <p class="text-[11px] text-gray-600 mt-1">${fluids.guidanceDisclaimer}</p>
         </div>
 
-        ${fluids.warnings.length > 0 ? `
+        ${fluids.warnings && fluids.warnings.length > 0 ? `
           <div class="p-2 bg-yellow-50 border-r-4 border-yellow-400 text-yellow-800 text-xs rounded space-y-1">
             ${fluids.warnings.map(w => `<p>• ${w}</p>`).join("")}
           </div>
@@ -307,9 +309,11 @@ export class PedsDashboard {
     if (drugSelect) {
       drugSelect.addEventListener("change", (e) => {
         this.state.selectedDrugId = e.target.value;
-        const currentDrug = pedsData.emergencyDrugs.find(d => d.id === this.state.selectedDrugId);
-        if (currentDrug && currentDrug.indications.length > 0) {
-          this.state.selectedIndicationId = currentDrug.indications[0].id;
+        if (pedsData && Array.isArray(pedsData.emergencyDrugs)) {
+          const currentDrug = pedsData.emergencyDrugs.find(d => d.id === this.state.selectedDrugId);
+          if (currentDrug && currentDrug.indications.length > 0) {
+            this.state.selectedIndicationId = currentDrug.indications[0].id;
+          }
         }
         this.updateDynamicSelectors();
         this.updateCalculations();
