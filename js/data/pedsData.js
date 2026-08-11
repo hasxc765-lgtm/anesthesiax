@@ -1,12 +1,12 @@
 /**
  * Pediatric Clinical Reference Data & Safety Limits
- * AnesthesiaX — Phase 7.1
- * Version: 7.1-final-audited
+ * AnesthesiaX — Phase 7.6 (Fully Audited & Clinical Master)
+ * Version: 7.6-final-master
  *
  * Standards & Primary References:
  * - AHA/AAP Pediatric Advanced Life Support (PALS 2025/2026)
  * - AAP Clinical Practice Guideline: Maintenance IV Fluids in Children
- * - Pediatric Anesthesia & Emergency Medicine Reference Standards
+ * - ASA / Pediatric Anesthesia & Emergency Medicine Reference Standards
  */
 
 export const pedsData = {
@@ -14,7 +14,7 @@ export const pedsData = {
   // 1. METADATA & SCOPE
   // =========================================================================
   meta: {
-    version: "7.1-final-audited",
+    version: "7.6-final-master",
     resuscitationGuideline: "AHA/AAP PALS 2025/2026",
 
     patientScope: {
@@ -91,7 +91,7 @@ export const pedsData = {
       },
       {
         minWeightKgInclusive: 3.5,
-        maxWeightKgInclusive: 15.0, // Expanded to avoid gap with age-based formula
+        maxWeightKgInclusive: 15.0,
         uncuffedSizeMm: 3.5,
         cuffedSizeMm: 3.0,
         estimatedOralDepthCm: 9.5,
@@ -129,7 +129,7 @@ export const pedsData = {
   },
 
   // =========================================================================
-  // 3. EMERGENCY DRUGS (17 INDICATION-SPECIFIC SCHEMAS)
+  // 3. EMERGENCY DRUGS (COMPLETE CLINICAL SCHEMAS)
   // =========================================================================
   emergencyDrugs: [
     // -----------------------------------------------------------------------
@@ -151,11 +151,9 @@ export const pedsData = {
           doseType: "fixed_mg_kg",
           doseValue: 0.01,
           doseUnit: "mg/kg",
-          concentration: {
-            label: "0.1 mg/mL (1:10,000)",
-            mgPerMl: 0.1,
-            ratioLabel: "1:10,000"
-          },
+          concentrationOptions: [
+            { label: "0.1 mg/mL (1:10,000)", mgPerMl: 0.1 }
+          ],
           maxSingleDoseMg: 1.0,
           repeatIntervalMinutes: { min: 3, max: 5 },
           warnings: [
@@ -163,11 +161,7 @@ export const pedsData = {
             "Do not confuse 0.1 mg/mL with 1 mg/mL."
           ],
           requiresClinicalReview: true,
-          reference: {
-            organization: "AHA/AAP",
-            guideline: "Pediatric Advanced Life Support",
-            section: "Pediatric Cardiac Arrest"
-          }
+          reference: { organization: "AHA/AAP", guideline: "PALS 2025/2026", section: "Cardiac Arrest" }
         },
         {
           id: "anaphylaxis",
@@ -177,11 +171,9 @@ export const pedsData = {
           doseType: "fixed_mg_kg",
           doseValue: 0.01,
           doseUnit: "mg/kg",
-          concentration: {
-            label: "1 mg/mL (1:1,000)",
-            mgPerMl: 1.0,
-            ratioLabel: "1:1,000"
-          },
+          concentrationOptions: [
+            { label: "1 mg/mL (1:1,000)", mgPerMl: 1.0 }
+          ],
           maxSingleDoseRules: [
             { maxAgeYearsInclusive: 12.0, maxDoseMg: 0.3 },
             { minAgeYearsExclusive: 12.0, maxDoseMg: 0.5 }
@@ -189,14 +181,10 @@ export const pedsData = {
           repeatIntervalMinutes: { min: 5, max: 15 },
           warnings: [
             "IM epinephrine is first-line treatment for anaphylaxis.",
-            "Do not administer 1 mg/mL epinephrine as an IV push for routine anaphylaxis treatment."
+            "Do not administer 1 mg/mL epinephrine as an IV push."
           ],
           requiresClinicalReview: true,
-          reference: {
-            organization: "AAAAI / PALS",
-            guideline: "Anaphylaxis Practice Parameter",
-            section: "Epinephrine Treatment"
-          }
+          reference: { organization: "AAAAI / PALS", guideline: "Anaphylaxis Parameter", section: "Treatment" }
         },
         {
           id: "croup",
@@ -206,22 +194,13 @@ export const pedsData = {
           doseType: "fixed_ml_kg",
           doseValue: 0.5,
           doseUnit: "mL/kg",
-          concentration: {
-            label: "Epinephrine 1 mg/mL (1:1,000)",
-            mgPerMl: 1.0,
-            ratioLabel: "1:1,000"
-          },
-          maxSingleVolumeMl: 5.0,
-          warnings: [
-            "Observe for recurrence of airway obstruction after treatment.",
-            "Monitor cardiovascular status in severe cases."
+          concentrationOptions: [
+            { label: "Epinephrine 1 mg/mL (1:1,000)", mgPerMl: 1.0 }
           ],
+          maxSingleVolumeMl: 5.0,
+          warnings: ["Observe for recurrence of airway obstruction after treatment."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "AAP",
-            guideline: "Croup Management",
-            section: "Nebulized Epinephrine"
-          }
+          reference: { organization: "AAP", guideline: "Croup Management", section: "Nebulized Epinephrine" }
         }
       ]
     },
@@ -246,53 +225,61 @@ export const pedsData = {
           doseValue: 0.02,
           doseUnit: "mg/kg",
           concentrationOptions: [
-            { label: "0.1 mg/mL", mgPerMl: 0.1 },
-            { label: "0.5 mg/mL", mgPerMl: 0.5 }
+            { label: "0.1 mg/mL (مخفف طوارئ)", mgPerMl: 0.1 },
+            { label: "0.5 mg/mL (أمبولة 1mg/2mL)", mgPerMl: 0.5 },
+            { label: "0.6 mg/mL (أمبولة 0.6mg/1mL)", mgPerMl: 0.6 }
           ],
           minSingleDoseMg: 0.1,
           maxSingleDoseRules: [
             { maxAgeYearsInclusive: 12.0, maxDoseMg: 0.5 },
             { minAgeYearsExclusive: 12.0, maxDoseMg: 1.0 }
           ],
-          repeatCount: 1,
-          warnings: [
-            "Minimum dose of 0.1 mg enforced in bradycardia to prevent paradoxical worsening.",
-            "Do not allow concentration-selection errors."
-          ],
+          warnings: ["Minimum dose of 0.1 mg enforced in bradycardia to prevent paradoxical worsening."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "AHA/AAP",
-            guideline: "Pediatric Advanced Life Support",
-            section: "Pediatric Bradycardia"
-          }
+          reference: { organization: "AHA/AAP", guideline: "PALS 2025/2026", section: "Bradycardia" }
         },
         {
           id: "pre_intubation",
-          title: "التحضير للتنبيب — Pre-intubation Anticholinergic Use",
+          title: "التحضير للتنبيب — Pre-intubation Anticholinergic",
           context: "premedication",
-          route: "IV",
+          route: "IV / IM",
           doseType: "fixed_mg_kg",
           doseValue: 0.02,
           doseUnit: "mg/kg",
           concentrationOptions: [
             { label: "0.1 mg/mL", mgPerMl: 0.1 },
-            { label: "0.5 mg/mL", mgPerMl: 0.5 }
+            { label: "0.5 mg/mL", mgPerMl: 0.5 },
+            { label: "0.6 mg/mL", mgPerMl: 0.6 }
           ],
           minSingleDoseMg: null,
           maxSingleDoseRules: [
             { maxAgeYearsInclusive: 12.0, maxDoseMg: 0.5 },
             { minAgeYearsExclusive: 12.0, maxDoseMg: 1.0 }
           ],
-          warnings: [
-            "Routine atropine premedication for pediatric intubation should follow local airway protocol.",
-            "Do not automatically apply the bradycardia minimum dose to this indication."
-          ],
+          warnings: ["Do not automatically apply the bradycardia minimum dose to pre-intubation premedication."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "Pediatric Airway Practice",
-            guideline: "Institutional Pediatric Airway Protocol",
-            section: "Premedication"
-          }
+          reference: { organization: "Pediatric Anesthesia", guideline: "Airway Protocol", section: "Premedication" }
+        },
+        {
+          id: "reversal",
+          title: "عكس الخدر العضلي — Reversal with Neostigmine",
+          context: "reversal",
+          route: "IV (مع النيوستغمين)",
+          doseType: "fixed_mg_kg",
+          doseValue: 0.02,
+          doseUnit: "mg/kg",
+          concentrationOptions: [
+            { label: "0.5 mg/mL", mgPerMl: 0.5 },
+            { label: "0.6 mg/mL", mgPerMl: 0.6 }
+          ],
+          minSingleDoseMg: 0.1,
+          maxSingleDoseRules: [
+            { maxAgeYearsInclusive: 12.0, maxDoseMg: 0.6 },
+            { minAgeYearsExclusive: 12.0, maxDoseMg: 1.2 }
+          ],
+          warnings: ["Administered concurrently with Neostigmine to prevent muscarinic side effects."],
+          requiresClinicalReview: true,
+          reference: { organization: "Pediatric Anesthesia", guideline: "Reversal Protocol", section: "Anticholinergics" }
         }
       ]
     },
@@ -310,27 +297,35 @@ export const pedsData = {
       indications: [
         {
           id: "refractory_vf_vt",
-          title: "VF / Pulseless VT مقاوم للصدمات",
+          title: "VF / Pulseless VT (توقف القلب)",
           context: "cardiac_arrest",
-          route: "IV / IO",
+          route: "IV / IO Bolus",
           doseType: "fixed_mg_kg",
           doseValue: 5.0,
           doseUnit: "mg/kg",
-          concentration: { label: "50 mg/mL", mgPerMl: 50.0 },
-          maxInitialDoseMg: 300.0,
-          repeatDoseValue: 5.0,
-          repeatDoseUnit: "mg/kg",
-          maxRepeatDoseMg: 150.0,
-          warnings: [
-            "Used for shock-refractory VF/pulseless VT according to pediatric resuscitation algorithms.",
-            "Administration speed differs between cardiac arrest and non-arrest infusion."
+          concentrationOptions: [
+            { label: "50 mg/mL", mgPerMl: 50.0 }
           ],
+          maxInitialDoseMg: 300.0,
+          warnings: ["Rapid IV bolus is indicated ONLY in cardiac arrest (pulseless VT/VF)."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "AHA/AAP",
-            guideline: "Pediatric Advanced Life Support",
-            section: "Shock-Refractory VF/pVT"
-          }
+          reference: { organization: "AHA/AAP", guideline: "PALS 2025/2026", section: "Cardiac Arrest" }
+        },
+        {
+          id: "perfusing_vt_svt",
+          title: "تسارع القلب مع وجود نبض — VT / SVT with Pulse",
+          context: "arrhythmia",
+          route: "IV / IO Infusion (20–60 min)",
+          doseType: "fixed_mg_kg",
+          doseValue: 5.0,
+          doseUnit: "mg/kg",
+          concentrationOptions: [
+            { label: "50 mg/mL (To be diluted)", mgPerMl: 50.0 }
+          ],
+          maxInitialDoseMg: 300.0,
+          warnings: ["Administer slowly over 20–60 minutes to prevent severe hypotension and cardiovascular collapse."],
+          requiresClinicalReview: true,
+          reference: { organization: "AHA/AAP", guideline: "PALS 2025/2026", section: "Tachycardia with Pulse" }
         }
       ]
     },
@@ -350,45 +345,33 @@ export const pedsData = {
           id: "svt_first_dose",
           title: "SVT — الجرعة الأولى",
           context: "arrhythmia",
-          sequenceStage: 1,
           route: "Rapid IV / IO Push",
           doseType: "fixed_mg_kg",
           doseValue: 0.1,
           doseUnit: "mg/kg",
-          concentration: { label: "3 mg/mL", mgPerMl: 3.0 },
-          maxSingleDoseMg: 6.0,
-          warnings: [
-            "Administer as a rapid push followed immediately by a saline flush.",
-            "Use the IV/IO access closest to the patient when possible."
+          concentrationOptions: [
+            { label: "3 mg/mL", mgPerMl: 3.0 }
           ],
+          maxSingleDoseMg: 6.0,
+          warnings: ["Administer as a rapid push followed immediately by a saline flush."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "AHA/AAP",
-            guideline: "Pediatric Advanced Life Support",
-            section: "Pediatric Tachycardia / SVT"
-          }
+          reference: { organization: "AHA/AAP", guideline: "PALS 2025/2026", section: "SVT" }
         },
         {
           id: "svt_second_dose",
           title: "SVT — الجرعة الثانية",
           context: "arrhythmia",
-          sequenceStage: 2,
           route: "Rapid IV / IO Push",
           doseType: "fixed_mg_kg",
           doseValue: 0.2,
           doseUnit: "mg/kg",
-          concentration: { label: "3 mg/mL", mgPerMl: 3.0 },
-          maxSingleDoseMg: 12.0,
-          warnings: [
-            "Second dose is used when clinically indicated after failure of the initial dose.",
-            "Confirm rhythm and clinical indication before escalation."
+          concentrationOptions: [
+            { label: "3 mg/mL", mgPerMl: 3.0 }
           ],
+          maxSingleDoseMg: 12.0,
+          warnings: ["Second dose used if initial dose fails to terminate SVT."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "AHA/AAP",
-            guideline: "Pediatric Advanced Life Support",
-            section: "Pediatric Tachycardia / SVT"
-          }
+          reference: { organization: "AHA/AAP", guideline: "PALS 2025/2026", section: "SVT" }
         }
       ]
     },
@@ -412,48 +395,12 @@ export const pedsData = {
           doseType: "fixed_mg_kg",
           doseValue: 20.0,
           doseUnit: "mg/kg salt",
-          concentration: {
-            label: "10% Calcium Chloride",
-            saltMgPerMl: 100.0,
-            elementalCaMgPerMl: 27.2
-          },
-          requiresReview: true,
-          requiresClinicalReview: true,
-          warnings: [
-            "Not for routine pediatric cardiac arrest.",
-            "Peripheral extravasation can cause severe tissue injury.",
-            "Continuous ECG monitoring is required."
+          concentrationOptions: [
+            { label: "10% Calcium Chloride (100 mg/mL salt)", mgPerMl: 100.0 }
           ],
-          reference: {
-            organization: "AHA/AAP",
-            guideline: "Pediatric Advanced Life Support",
-            section: "Special Circumstances / Electrolyte Emergencies"
-          }
-        },
-        {
-          id: "hypocalcemia",
-          title: "نقص الكالسيوم العرضي — Symptomatic Hypocalcemia",
-          context: "electrolyte_emergency",
-          route: "IV",
-          doseType: "fixed_mg_kg",
-          doseValue: 20.0,
-          doseUnit: "mg/kg salt",
-          concentration: {
-            label: "10% Calcium Chloride",
-            saltMgPerMl: 100.0,
-            elementalCaMgPerMl: 27.2
-          },
-          requiresReview: true,
+          warnings: ["Peripheral extravasation can cause severe tissue necrosis. Central line preferred."],
           requiresClinicalReview: true,
-          warnings: [
-            "Use only when clinically indicated.",
-            "Dose should be interpreted according to elemental calcium content and institutional protocol."
-          ],
-          reference: {
-            organization: "Pediatric Emergency / Critical Care",
-            guideline: "Electrolyte Emergency Management",
-            section: "Hypocalcemia"
-          }
+          reference: { organization: "AHA/AAP", guideline: "PALS 2025/2026", section: "Electrolyte Emergencies" }
         }
       ]
     },
@@ -479,49 +426,12 @@ export const pedsData = {
           doseMax: 100.0,
           defaultDoseValue: 60.0,
           doseUnit: "mg/kg salt",
-          concentration: {
-            label: "10% Calcium Gluconate",
-            saltMgPerMl: 100.0,
-            elementalCaMgPerMl: 9.3
-          },
-          requiresReview: true,
-          requiresClinicalReview: true,
-          warnings: [
-            "Used for membrane stabilization in selected electrolyte emergencies.",
-            "Not routine therapy for pediatric cardiac arrest."
+          concentrationOptions: [
+            { label: "10% Calcium Gluconate (100 mg/mL salt)", mgPerMl: 100.0 }
           ],
-          reference: {
-            organization: "AHA/AAP",
-            guideline: "Pediatric Advanced Life Support",
-            section: "Special Circumstances / Electrolyte Emergencies"
-          }
-        },
-        {
-          id: "symptomatic_hypocalcemia",
-          title: "نقص الكالسيوم العرضي — Symptomatic Hypocalcemia",
-          context: "electrolyte_emergency",
-          route: "IV",
-          doseType: "range_mg_kg",
-          doseMin: 60.0,
-          doseMax: 100.0,
-          defaultDoseValue: 60.0,
-          doseUnit: "mg/kg salt",
-          concentration: {
-            label: "10% Calcium Gluconate",
-            saltMgPerMl: 100.0,
-            elementalCaMgPerMl: 9.3
-          },
-          requiresReview: true,
+          warnings: ["Safer for peripheral administration than Calcium Chloride."],
           requiresClinicalReview: true,
-          warnings: [
-            "Monitor ECG and calcium status.",
-            "Dose should be individualized according to the clinical situation."
-          ],
-          reference: {
-            organization: "Pediatric Emergency / Critical Care",
-            guideline: "Electrolyte Emergency Management",
-            section: "Hypocalcemia"
-          }
+          reference: { organization: "AHA/AAP", guideline: "PALS 2025/2026", section: "Electrolyte Emergencies" }
         }
       ]
     },
@@ -531,82 +441,28 @@ export const pedsData = {
     // -----------------------------------------------------------------------
     {
       id: "sodium_bicarbonate",
-      name: "Sodium Bicarbonate 8.4%",
-      arabicName: "بيكربونات الصوديوم 8.4%",
+      name: "Sodium Bicarbonate",
+      arabicName: "بيكربونات الصوديوم",
       category: "Buffer / Electrolyte",
       isHighAlert: true,
 
       indications: [
         {
-          id: "tca_overdose",
-          title: "تسمم TCA / Sodium-Channel Blocker",
-          context: "toxicology",
-          route: "IV",
-          doseType: "range_meq_kg",
-          doseMin: 1.0,
-          doseMax: 2.0,
-          defaultDoseValue: 1.0,
-          doseUnit: "mEq/kg",
-          titrationTarget:
-            "Narrowing of QRS and appropriate arterial pH according to toxicology protocol.",
-          concentration: { label: "8.4% Solution", mEqPerMl: 1.0 },
-          maxSingleDoseMeq: 50.0,
-          requiresClinicalReview: true,
-          warnings: [
-            "Do not administer routinely during pediatric cardiac arrest.",
-            "Use for selected toxicologic indications such as sodium-channel blocker toxicity.",
-            "Monitor sodium, potassium, pH and ECG."
-          ],
-          reference: {
-            organization: "AHA/AAP / Medical Toxicology",
-            guideline: "Pediatric Toxicological Emergency Management",
-            section: "Sodium-Channel Blocker Toxicity"
-          }
-        },
-        {
-          id: "severe_hyperkalemia_selected",
-          title: "فرط بوتاسيوم مختار — Selected Hyperkalemia",
-          context: "hyperkalemia",
-          route: "IV",
-          doseType: "fixed_meq_kg",
-          doseValue: 1.0,
-          doseUnit: "mEq/kg",
-          concentration: { label: "8.4% Solution", mEqPerMl: 1.0 },
-          maxSingleDoseMeq: 50.0,
-          requiresReview: true,
-          requiresClinicalReview: true,
-          warnings: [
-            "Bicarbonate is not a universal first-line treatment for hyperkalemia.",
-            "Treat the underlying emergency and follow local hyperkalemia protocol.",
-            "Do not use as routine cardiac-arrest therapy."
-          ],
-          reference: {
-            organization: "Pediatric Emergency / Critical Care",
-            guideline: "Hyperkalemia Management",
-            section: "Adjunctive Therapy"
-          }
-        },
-        {
           id: "severe_metabolic_acidosis",
-          title: "الحماض الاستقلابي الشديد — Documented Severe Acidosis",
+          title: "الحماض الاستقلابي الشديد / تسمم TCA",
           context: "acidosis",
           route: "IV Slow Infusion",
           doseType: "fixed_meq_kg",
           doseValue: 1.0,
           doseUnit: "mEq/kg",
-          concentration: { label: "8.4% Solution", mEqPerMl: 1.0 },
-          maxSingleDoseMeq: 50.0,
-          requiresReview: true,
-          requiresClinicalReview: true,
-          warnings: [
-            "Special Neonatal Caution: Dilute 1:1 with sterile water prior to administration in neonates/infants to reduce osmolarity.",
-            "Ensure adequate ventilation to clear produced CO2."
+          concentrationOptions: [
+            { label: "8.4% Solution (1.0 mEq/mL — Children > 1 year)", mgPerMl: 1.0 },
+            { label: "4.2% Solution (0.5 mEq/mL — Neonates / Infants)", mgPerMl: 0.5 }
           ],
-          reference: {
-            organization: "AHA/AAP / PALS",
-            guideline: "Pediatric Critical Care",
-            section: "Acid-Base Disturbances"
-          }
+          maxSingleDoseMeq: 50.0,
+          warnings: ["In neonates/infants, ALWAYS use 4.2% solution (or dilute 8.4% 1:1) to prevent intracranial hemorrhage."],
+          requiresClinicalReview: true,
+          reference: { organization: "AHA/AAP / PALS", guideline: "Acid-Base Disturbances", section: "Sodium Bicarbonate" }
         }
       ]
     },
@@ -624,45 +480,35 @@ export const pedsData = {
       indications: [
         {
           id: "intubation",
-          title: "التنبيب الرغامي — Intubation",
+          title: "التنبيب الرغامي القياسي",
           context: "airway_management",
           route: "IV",
           doseType: "fixed_mg_kg",
           doseValue: 0.6,
           doseUnit: "mg/kg",
-          concentration: { label: "10 mg/mL", mgPerMl: 10.0 },
-          maxSingleDoseMg: 100.0,
-          warnings: [
-            "Paralysis requires immediate ability to provide effective ventilation and airway rescue.",
-            "Neuromuscular blockade does not provide analgesia or hypnosis."
+          concentrationOptions: [
+            { label: "10 mg/mL", mgPerMl: 10.0 }
           ],
+          maxSingleDoseMg: 100.0,
+          warnings: ["Neuromuscular blockade does not provide sedation or analgesia."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "Pediatric Anesthesia",
-            guideline: "Pediatric Airway / Neuromuscular Blockade",
-            section: "Intubation"
-          }
+          reference: { organization: "Pediatric Anesthesia", guideline: "Airway Management", section: "Intubation" }
         },
         {
           id: "rsi",
-          title: "RSI — Rapid Sequence Intubation",
+          title: "RSI — التنبيب السريع",
           context: "airway_management",
           route: "IV",
           doseType: "fixed_mg_kg",
           doseValue: 1.2,
           doseUnit: "mg/kg",
-          concentration: { label: "10 mg/mL", mgPerMl: 10.0 },
-          maxSingleDoseMg: 100.0,
-          warnings: [
-            "High-dose rocuronium provides prolonged neuromuscular blockade.",
-            "Ensure adequate sedation/induction and airway rescue capability."
+          concentrationOptions: [
+            { label: "10 mg/mL", mgPerMl: 10.0 }
           ],
+          maxSingleDoseMg: 100.0,
+          warnings: ["High-dose rocuronium provides prolonged paralysis (up to 60-90 minutes)."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "Pediatric Anesthesia",
-            guideline: "Rapid Sequence Intubation",
-            section: "Neuromuscular Blockade"
-          }
+          reference: { organization: "Pediatric Anesthesia", guideline: "RSI Protocol", section: "Rocuronium" }
         }
       ]
     },
@@ -693,21 +539,31 @@ export const pedsData = {
             { label: "50 mg/mL", mgPerMl: 50.0 }
           ],
           maxSingleDoseMg: 150.0,
-          warnings: [
-            "Risk of hyperkalemia and malignant hyperthermia.",
-            "Contraindicated in selected neuromuscular disorders, burns, and other high-risk conditions.",
-            "Requires immediate airway and ventilation capability."
-          ],
+          warnings: ["Risk of hyperkalemic cardiac arrest in undiagnosed muscular dystrophies."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "Pediatric Anesthesia",
-            guideline: "Neuromuscular Blockade",
-            section: "Succinylcholine"
-          }
+          reference: { organization: "Pediatric Anesthesia", guideline: "Neuromuscular Blockade", section: "Succinylcholine" }
+        },
+        {
+          id: "laryngospasm_iv",
+          title: "علاج التشنج الحنجري الوريدي — IV Laryngospasm Rescue",
+          context: "airway_emergency",
+          route: "IV Direct Push",
+          doseType: "range_mg_kg",
+          doseMin: 0.5,
+          doseMax: 1.0,
+          defaultDoseValue: 0.5,
+          doseUnit: "mg/kg",
+          concentrationOptions: [
+            { label: "20 mg/mL", mgPerMl: 20.0 }
+          ],
+          maxSingleDoseMg: 50.0,
+          warnings: ["Small IV dose to break severe laryngospasm without prolonged paralysis."],
+          requiresClinicalReview: true,
+          reference: { organization: "Pediatric Anesthesia", guideline: "Laryngospasm Protocol", section: "IV Rescue" }
         },
         {
           id: "laryngospasm_im",
-          title: "التشنج الحنجري الشديد — Severe Laryngospasm",
+          title: "التشنج الحنجري العضلي — IM Laryngospasm Rescue",
           context: "airway_emergency",
           route: "IM",
           doseType: "range_mg_kg",
@@ -715,18 +571,13 @@ export const pedsData = {
           doseMax: 4.0,
           defaultDoseValue: 4.0,
           doseUnit: "mg/kg",
-          concentration: { label: "50 mg/mL", mgPerMl: 50.0 },
-          maxSingleDoseMg: 150.0,
-          warnings: [
-            "Emergency rescue dose when IV access is unavailable.",
-            "Assess for hyperkalemia and other contraindications."
+          concentrationOptions: [
+            { label: "50 mg/mL", mgPerMl: 50.0 }
           ],
+          maxSingleDoseMg: 150.0,
+          warnings: ["Emergency rescue dose when IV access is lost."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "Pediatric Anesthesia",
-            guideline: "Management of Severe Laryngospasm",
-            section: "Neuromuscular Blockade"
-          }
+          reference: { organization: "Pediatric Anesthesia", guideline: "Laryngospasm Protocol", section: "IM Rescue" }
         }
       ]
     },
@@ -757,16 +608,9 @@ export const pedsData = {
             { label: "30 mg/mL — Stock", mgPerMl: 30.0 }
           ],
           maxSingleDoseMg: 10.0,
-          warnings: [
-            "Stock concentration must not be administered without appropriate dilution according to local protocol.",
-            "Monitor blood pressure and heart rate."
-          ],
+          warnings: ["Stock concentration (30 mg/mL) must be diluted before administration."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "Pediatric Anesthesia",
-            guideline: "Perioperative Hemodynamic Management",
-            section: "Vasopressors"
-          }
+          reference: { organization: "Pediatric Anesthesia", guideline: "Hemodynamic Management", section: "Vasopressors" }
         }
       ]
     },
@@ -788,27 +632,17 @@ export const pedsData = {
           context: "hemodynamic_support",
           route: "IV Direct Push",
           doseType: "range_mcg_kg",
-          doseMin: 5.0, // Corrected from 0.5 to standard 5.0 mcg/kg
-          doseMax: 10.0, // Corrected from 2.0 to standard 10.0 mcg/kg
+          doseMin: 5.0,
+          doseMax: 10.0,
           defaultDoseValue: 5.0,
           doseUnit: "mcg/kg",
-          concentration: {
-            label: "100 mcg/mL — Diluted",
-            mcgPerMl: 100.0,
-            mgPerMl: 0.1
-          },
-          maxSingleDoseMcg: 500.0,
-          warnings: [
-            "Pure alpha-1 agonist; may cause reflex bradycardia.",
-            "Use a verified diluted concentration (100 mcg/mL).",
-            "Dose must be titrated to hemodynamic response."
+          concentrationOptions: [
+            { label: "100 mcg/mL (0.1 mg/mL)", mgPerMl: 0.1 }
           ],
+          maxSingleDoseMcg: 500.0,
+          warnings: ["Pure alpha-1 agonist; may cause reflex bradycardia."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "Pediatric Anesthesia",
-            guideline: "Perioperative Hemodynamic Management",
-            section: "Phenylephrine"
-          }
+          reference: { organization: "Pediatric Anesthesia", guideline: "Hemodynamic Management", section: "Phenylephrine" }
         }
       ]
     },
@@ -820,93 +654,78 @@ export const pedsData = {
       id: "magnesium_sulfate",
       name: "Magnesium Sulfate",
       arabicName: "كبريتات المغنيسيوم",
-      category: "Electrolyte / Antiarrhythmic / Bronchodilator",
+      category: "Electrolyte / Bronchodilator",
       isHighAlert: true,
 
       indications: [
         {
           id: "torsades",
-          title: "Torsades de Pointes",
+          title: "Torsades de Pointes / Severe Asthma",
           context: "arrhythmia",
-          route: "IV / IO",
+          route: "IV / IO Infusion",
           doseType: "range_mg_kg",
           doseMin: 25.0,
           doseMax: 50.0,
           defaultDoseValue: 25.0,
           doseUnit: "mg/kg",
-          concentration: { label: "50% Solution", mgPerMl: 500.0 },
-          maxSingleDoseMg: 2000.0,
-          warnings: [
-            "Administer according to rhythm/emergency protocol.",
-            "Rapid administration may cause severe hypotension."
+          concentrationOptions: [
+            { label: "10% Solution (100 mg/mL — Diluted)", mgPerMl: 100.0 },
+            { label: "50% Solution (500 mg/mL — Stock)", mgPerMl: 500.0 }
           ],
-          requiresClinicalReview: true,
-          reference: {
-            organization: "AHA/AAP",
-            guideline: "Pediatric Advanced Life Support",
-            section: "Torsades de Pointes"
-          }
-        },
-        {
-          id: "severe_asthma",
-          title: "الربو الحاد الشديد — Severe Asthma",
-          context: "respiratory_emergency",
-          route: "IV Infusion",
-          doseType: "range_mg_kg",
-          doseMin: 25.0,
-          doseMax: 75.0,
-          defaultDoseValue: 50.0,
-          doseUnit: "mg/kg",
-          concentration: { label: "50% Solution", mgPerMl: 500.0 },
           maxSingleDoseMg: 2000.0,
-          warnings: [
-            "Use as adjunctive therapy in severe/refractory asthma according to local pediatric protocol.",
-            "Monitor blood pressure and respiratory status."
-          ],
+          warnings: ["Dilute 50% stock solution to 10-20% before IV infusion to prevent phlebitis and hypotension."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "Pediatric Emergency / Critical Care",
-            guideline: "Severe Asthma Management",
-            section: "Intravenous Magnesium"
-          }
+          reference: { organization: "AHA/AAP", guideline: "PALS 2025/2026", section: "Magnesium Sulfate" }
         }
       ]
     },
 
     // -----------------------------------------------------------------------
-    // 13. DEXTROSE 10%
+    // 13. DEXTROSE
     // -----------------------------------------------------------------------
     {
       id: "dextrose_10",
-      name: "Dextrose 10% (D10W)",
-      arabicName: "ديكستروز 10%",
+      name: "Dextrose Solutions",
+      arabicName: "محلول السكر (ديكستروز)",
       category: "Glucose / Metabolic Emergency",
       isHighAlert: false,
 
       indications: [
         {
-          id: "hypoglycemia",
-          title: "نقص سكر الدم الحاد — Acute Hypoglycemia",
+          id: "hypoglycemia_d10",
+          title: "نقص سكر الدم (D10W — للرضع والأطفال)",
           context: "metabolic_emergency",
           route: "IV",
           doseType: "range_ml_kg",
-          doseMin: 2.0, // Corrected to standard PALS 2.0 mL/kg
-          doseMax: 4.0, // Corrected to standard PALS 4.0 mL/kg
-          defaultDoseValue: 2.0, // Provides 0.2 g/kg dextrose
+          doseMin: 2.0,
+          doseMax: 4.0,
+          defaultDoseValue: 2.0,
           doseUnit: "mL/kg D10W",
-          concentration: { label: "D10W", mgPerMl: 100.0 },
-          maxSingleVolumeMl: 250.0,
-          warnings: [
-            "2 mL/kg of D10W provides 0.2 g/kg of dextrose.",
-            "Recheck blood glucose 10–15 minutes after treatment.",
-            "Avoid routine use of hypertonic dextrose (D25W/D50W) in infants and small children."
+          concentrationOptions: [
+            { label: "D10W (100 mg/mL)", mgPerMl: 100.0 }
           ],
+          maxSingleVolumeMl: 250.0,
+          warnings: ["2 mL/kg of D10W provides 0.2 g/kg dextrose."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "AHA/AAP",
-            guideline: "Pediatric Advanced Life Support",
-            section: "Hypoglycemia"
-          }
+          reference: { organization: "AHA/AAP", guideline: "PALS 2025/2026", section: "Hypoglycemia" }
+        },
+        {
+          id: "hypoglycemia_d25",
+          title: "نقص سكر الدم (D25W — للأطفال الكبار > 2 سنة)",
+          context: "metabolic_emergency",
+          route: "IV",
+          doseType: "range_ml_kg",
+          doseMin: 1.0,
+          doseMax: 2.0,
+          defaultDoseValue: 1.0,
+          doseUnit: "mL/kg D25W",
+          concentrationOptions: [
+            { label: "D25W (250 mg/mL)", mgPerMl: 250.0 }
+          ],
+          maxSingleVolumeMl: 100.0,
+          warnings: ["Do not use D25W in neonates or small infants."],
+          requiresClinicalReview: true,
+          reference: { organization: "AHA/AAP", guideline: "PALS 2025/2026", section: "Hypoglycemia" }
         }
       ]
     },
@@ -926,25 +745,19 @@ export const pedsData = {
           id: "opioid_reversal",
           title: "عكس تثبيط الجهاز التنفسي بسبب الأفيونات",
           context: "toxicology",
-          route: "IV / IO / IM",
+          route: "IV / IO / IM / IN",
           doseType: "range_mg_kg",
           doseMin: 0.01,
           doseMax: 0.1,
           defaultDoseValue: 0.01,
           doseUnit: "mg/kg",
-          concentrationOptions: [{ label: "0.4 mg/mL", mgPerMl: 0.4 }],
-          maxSingleDoseMg: 2.0,
-          warnings: [
-            "Titrate to adequate ventilation rather than automatically reversing all opioid effects.",
-            "Repeated dosing or infusion may be required because opioid duration can exceed naloxone duration.",
-            "Monitor for recurrent respiratory depression."
+          concentrationOptions: [
+            { label: "0.4 mg/mL", mgPerMl: 0.4 }
           ],
+          maxSingleDoseMg: 2.0,
+          warnings: ["Titrate to adequate spontaneous respiration."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "Pediatric Emergency / Toxicology",
-            guideline: "Opioid Toxicity Management",
-            section: "Naloxone"
-          }
+          reference: { organization: "Pediatric Emergency", guideline: "Opioid Toxicity", section: "Naloxone" }
         }
       ]
     },
@@ -968,21 +781,14 @@ export const pedsData = {
           doseType: "fixed_mg_kg",
           doseValue: 0.01,
           doseUnit: "mg/kg",
-          concentration: { label: "0.1 mg/mL", mgPerMl: 0.1 },
-          maxSingleDoseMg: 0.2,
-          repeatIntervalMinutes: 1,
-          maxCumulativeDoseMg: 1.0,
-          warnings: [
-            "Avoid in patients with significant seizure risk.",
-            "Avoid in chronic benzodiazepine dependence because withdrawal and seizures may occur.",
-            "Avoid when benzodiazepine overdose is mixed with pro-convulsant agents."
+          concentrationOptions: [
+            { label: "0.1 mg/mL", mgPerMl: 0.1 }
           ],
+          maxSingleDoseMg: 0.2,
+          maxCumulativeDoseMg: 1.0,
+          warnings: ["Avoid in patients with chronic benzodiazepine dependence or seizure history."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "Pediatric Sedation / Toxicology",
-            guideline: "Benzodiazepine Reversal",
-            section: "Flumazenil"
-          }
+          reference: { organization: "Pediatric Sedation", guideline: "Reversal Agents", section: "Flumazenil" }
         }
       ]
     },
@@ -999,8 +805,8 @@ export const pedsData = {
 
       indications: [
         {
-          id: "procedural_sedation",
-          title: "التهدئة الإجرائية",
+          id: "procedural_sedation_iv",
+          title: "التهدئة الإجرائية الوريدية — IV Sedation",
           context: "sedation",
           route: "IV",
           doseType: "range_mg_kg",
@@ -1013,22 +819,33 @@ export const pedsData = {
             { label: "5 mg/mL", mgPerMl: 5.0 }
           ],
           maxSingleDoseMg: 5.0,
-          warnings: [
-            "Respiratory depression risk increases with opioids and other sedatives.",
-            "Continuous respiratory and oxygenation monitoring is required."
-          ],
+          warnings: ["Continuous SpO2 and airway monitoring required."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "AAP",
-            guideline: "Pediatric Procedural Sedation",
-            section: "Benzodiazepines"
-          }
+          reference: { organization: "AAP", guideline: "Procedural Sedation", section: "Midazolam" }
+        },
+        {
+          id: "sedation_in",
+          title: "التهدئة عبر الأنف — Intranasal (IN) Sedation",
+          context: "sedation",
+          route: "IN (Intranasal via MAD)",
+          doseType: "range_mg_kg",
+          doseMin: 0.2,
+          doseMax: 0.3,
+          defaultDoseValue: 0.2,
+          doseUnit: "mg/kg",
+          concentrationOptions: [
+            { label: "5 mg/mL (High Concentration)", mgPerMl: 5.0 }
+          ],
+          maxSingleDoseMg: 10.0,
+          warnings: ["ALWAYS use the 5 mg/mL concentration for intranasal administration to minimize volume."],
+          requiresClinicalReview: true,
+          reference: { organization: "Pediatric Anesthesia", guideline: "Premedication", section: "Intranasal Midazolam" }
         },
         {
           id: "status_epilepticus",
           title: "النوبات الحادة / Status Epilepticus",
           context: "neurological_emergency",
-          route: "IV / IO / IM",
+          route: "IV / IO / IM / IN",
           doseType: "fixed_mg_kg",
           doseValue: 0.1,
           doseUnit: "mg/kg",
@@ -1037,16 +854,9 @@ export const pedsData = {
             { label: "5 mg/mL", mgPerMl: 5.0 }
           ],
           maxSingleDoseMg: 10.0,
-          warnings: [
-            "Monitor ventilation and airway closely.",
-            "Follow the institution's status epilepticus pathway."
-          ],
+          warnings: ["Monitor airway and respiration."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "Pediatric Emergency / Critical Care",
-            guideline: "Status Epilepticus Management",
-            section: "Benzodiazepine Therapy"
-          }
+          reference: { organization: "Pediatric Emergency", guideline: "Status Epilepticus", section: "Benzodiazepines" }
         }
       ]
     },
@@ -1063,8 +873,8 @@ export const pedsData = {
 
       indications: [
         {
-          id: "analgesia",
-          title: "تسكين الألم / Analgesia",
+          id: "analgesia_iv",
+          title: "تسكين الألم الوريدي — IV Analgesia",
           context: "analgesia",
           route: "IV Slow Push",
           doseType: "range_mcg_kg",
@@ -1072,23 +882,31 @@ export const pedsData = {
           doseMax: 2.0,
           defaultDoseValue: 1.0,
           doseUnit: "mcg/kg",
-          concentration: {
-            label: "50 mcg/mL",
-            mcgPerMl: 50.0,
-            mgPerMl: 0.05
-          },
-          maxSingleDoseMcg: 100.0,
-          warnings: [
-            "Administer slowly and monitor ventilation.",
-            "Rapid administration can contribute to chest wall rigidity.",
-            "Dose must be individualized according to age, opioid exposure and clinical context."
+          concentrationOptions: [
+            { label: "50 mcg/mL (0.05 mg/mL)", mgPerMl: 0.05 }
           ],
+          maxSingleDoseMcg: 100.0,
+          warnings: ["Rapid administration can cause chest wall rigidity."],
           requiresClinicalReview: true,
-          reference: {
-            organization: "AAP / Pediatric Anesthesia",
-            guideline: "Pediatric Opioid Analgesia",
-            section: "Fentanyl"
-          }
+          reference: { organization: "AAP / Pediatric Anesthesia", guideline: "Opioid Analgesia", section: "Fentanyl" }
+        },
+        {
+          id: "analgesia_in",
+          title: "تسكين الألم عبر الأنف — Intranasal (IN) Analgesia",
+          context: "analgesia",
+          route: "IN (Intranasal via MAD)",
+          doseType: "range_mcg_kg",
+          doseMin: 1.5,
+          doseMax: 2.0,
+          defaultDoseValue: 1.5,
+          doseUnit: "mcg/kg",
+          concentrationOptions: [
+            { label: "50 mcg/mL (0.05 mg/mL)", mgPerMl: 0.05 }
+          ],
+          maxSingleDoseMcg: 100.0,
+          warnings: ["Effective non-invasive analgesia for acute pediatric pain."],
+          requiresClinicalReview: true,
+          reference: { organization: "Pediatric Emergency", guideline: "Acute Pain Management", section: "IN Fentanyl" }
         }
       ]
     }
@@ -1102,21 +920,9 @@ export const pedsData = {
     calculationTargets: ["hourlyRateMlHr", "dailyVolumeMl24h"],
 
     tiers: [
-      {
-        minKgInclusive: 0.0,
-        maxKgInclusive: 10.0,
-        ratePerKg: 4.0
-      },
-      {
-        minKgExclusive: 10.0,
-        maxKgInclusive: 20.0,
-        ratePerKg: 2.0
-      },
-      {
-        minKgExclusive: 20.0,
-        maxKgExclusive: Infinity,
-        ratePerKg: 1.0
-      }
+      { minKgInclusive: 0.0, maxKgInclusive: 10.0, ratePerKg: 4.0 },
+      { minKgExclusive: 10.0, maxKgInclusive: 20.0, ratePerKg: 2.0 },
+      { minKgExclusive: 20.0, maxKgExclusive: Infinity, ratePerKg: 1.0 }
     ],
 
     scope: {
@@ -1142,15 +948,14 @@ export const pedsData = {
     compositionGuidance: {
       title: "AAP Maintenance IV Fluid Composition",
       recommendation:
-        "For children 28 days to 18 years who require maintenance IV fluids in the guideline's applicable acute-care populations, use isotonic maintenance fluids with appropriate potassium chloride and dextrose when clinically appropriate.",
+        "For children 28 days to 18 years who require maintenance IV fluids in acute-care populations, use isotonic maintenance fluids with appropriate potassium chloride and dextrose when clinically appropriate.",
 
       disclaimer:
-        "The Holliday-Segar calculation estimates maintenance volume only. It does not determine fluid composition, resuscitation volume, replacement of ongoing losses, or individualized fluid restriction.",
+        "The Holliday-Segar calculation estimates maintenance volume only. It does not determine fluid composition or replacement of ongoing losses.",
 
       reference: {
         organization: "American Academy of Pediatrics",
-        guideline:
-          "Clinical Practice Guideline: Maintenance Intravenous Fluids in Children",
+        guideline: "Maintenance Intravenous Fluids in Children",
         section: "Key Action Statement 1A"
       }
     }
@@ -1168,10 +973,10 @@ export const pedsData = {
       invalidWeight: "Weight must be greater than 0 kg.",
       invalidAge: "Age must be greater than or equal to 0.",
       highWeightWarning:
-        "Patient weight >100 kg. Verify whether actual, ideal, adjusted, or another dosing weight is appropriate for the selected medication.",
+        "Patient weight >100 kg. Verify whether actual, ideal, or dosing weight is appropriate.",
       overAgeWarning: "Patient age exceeds the pediatric reference scope.",
       neonatalWarning:
-        "Neonatal patients require age-, gestational-age-, and indication-specific verification.",
+        "Neonatal patients require age- and indication-specific verification.",
       concentrationWarning:
         "Verify the actual drug concentration on the vial/syringe before administration.",
       clinicalReviewWarning:
