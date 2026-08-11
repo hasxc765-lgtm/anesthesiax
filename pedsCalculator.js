@@ -1,7 +1,7 @@
 /**
  * Pediatric Calculation & Safety Engine
- * AnesthesiaX — Phase 7.2 (Audited & Patched)
- * Version: 7.2-engine-strict-v2
+ * AnesthesiaX — Phase 7.5 (Audited & Patched)
+ * Version: 7.5-engine-strict-v3
  * 
  * Dependencies:
  * - ../data/pedsData.js
@@ -12,7 +12,7 @@ import { pedsData } from "../data/pedsData.js";
 export class PedsCalculator {
 
   // =========================================================================
-  // 1. STRICT INPUT VALIDATION
+  // 1. STRICT INPUT VALIDATION & CLINICAL PLAUSIBILITY ENGINE
   // =========================================================================
   static validateInputs(weightKg, ageYears, ageDays = null) {
     const alerts = [];
@@ -46,6 +46,17 @@ export class PedsCalculator {
 
     if (age < (28 / 365.25)) {
       alerts.push(pedsData.plausibilityConstraints.messages.neonatalWarning);
+    }
+
+    // 🛡️ فحص التناسق السريري بين الوزن والعمر (Weight-for-Age Plausibility Check)
+    // منع أخطاء الإدخال المطبعية (Typo) مثل إدخال 50 كجم لطفل بعمر سنتين
+    if (!isNaN(weight) && !isNaN(age) && age > 0 && age <= 12) {
+      const maxPlausibleWeight = (age * 4) + 20; // حد مرن مرتفع للمدى العادي
+      if (weight > maxPlausibleWeight) {
+        alerts.push(
+          `🚨 تحذير أمان سريري حاد: الوزن المدخل (${weight} كجم) مرتفع وغير متناسب مع عمر الطفل (${age} سنة). يرجى التأكد من عدم وجود خطأ إملائي (Typo).`
+        );
+      }
     }
 
     return {
