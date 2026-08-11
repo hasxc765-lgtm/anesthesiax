@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnesthesiaX — Pediatric Calculator Test</title>
+  <!-- Tailwind CSS CDN للتصميم -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+
+  <div class="max-w-6xl mx-auto space-y-4">
+    <!-- TEST PAGE HEADER -->
+    <header class="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
+      <div>
+        <h1 class="text-xl font-extrabold text-blue-900">AnesthesiaX — Pediatric Calculator (Phase 7.0–7.3)</h1>
+        <p class="text-xs text-gray-500 mt-1">صفحة تجريبية معزولة لاختبار حاسبة تخدير الأطفال ومحرك الأمان السريري</p>
+      </div>
+      <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
+        بيئة تجريبية (Isolated Test Environment)
+      </span>
+    </header>
+
+    <!-- DASHBOARD CONTAINER -->
+    <div id="peds-app-container"></div>
+  </div>
+
+  <!-- SCRIPT INITIALIZATION MODULE -->
+  <script type="module">
+    import { PedsDashboard } from "./js/components/pedsDashboard.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const pedsApp = new PedsDashboard("peds-app-container");
+      pedsApp.init();
+    });
+  </script>
+
+</body>
+</html>
