@@ -1,11 +1,6 @@
 /**
  * Pediatric Dashboard UI Component
- * AnesthesiaX — Phase 7.5 (Fully Audited & Isolated)
- * Version: 7.5-dashboard-strict-v3
- * 
- * Dependencies:
- * - ../data/pedsData.js
- * - ../calculators/pedsCalculator.js
+ * AnesthesiaX — Phase 7.5
  */
 
 import { pedsData } from "../data/pedsData.js";
@@ -163,15 +158,23 @@ export class PedsDashboard {
 
     if (typeof PedsCalculator === 'undefined') return;
 
-    const airway = PedsCalculator.calculateAirway ? PedsCalculator.calculateAirway(this.state.weightKg, this.state.ageYears) : { success: false, errors: ['الدالة غير متوفرة'] };
-    const drug = PedsCalculator.calculateDrugDose ? PedsCalculator.calculateDrugDose(
-      this.state.selectedDrugId,
-      this.state.selectedIndicationId,
-      this.state.weightKg,
-      this.state.ageYears,
-      this.state.selectedConcentrationMgPerMl
-    ) : { success: false, errors: ['الدالة غير متوفرة'] };
-    const fluids = PedsCalculator.calculateMaintenanceFluids ? PedsCalculator.calculateMaintenanceFluids(this.state.weightKg, this.state.ageYears * 365.25) : { success: false, errors: ['الدالة غير متوفرة'] };
+    const airway = typeof PedsCalculator.calculateAirway === 'function' 
+      ? PedsCalculator.calculateAirway(this.state.weightKg, this.state.ageYears) 
+      : { success: false, errors: ['دالة حساب المجرى الهوائي غير متوفرة'] };
+
+    const drug = typeof PedsCalculator.calculateDrugDose === 'function' 
+      ? PedsCalculator.calculateDrugDose(
+          this.state.selectedDrugId,
+          this.state.selectedIndicationId,
+          this.state.weightKg,
+          this.state.ageYears,
+          this.state.selectedConcentrationMgPerMl
+        ) 
+      : { success: false, errors: ['دالة حساب الجرعات غير متوفرة'] };
+
+    const fluids = typeof PedsCalculator.calculateMaintenanceFluids === 'function' 
+      ? PedsCalculator.calculateMaintenanceFluids(this.state.weightKg, this.state.ageYears * 365.25) 
+      : { success: false, errors: ['دالة حساب السوائل غير متوفرة'] };
 
     if (airwayContainer) airwayContainer.innerHTML = this.renderAirwayContent(airway);
     if (drugContainer) drugContainer.innerHTML = this.renderDrugContent(drug);
@@ -179,8 +182,9 @@ export class PedsDashboard {
   }
 
   renderAirwayContent(airway) {
-    if (!airway.success) {
-      return `<div class="p-3 bg-red-50 text-red-700 rounded-lg text-sm">${airway.errors.join("<br>")}</div>`;
+    if (!airway || !airway.success) {
+      const errMsgs = (airway && Array.isArray(airway.errors)) ? airway.errors.join("<br>") : "خطأ في حساب المجرى الهوائي";
+      return `<div class="p-3 bg-red-50 text-red-700 rounded-lg text-sm">${errMsgs}</div>`;
     }
 
     return `
@@ -211,8 +215,9 @@ export class PedsDashboard {
   }
 
   renderDrugContent(drug) {
-    if (!drug.success) {
-      return `<div class="p-3 bg-red-50 text-red-700 rounded-lg text-sm">${drug.errors.join("<br>")}</div>`;
+    if (!drug || !drug.success) {
+      const errMsgs = (drug && Array.isArray(drug.errors)) ? drug.errors.join("<br>") : "خطأ في حساب الجرعة";
+      return `<div class="p-3 bg-red-50 text-red-700 rounded-lg text-sm">${errMsgs}</div>`;
     }
 
     return `
@@ -251,8 +256,9 @@ export class PedsDashboard {
   }
 
   renderFluidContent(fluids) {
-    if (!fluids.success) {
-      return `<div class="p-3 bg-red-50 text-red-700 rounded-lg text-sm">${fluids.errors.join("<br>")}</div>`;
+    if (!fluids || !fluids.success) {
+      const errMsgs = (fluids && Array.isArray(fluids.errors)) ? fluids.errors.join("<br>") : "خطأ في حساب السوائل";
+      return `<div class="p-3 bg-red-50 text-red-700 rounded-lg text-sm">${errMsgs}</div>`;
     }
 
     return `
