@@ -1,7 +1,7 @@
 /**
  * Pediatric Calculation & Safety Engine
- * AnesthesiaX — Phase 7.2 (Final Audited & Verified)
- * Version: 7.2-engine-strict
+ * AnesthesiaX — Phase 7.2 (Audited & Patched)
+ * Version: 7.2-engine-strict-v2
  * 
  * Dependencies:
  * - ../data/pedsData.js
@@ -21,7 +21,6 @@ export class PedsCalculator {
     const weight = parseFloat(weightKg);
     let age = parseFloat(ageYears);
 
-    // Precise neonatal age calculation if days are explicitly supplied
     if (ageDays !== null && !isNaN(parseFloat(ageDays))) {
       const days = parseFloat(ageDays);
       if (days >= 0) {
@@ -45,7 +44,7 @@ export class PedsCalculator {
       alerts.push(pedsData.plausibilityConstraints.messages.overAgeWarning);
     }
 
-    if (age < (28 / 365.25)) { // Less than 28 days
+    if (age < (28 / 365.25)) {
       alerts.push(pedsData.plausibilityConstraints.messages.neonatalWarning);
     }
 
@@ -70,7 +69,6 @@ export class PedsCalculator {
     const { weight, age } = validation;
     const warnings = [...validation.alerts];
 
-    // Infant / Neonatal Range Logic (< 1 year)
     if (age < pedsData.airwayRules.childFormulas.minAgeYearsInclusive) {
       const match = pedsData.airwayRules.neonatalInfantRanges.find(range => {
         const minOk = weight >= range.minWeightKgInclusive;
@@ -101,7 +99,6 @@ export class PedsCalculator {
       };
     }
 
-    // Child Formula Logic (≥ 1 year)
     const uncuffed = (age / 4) + 4;
     const cuffed = (age / 4) + 3.5;
     const oralDepth = (age / 2) + 12;
@@ -138,7 +135,7 @@ export class PedsCalculator {
   }
 
   // =========================================================================
-  // 3. EMERGENCY DRUG CALCULATION ENGINE (UNIVERSAL CAP ENFORCEMENT)
+  // 3. EMERGENCY DRUG CALCULATION ENGINE
   // =========================================================================
   static calculateDrugDose(drugId, indicationId, weightKg, ageYears, selectedMgPerMl = null) {
     const validation = this.validateInputs(weightKg, ageYears);
@@ -165,7 +162,7 @@ export class PedsCalculator {
       safetyAlerts.push(...indication.warnings);
     }
 
-    // Determine Concentration
+    // Concentration Resolution
     let concentrationMgPerMl = selectedMgPerMl;
     if (!concentrationMgPerMl) {
       if (indication.concentration && indication.concentration.mgPerMl) {
@@ -175,7 +172,6 @@ export class PedsCalculator {
       }
     }
 
-    // Calculate Raw Dose based on Dose Type
     let rawDose = 0;
     let minDose = null;
     let maxDose = null;
@@ -211,8 +207,9 @@ export class PedsCalculator {
       unit = "mcg";
     }
 
-    // Universal Maximum Single Limits Resolution across ALL Units (Mg, Mcg, Meq, VolumeMl, SaltMg)
+    // Comprehensive Maximum Limit Detection across all keys
     let maxLimit = indication.maxSingleDoseMg || 
+                   indication.maxInitialDoseMg || 
                    indication.maxSingleDoseMcg || 
                    indication.maxSingleDoseMeq || 
                    indication.maxSingleVolumeMl || 
@@ -229,19 +226,16 @@ export class PedsCalculator {
       }
     }
 
-    // Apply Safety Constraints
     let appliedDose = rawDose;
     let isCapped = false;
     let isMinEnforced = false;
 
-    // Minimum Enforcement (e.g., Atropine Bradycardia 0.1 mg)
     if (indication.minSingleDoseMg && appliedDose < indication.minSingleDoseMg) {
       appliedDose = indication.minSingleDoseMg;
       isMinEnforced = true;
-      safetyAlerts.push(`Minimum single dose enforced (${indication.minSingleDoseMg} mg) to prevent paradoxical bradycardia.`);
+      safetyAlerts.push(`Minimum single dose enforced (${indication.minSingleDoseMg} mg) to prevent paradoxical effects.`);
     }
 
-    // Universal Maximum Single Dose Capping
     if (maxLimit !== null && appliedDose > maxLimit) {
       appliedDose = maxLimit;
       isCapped = true;
@@ -250,7 +244,6 @@ export class PedsCalculator {
       safetyAlerts.push("No configured maximum single dose limit — Clinical review required.");
     }
 
-    // Volume Calculation (mL)
     let calculatedVolumeMl = null;
     if (indication.doseType.includes("ml_kg")) {
       calculatedVolumeMl = appliedDose;
@@ -260,7 +253,6 @@ export class PedsCalculator {
       calculatedVolumeMl = appliedDose / concentrationMgPerMl;
     }
 
-    // Calcium Elemental Specific Calculation
     let elementalCalciumInfo = null;
     if (indication.concentration && indication.concentration.elementalCaMgPerMl) {
       const elementalCaMgPerMl = indication.concentration.elementalCaMgPerMl;
@@ -298,7 +290,7 @@ export class PedsCalculator {
   }
 
   // =========================================================================
-  // 4. MAINTENANCE FLUID ENGINE (HOLLIDAY-SEGAR 4-2-1)
+  // 4. MAINTENANCE FLUID ENGINE
   // =========================================================================
   static calculateMaintenanceFluids(weightKg, ageDays = 30) {
     const validation = this.validateInputs(weightKg, null, ageDays);
