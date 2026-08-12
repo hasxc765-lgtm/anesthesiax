@@ -110,19 +110,19 @@ export function renderPreOpRiskView() {
         </button>
       </div>
 
-      <!-- TABS NAVIGATION -->
+      <!-- TABS NAVIGATION WITH CLEAN NUMBERING -->
       <div class="flex border border-slate-200 bg-white rounded-xl p-1 shadow-sm text-xs font-bold overflow-x-auto">
         <button data-tab="asa" class="tab-btn flex-1 py-2 px-1 text-center rounded-lg transition cursor-pointer ${state.activeTab === 'asa' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
-          1. تصنيف ASA
+          <span>1. تصنيف ASA</span>
         </button>
         <button data-tab="rcri" class="tab-btn flex-1 py-2 px-1 text-center rounded-lg transition cursor-pointer ${state.activeTab === 'rcri' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
-          2. القلب RCRI
+          <span>2. القلب RCRI</span>
         </button>
         <button data-tab="ariscat" class="tab-btn flex-1 py-2 px-1 text-center rounded-lg transition cursor-pointer ${state.activeTab === 'ariscat' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
-          3. الرئة ARISCAT
+          <span>3. الرئة ARISCAT</span>
         </button>
         <button data-tab="summary" class="tab-btn flex-1 py-2 px-1 text-center rounded-lg transition cursor-pointer ${state.activeTab === 'summary' ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
-          4. التقرير 📊
+          <span>4. التقرير 📊</span>
         </button>
       </div>
 
@@ -157,7 +157,7 @@ function renderAsaTab(assessment) {
         <h3 class="text-xs font-bold text-slate-800">${asaData.title}:</h3>
         <label class="flex items-center gap-1.5 cursor-pointer bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 text-amber-900">
           <input type="checkbox" id="emergency-check" ${state.emergencyProcedure ? 'checked' : ''} class="w-4 h-4 text-amber-600 rounded">
-          <span class="text-xs font-bold">${asaData.emergencyModifier.label} <span dir="ltr">(+E)</span></span>
+          <span class="text-xs font-bold">${asaData.emergencyModifier.label} <bdi dir="ltr" class="font-mono">(+E)</bdi></span>
         </label>
       </div>
 
@@ -167,11 +167,11 @@ function renderAsaTab(assessment) {
             <input type="radio" name="asa-radio" value="${cat.id}" ${state.asaClass === cat.id ? 'checked' : ''} class="mt-1 text-blue-600">
             <div>
               <div class="flex items-center gap-2">
-                <span class="font-mono font-bold text-xs bg-slate-800 text-white px-2 py-0.5 rounded">${cat.code}</span>
+                <span class="font-mono font-bold text-xs bg-slate-800 text-white px-2 py-0.5 rounded" dir="ltr">${cat.code}</span>
                 <strong class="text-xs text-slate-900">${cat.title}</strong>
               </div>
               <p class="text-[11px] text-slate-600 mt-1">${cat.desc}</p>
-              <p class="text-[10px] text-slate-400 mt-0.5"><strong>أمثلة:</strong> ${cat.example}</p>
+              <p class="text-[10px] text-slate-500 mt-0.5"><strong>أمثلة:</strong> ${cat.example}</p>
             </div>
           </label>
         `).join('')}
@@ -212,7 +212,9 @@ function renderRcriTab(assessment) {
       </div>
 
       <div class="p-3 bg-slate-100/80 rounded-xl border border-slate-200 text-xs space-y-1.5">
-        <label class="block font-bold text-slate-700">مستوى الكرياتينين المصلي <span dir="ltr">(mg/dL)</span> - اختياري:</label>
+        <label class="block font-bold text-slate-700">
+          مستوى الكرياتينين المصلي <bdi dir="ltr" class="font-mono">(Serum Creatinine - mg/dL)</bdi> - اختياري:
+        </label>
         <input type="number" id="creatinine-input" step="0.1" min="0" placeholder="مثال: 2.2" value="${state.creatinineMgDl}" class="w-full p-2 border border-slate-300 rounded-lg bg-white font-mono text-xs">
         <p class="text-[10px] text-slate-500">عند إدخال قيمة أكبر من 2.0 mg/dL سيتم تفعيل عامل الكرياتينين تلقائياً.</p>
       </div>
@@ -240,7 +242,7 @@ function renderAriscatTab(assessment) {
       <div class="flex justify-between items-center border-b border-slate-100 pb-2">
         <div>
           <h3 class="text-xs font-bold text-slate-800">${ariscatData.title}</h3>
-          <p class="text-[10px] text-slate-500">المتغيرات الـ 7 لتقييم مضاعفات الرئة بعد العملية</p>
+          <p class="text-[10px] text-slate-500">المتغيرات الـ 7 لتقييم مضاعفات الرئة بعد العملية (على هواء الغرفة - Room Air)</p>
         </div>
         <div id="ariscat-badge-container">
           ${renderAriscatBadge(pulmonary)}
@@ -254,12 +256,16 @@ function renderAriscatTab(assessment) {
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 mb-1">2. تشبع أكسجين الدم <span dir="ltr">(SpO₂ % Room Air)</span>:</label>
+          <label class="block font-bold text-slate-700 mb-1">
+            2. تشبع أكسجين الدم <bdi dir="ltr" class="font-mono">(SpO₂ % Room Air)</bdi>:
+          </label>
           <input type="number" id="ariscat-spo2" min="50" max="100" value="${state.spo2Percent}" class="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 font-bold font-mono text-xs">
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 mb-1">3. تركيز الهيموغلوبين في الدم <span dir="ltr">(Hb g/dL)</span>:</label>
+          <label class="block font-bold text-slate-700 mb-1">
+            3. تركيز الهيموغلوبين في الدم <bdi dir="ltr" class="font-mono">(Hb g/dL)</bdi>:
+          </label>
           <input type="number" id="ariscat-hb" step="0.1" min="1" max="25" value="${state.hemoglobinGdl}" class="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 font-bold font-mono text-xs">
         </div>
 
@@ -328,10 +334,15 @@ function renderSummaryTab(assessment) {
 
   return `
     <div class="space-y-4">
-      <h3 class="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 flex justify-between items-center">
-        <span>📊 ملخص تقييم المخاطر المدمج <span dir="ltr">(Integrated Risk Summary)</span></span>
-        <span class="text-[10px] text-slate-400 font-mono">AnesthesiaX Report</span>
-      </h3>
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <h3 class="text-xs font-bold text-slate-800">
+          📊 ملخص تقييم المخاطر المدمج <bdi dir="ltr" class="font-mono text-slate-400">(Integrated Risk Summary)</bdi>
+        </h3>
+        <button id="btnPrintReport" type="button" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+          <span>🖨️</span>
+          <span>طباعة / تصدير PDF</span>
+        </button>
+      </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-center text-xs">
         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
@@ -366,7 +377,7 @@ function renderSummaryTab(assessment) {
       <div class="p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl text-xs space-y-2 leading-relaxed">
         <h4 class="font-bold text-blue-950 flex items-center gap-1">
           <span>💡</span>
-          <span>تنبيهات استرشادية قبل العملية <span dir="ltr">(Clinical Considerations)</span>:</span>
+          <span>تنبيهات استرشادية قبل العملية <bdi dir="ltr" class="font-mono text-blue-800">(Clinical Considerations)</bdi>:</span>
         </h4>
 
         <ul class="list-disc list-inside space-y-2 text-blue-900 text-[11px]">
@@ -416,6 +427,14 @@ export function initPreOpRiskEvents() {
     });
   }
 
+  // Print / Export PDF Handler
+  const btnPrint = document.getElementById("btnPrintReport");
+  if (btnPrint) {
+    btnPrint.addEventListener("click", () => {
+      window.print();
+    });
+  }
+
   // Tabs Switching
   container.querySelectorAll(".tab-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
@@ -461,16 +480,20 @@ export function initPreOpRiskEvents() {
     });
   });
 
-  // Creatinine Input (Input event without DOM destroy)
+  // Creatinine Input (Sync State Correctly on Clear)
   const creatInput = document.getElementById("creatinine-input");
   if (creatInput) {
     creatInput.addEventListener("input", (e) => {
-      state.creatinineMgDl = e.target.value;
+      const val = e.target.value.trim();
+      state.creatinineMgDl = val;
+      if (val === "" || parseFloat(val) <= 2.0) {
+        state.renallyImpaired = false;
+      }
       updateLiveBadges();
     });
   }
 
-  // ARISCAT Inputs (Input events update state and badges live without focus loss)
+  // ARISCAT Inputs
   const ageInput = document.getElementById("ariscat-age");
   if (ageInput) ageInput.addEventListener("input", e => { state.ageYears = e.target.value; updateLiveBadges(); });
 
