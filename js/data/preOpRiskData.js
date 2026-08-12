@@ -10,7 +10,7 @@
 
 export const preOpRiskData = {
   meta: {
-    version: "8.3.0-data-final-validated",
+    version: "8.3.1-data-validated",
     moduleName: "preOpRiskData",
     disclaimer: "مؤشرات تقييم المخاطر قبل العملية هي أدوات استرشادية مشتقة من دراسات إحصائية للمجموعات، ولا تغني عن التقييم السريري المباشر والتقييم الفردي لكل حالة.",
     clinicalNotice: "جميع النتائج تُعرض كـ 'تنبيهات استرشادية' (Clinical Considerations) لرفع الوعي بالعوامل المرتفعة الخطورة ولا تصدر أوامر سريرية ملزمة."
@@ -47,14 +47,14 @@ export const preOpRiskData = {
         code: "ASA III",
         title: "مرض جهازي شديد (Severe Systemic Disease)",
         desc: "مرض جهازي شديد يسبب قيوداً وظيفية واضحة في الحياة اليومية (غير عاجزة بالكامل).",
-        example: "سكري أو ضغط دم غير مضبوط، COPD شديد، سمنة مفرطة (BMI ≥ 40)، غسيل كلى منتظم، أو MI قديم (> 3 أشهر)."
+        example: "سكري أو ضغط دم غير مضبوط، COPD شديد، سمنة مفرطة (BMI ≥ 40)، غسيل كلى منتظم، أو احتشاء سابق بعضلة القلب (أكثر من 3 أشهر > 3 months)."
       },
       {
         id: "asa4",
         code: "ASA IV",
         title: "مرض جهازي شديد يهدد الحياة (Constant Threat to Life)",
         desc: "مرض جهازي شديد يمثل تهديداً مستمراً لحياة المريض.",
-        example: "احتشاء حديث بعضلة القلب (< 3 أشهر)، ذبحة غير مستقرة، فشل كلوي حاد، أو صدمة جراثيمية."
+        example: "احتشاء حديث بعضلة القلب (أقل من 3 أشهر < 3 months)، ذبحة غير مستقرة، قصور حاد بالوظائف التنفسية، أو صدمة جراثيمية."
       },
       {
         id: "asa5",
@@ -86,7 +86,7 @@ export const preOpRiskData = {
         id: "highRiskSurgery",
         label: "جراحة عالية الخطورة (High-Risk Surgery)",
         points: 1,
-        desc: "جراحات الأوعية الدموية فوق الرباط الإربي (Suprainguinal Vascular)، الجراحات داخل الصدر (Intrathoracic)، وجراحات داخل الصفاق (Intraperitoneal)."
+        desc: "جراحات الأوعية الدموية فوق الرباط الإربي، الجراحات داخل الصدر، وجراحات داخل الصفاق."
       },
       {
         id: "ischemicHeartDisease",
@@ -114,7 +114,7 @@ export const preOpRiskData = {
       },
       {
         id: "renallyImpaired",
-        label: "ارتفاع كراتينين الدم المصلي (Creatinine > 2.0 mg/dL)",
+        label: "ارتفاع كراتينين الدم المصلي (Serum Creatinine > 2.0 mg/dL)",
         points: 1,
         desc: "تركيز الكراتينين المصلي أكبر من 2.0 mg/dL (177 µmol/L) قبل العملية."
       }
@@ -175,7 +175,7 @@ export const preOpRiskData = {
         id: "preopAnemia",
         label: "فقر الدم قبل العملية (Preoperative Anemia: Hb ≤ 10 g/dL)",
         points: 11,
-        desc: "تركيز الهيموجلوبين المصلي قبل العملية 10 g/dL أو أقل."
+        desc: "تركيز الهيموغلوبين في الدم قبل العملية 10 g/dL أو أقل."
       },
       incisionOptions: [
         { value: "peripheral", points: 0, label: "جراحة طرفية (Peripheral)" },
