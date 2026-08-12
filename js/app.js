@@ -10,6 +10,7 @@ import { renderRegionalView, renderRegionalResultsHTML, renderLastEmergencyHTML 
 import { calculateRegionalParams, localAnestheticsDB } from './calculators/regionalCalculator.js';
 import { renderInfusionView } from './components/infusionView.js';
 import { renderVaporizerView, initVaporizerEvents } from './components/vaporizerView.js';
+import { renderPreOpRiskView, initPreOpRiskEvents } from './components/preOpRiskView.js';
 
 // =========================================================
 // INITIALIZATION & GLOBAL HANDLERS
@@ -131,6 +132,8 @@ function render() {
       renderPediatricLayout(contentContainer);
     } else if (currentView === 'vaporizers') {
       renderVaporizerLayout(contentContainer);
+    } else if (currentView === 'preOpRisk') {
+      renderPreOpRiskLayout(contentContainer);
     } else {
       renderDashboardView(contentContainer);
     }
@@ -153,7 +156,7 @@ function renderDashboardView(container) {
     { id: 'infusionTci', title: 'مضخات التنقيط المستمر', subtitle: 'حساب معدلات mcg/kg/min و mg/hr', icon: '💉', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
     { id: 'pediatric', title: 'تخدير الأطفال الشامل', subtitle: 'حاسبة جرعات وأنابيب الأطفال', icon: '👶', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
     { id: 'vaporizers', title: 'تركيز الغازات الـ MAC', subtitle: 'حاسبة النسبة المئوية واستهلاك الغاز', icon: '💨', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-    { id: 'preOpRisk', title: 'تقييم المخاطر قبل العملية', subtitle: 'تصنيف ASA وتقييم القلب والتنفس', icon: '📋', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
+    { id: 'preOpRisk', title: 'تقييم المخاطر قبل العملية', subtitle: 'تصنيف ASA وتقييم القلب والتنفس', icon: '📋', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
     { id: 'abgElectrolytes', title: 'غازات الدم والأملاح', subtitle: 'تفسير ABG وتصحيح الصوديوم والبوتاسيوم', icon: '🧪', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
     { id: 'emergencyProtocols', title: 'بروتوكولات الطوارئ', subtitle: 'خوارزميات ACLS والحساسية والملايجنانت', icon: '🚨', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
     { id: 'drugInteractions', title: 'التداخلات الدوائية', subtitle: 'دليل الأدوية المزمنة والتفاعلات', icon: '📚', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' }
@@ -192,13 +195,26 @@ function renderDashboardView(container) {
   `;
 
   // Dynamic Routing Bindings
-  const toolIds = ['drugCenter', 'airway', 'fluidAbl', 'regionalLast', 'infusionTci', 'pediatric', 'vaporizers'];
+  const toolIds = ['drugCenter', 'airway', 'fluidAbl', 'regionalLast', 'infusionTci', 'pediatric', 'vaporizers', 'preOpRisk'];
   toolIds.forEach(id => {
     const card = container.querySelector(`[data-tool-id="${id}"]`);
     if (card) {
       card.addEventListener('click', () => window.navigateTo(id));
     }
   });
+}
+
+// =========================================================
+// PREOPERATIVE RISK CALCULATOR LAYOUT
+// =========================================================
+
+function renderPreOpRiskLayout(container) {
+  if (typeof renderPreOpRiskView === 'function') {
+    container.innerHTML = renderPreOpRiskView();
+    if (typeof initPreOpRiskEvents === 'function') {
+      initPreOpRiskEvents();
+    }
+  }
 }
 
 // =========================================================
