@@ -1,17 +1,11 @@
 /**
  * Volatile Anesthetics Reference Data & Clinical Standards
  *
- * AnesthesiaX — Phase 8.2
+ * AnesthesiaX — Phase 8.2 (Arabic Localization)
  * File: js/data/volatileAgentsData.js
  *
  * Architecture:
  * Pure Data ES Module.
- *
- * IMPORTANT:
- * - No calculation functions.
- * - No DOM/UI logic.
- * - No patient-specific prescribing logic.
- * - Clinical reference dataset only.
  */
 
 export const volatileAgentsData = {
@@ -20,11 +14,11 @@ export const volatileAgentsData = {
   // =========================================================================
 
   meta: {
-    version: "8.2.0-data-master",
+    version: "8.2.1-data-ar",
     moduleName: "volatileAgentsData",
 
     description:
-      "Clinical reference data for volatile anesthetics, MAC values, pediatric references, age-adjustment metadata, vaporizer consumption estimation, and safety constraints.",
+      "بيانات مرجعية سريرية للغازات الاستنشاقية، قيم MAC، مراجع الأطفال، تعديل العمر، تقدير استهلاك المبخرات، ومحددات الأمان.",
 
     lastAudited: "2026-08",
 
@@ -35,10 +29,10 @@ export const volatileAgentsData = {
     ],
 
     disclaimer:
-      "MAC is a population-derived pharmacodynamic measure. It is not a patient-specific anesthetic dose, guaranteed anesthetic-depth target, or substitute for clinical monitoring.",
+      "MAC هو مقياس فارماكوديناميكي إحصائي مشتق من المجموعات. وهو ليس جرعة تخديرية مخصصة لمريض معين، ولا يضمن عمق تخدير محدد، ولا يغني عن المراقبة السريرية المستمرة.",
 
     clinicalUseNotice:
-      "All calculated values are estimates. Verify agent concentration, vaporizer settings, measured end-tidal concentration, oxygen concentration, patient age, physiologic status, equipment performance, and institutional protocols before clinical use."
+      "جميع القيم المحسوبة هي تقديرات استرشادية. يُرجى دائماً التحقق من تركيز الغاز، إعدادات المبخر، التركيز السنخي المقاس End-Tidal، تركيز الأكسجين، عمر المريض، وضعه الفسيولوجي، كفاءة الأجهزة، والبروتوكولات المحلية قبل الاستخدام السريري."
   },
 
   // =========================================================================
@@ -47,25 +41,25 @@ export const volatileAgentsData = {
 
   semantics: {
     definition:
-      "Minimum Alveolar Concentration (MAC) is the alveolar concentration of a volatile anesthetic at one atmosphere that prevents gross purposeful movement in 50% of subjects exposed to a standardized surgical stimulus.",
+      "التركيز السنخي الأدنى (MAC) هو التركيز السنخي للغاز الاستنشاقي عند ضغط 1 جو والذي يمنع الحركة الإرادية استجابة لمحفز جراحي موحد لدى 50% من المرضى.",
 
     interpretation:
-      "MAC is population-derived and varies with age, temperature, physiologic state, concurrent medications, and other clinical factors.",
+      "الـ MAC قياس إحصائي للمجموعات ويختلف بحسب العمر، درجة الحرارة، الحالة الفسيولوجية، الأدوية المصاحبة، والعوامل السريرية الأخرى.",
 
     macFractionDefinition:
-      "MAC fraction = measured end-tidal anesthetic concentration divided by the applicable MAC reference concentration.",
+      "نسبة الـ MAC = التركيز السنخي المقاس End-Tidal مقسوماً على قيمة الـ MAC المرجعية المناسبة.",
 
     isNot: [
-      "A patient-specific dosing prescription",
-      "A guaranteed measure of anesthetic depth",
-      "A mandatory concentration target",
-      "A substitute for clinical monitoring",
-      "A substitute for end-tidal anesthetic monitoring",
-      "A substitute for institutional protocols"
+      "وصفة طبية لجرعة مريض محدد",
+      "مقياساً مؤكداً بمفرده لعمق التخدير",
+      "هدف إجباري لتركيز التخدير",
+      "بديلاً عن المراقبة السريرية",
+      "بديلاً عن مراقبة التركيز السنخي للغازات",
+      "بديلاً عن البروتوكولات المؤسسية"
     ],
 
     additiveMacNotice:
-      "MAC fractions of inhaled anesthetic agents may be considered additive for population-level estimation. This does not guarantee an individual patient's anesthetic depth."
+      "يمكن جمع أجزاء الـ MAC للغازات الاستنشاقية كتقدير إحصائي تراكمي، ولا يضمن ذلك عمق التخدير الفردي للمريض."
   },
 
   // =========================================================================
@@ -73,7 +67,7 @@ export const volatileAgentsData = {
   // =========================================================================
 
   ageAdjustmentModel: {
-    name: "Nickalls & Mapleson Age-Adjustment Model",
+    name: "نموذج Nickalls & Mapleson للتعديل العمري",
 
     type: "logarithmic_age_adjustment",
 
@@ -101,7 +95,7 @@ export const volatileAgentsData = {
     },
 
     limitations:
-      "The adult age-adjustment model must not be automatically extrapolated into unsupported pediatric age ranges. When a validated pediatric reference exists, that reference takes priority.",
+      "لا يجوز استخدام نموذج تعديل العمر للبالغين تلقائياً على الفئات العمرية للأطفال غير المدعومة. عند توفر مرجع أطفال معتمد، تكون له الأولوية.",
 
     reference: {
       authors: "Nickalls RWD, Mapleson WW",
@@ -121,10 +115,10 @@ export const volatileAgentsData = {
   // =========================================================================
 
   consumptionModel: {
-    name: "Dion Volatile Agent Consumption Approximation",
+    name: "نموذج Dion لتقدير استهلاك سائل المبخر",
 
     formula:
-      "Liquid consumption (mL/hr) = FGF (L/min) × dial concentration (%) × molecular weight × 60 / (2412 × liquid density)",
+      "استهلاك السائل (mL/hr) = FGF (L/min) × تركيز المبخر (%) × الوزن الجزئي × 60 / (2412 × الكثافة السائلة)",
 
     inputFlowUnit: "L/min",
 
@@ -137,10 +131,10 @@ export const volatileAgentsData = {
     factorType: "Dion_equation_derived",
 
     notes:
-      "This estimates delivered vaporizer output converted to liquid volume. It does not estimate patient uptake, circuit losses, leaks, or actual vaporizer bottle weight change.",
+      "يقدر مخرجات المبخر المسلمة وتحويلها إلى حجم سائل. لا يقدر امتصاص المريض، ضياع الدائرة، التسريبات، أو التغير الفعلي في وزن زجاجة المبخر.",
 
     clinicalInterpretation:
-      "Consumption is an estimate based on fresh gas flow and vaporizer dial concentration. Actual consumption can differ because of equipment characteristics, temperature, leaks, rebreathing, and other operating conditions.",
+      "الاستهلاك هو قيمة تقديرية تعتمد على تدفق الغاز النقي وتركيز المبخر. قد يختلف الاستهلاك الفعلي بسبب خصائص الأجهزة، درجة الحرارة، التسريب، وإعادة التنفس.",
 
     reference: {
       author: "Dion P",
@@ -173,20 +167,20 @@ export const volatileAgentsData = {
     },
 
     definition:
-      "Low-flow anesthesia generally refers to fresh gas flow below approximately 1 L/min, although terminology varies by source and anesthesia system.",
+      "يشير التخدير بالتدفق المنخفض عموماً إلى استخدام تدفق غاز نقي أقل من 1 L/min تقريباً.",
 
     safetyRequirements: [
-      "Continuous inspired oxygen monitoring",
-      "Continuous end-tidal CO2 monitoring",
-      "Continuous end-tidal volatile-agent monitoring",
-      "Effective CO2 absorbent",
-      "Appropriate anesthesia machine leak performance",
-      "Reliable vaporizer performance",
-      "Appropriate patient monitoring"
+      "مراقبة مستمرة للأكسجين المستنشق (FiO2)",
+      "مراقبة مستمرة لثاني أكسيد الكربون (End-Tidal CO2)",
+      "مراقبة مستمرة لتركيز الغاز التخديري المستنشق والسنخي",
+      "صودا لايم فعالة لامتصاص CO2",
+      "أداء خالي من التسريب لجهاز التخدير",
+      "أداء دقيق للمبخر",
+      "مراقبة سريرية مناسبة للمريض"
     ],
 
     disclaimer:
-      "Low-flow anesthesia requires an anesthesia workstation and breathing system capable of safe low-flow operation and appropriate monitoring."
+      "يتطلب التخدير بالتدفق المنخفض جهاز تخدير ودائرة تنفس قادرة على التشغيل الآمن بالتدفق المنخفض مع توفر المراقبة المناسبة."
   },
 
   // =========================================================================
@@ -199,6 +193,8 @@ export const volatileAgentsData = {
     id: "nitrous_oxide",
 
     name: "Nitrous Oxide (N₂O)",
+
+    arabicName: "أكسيد النيتروز",
 
     macAt40: 104.0,
 
@@ -222,11 +218,11 @@ export const volatileAgentsData = {
         true,
 
       warning:
-        "N₂O percentage alone does not establish actual FiO₂ when other gases or volatile agents are present."
+        "نسبة N₂O بمفردها لا تثبت تركيز الأكسجين المستنشق الفعلي FiO₂ عند وجود غازات أخرى."
     },
 
     disclaimer:
-      "The N₂O MAC reference is population-derived. Actual oxygen concentration must be monitored clinically. A simple N₂O ceiling must not be interpreted as proof of adequate FiO₂.",
+      "قيمة MAC المرجعية لـ N₂O مشتقة إحصائياً. يجب مراقبة تركيز الأكسجين الفعلي سريرياً. الحد الأقصى لـ N₂O لا يعتبر إثباتاً لـ FiO₂ كافٍ.",
 
     reference: {
       authors:
@@ -258,7 +254,7 @@ export const volatileAgentsData = {
     },
 
     clinicalNotice:
-      "Opioids and other anesthetic adjuncts may reduce volatile anesthetic requirements. The magnitude varies with drug, dose, timing, patient factors, and surgical stimulation. No fixed numerical reduction is applied."
+      "الأفيونات والأدوية المساعدة تقلل من احتياج الغازات الاستنشاقية. تختلف نسبة التخفيض بحسب الدواء، الجرعة، التوقيت، وعمر المريض. لا تطبق الحاسبة نسبة تخفيض رقمية ثابتة لمنع التضليل السريري."
   },
 
   // =========================================================================
@@ -270,42 +266,42 @@ export const volatileAgentsData = {
       minInclusive: 0,
       maxInclusive: 120,
       reason:
-        "Input sanity boundary only. It is not the validated range of every MAC model."
+        "حدود منطقية لإدخال العمر."
     },
 
     fgfLmin: {
       minInclusive: 0.1,
       maxInclusive: 15.0,
       reason:
-        "Input plausibility boundary for fresh gas flow."
+        "حدود إدخال تدفق الغاز النقي."
     },
 
     dialPercent: {
       minInclusive: 0,
       maxInclusive: 18,
       reason:
-        "Global sanity boundary. Agent-specific vaporizer limits are enforced separately."
+        "حدود إدخال المبخر العامة. يتم تطبيق حدود المبخر الخاصة بكل غاز بشكل مستقل."
     },
 
     endTidalPercent: {
       minInclusive: 0,
       maxInclusive: 18,
       reason:
-        "Global sanity boundary. Agent-specific limits should also be considered."
+        "حدود إدخال التركيز السنخي المقاس."
     },
 
     n2oPercent: {
       minInclusive: 0,
       maxInclusive: 70,
       reason:
-        "Simplified upper boundary for this educational calculator. Actual FiO2 must be monitored clinically."
+        "حد أقصى مبسط لضمان حفظ نسبة أكسجين لا تقل عن 30% في الخليط الثنائي. يجب مراقبة FiO2 سريرياً."
     },
 
     durationHours: {
       minInclusive: 0.01,
       maxInclusive: 24,
       reason:
-        "Practical calculator input boundary."
+        "حدود إدخال مدة التخدير."
     }
   },
 
@@ -359,7 +355,7 @@ export const volatileAgentsData = {
         approximateLiquidConsumptionFactor: 3.27,
 
         factorUnit:
-          "mL liquid / (L gas × vol%) per hour",
+          "mL سائل / (L غاز × vol%) لكل ساعة",
 
         formula:
           "mL/hr = FGF × dial% × MW × 60 / (2412 × density)",
@@ -385,7 +381,7 @@ export const volatileAgentsData = {
 
         ageGroups: [
           {
-            label: "Term neonates: 0 to <1 month",
+            label: "حديثو الولادة المكتملون: 0 إلى <1 شهر",
 
             minAgeYearsInclusive: 0,
 
@@ -400,7 +396,7 @@ export const volatileAgentsData = {
             requiresClinicalReview: true,
 
             note:
-              "Applies to full-term neonates. MAC in premature infants has not been determined.",
+              "ينطبق على حديثي الولادة المكتملين. لم يتم تحديد الـ MAC للأطفال الخدج.",
 
             reference: {
               organization: "FDA / DailyMed",
@@ -411,7 +407,7 @@ export const volatileAgentsData = {
           },
 
           {
-            label: "Infants: 1 to <6 months",
+            label: "الرضع: 1 إلى <6 أشهر",
 
             minAgeYearsInclusive: 1 / 12,
 
@@ -434,7 +430,7 @@ export const volatileAgentsData = {
           },
 
           {
-            label: "Infants/young children: 6 months to <3 years",
+            label: "الرضع والأطفال الصغار: 6 أشهر إلى <3 سنوات",
 
             minAgeYearsInclusive: 0.5,
 
@@ -457,7 +453,7 @@ export const volatileAgentsData = {
           },
 
           {
-            label: "Children: 3 to 12 years",
+            label: "الأطفال: 3 إلى 12 سنة",
 
             minAgeYearsInclusive: 3.0,
 
@@ -482,12 +478,12 @@ export const volatileAgentsData = {
       },
 
       clinicalNotes:
-        "Sevoflurane is relatively nonpungent and is commonly used for inhalational induction and maintenance.",
+        "السيفوفلوران غير متهيج نسبياً للمجاري التنفسية ويستخدم شائعاً للتحريض الاستنشاقي وصيانة التخدير.",
 
       warnings: [
-        "Avoid strongly desiccated CO₂ absorbents.",
-        "Pediatric patients may have emergence agitation/delirium.",
-        "MAC is a population-derived measure and is not an individual anesthetic-depth target."
+        "تجنب استخدام صودا لايم الجافة جداً لتقليل خطر التفاعلات أو ارتفاع الحرارة.",
+        "قد يعاني الأطفال من ظاهرة هيجان أوذيان الإيقاظ (Emergence Agitation/Delirium).",
+        "الـ MAC قياس إحصائي للمجموعات ولا يمثل هدفاً فردياً لعمق التخدير."
       ],
 
       references: {
@@ -552,7 +548,7 @@ export const volatileAgentsData = {
         approximateLiquidConsumptionFactor: 3.06,
 
         factorUnit:
-          "mL liquid / (L gas × vol%) per hour",
+          "mL سائل / (L غاز × vol%) لكل ساعة",
 
         formula:
           "mL/hr = FGF × dial% × MW × 60 / (2412 × density)",
@@ -578,7 +574,7 @@ export const volatileAgentsData = {
 
         ageGroups: [
           {
-            label: "Neonates: 0 to <1 month",
+            label: "حديثو الولادة: 0 إلى <1 شهر",
 
             minAgeYearsInclusive: 0,
 
@@ -604,7 +600,7 @@ export const volatileAgentsData = {
           },
 
           {
-            label: "Infants: 1 to <6 months",
+            label: "الرضع: 1 إلى <6 أشهر",
 
             minAgeYearsInclusive: 1 / 12,
 
@@ -630,7 +626,7 @@ export const volatileAgentsData = {
           },
 
           {
-            label: "Infants: 6 to <12 months",
+            label: "الرضع: 6 إلى <12 شهر",
 
             minAgeYearsInclusive: 0.5,
 
@@ -656,7 +652,7 @@ export const volatileAgentsData = {
           },
 
           {
-            label: "Children: 1 to <3 years",
+            label: "الأطفال: 1 إلى <3 سنوات",
 
             minAgeYearsInclusive: 1.0,
 
@@ -682,7 +678,7 @@ export const volatileAgentsData = {
           },
 
           {
-            label: "Children: 3 to <5 years",
+            label: "الأطفال: 3 إلى <5 سنوات",
 
             minAgeYearsInclusive: 3.0,
 
@@ -710,12 +706,12 @@ export const volatileAgentsData = {
       },
 
       clinicalNotes:
-        "Isoflurane is relatively pungent and is generally less suitable for inhalational mask induction than sevoflurane.",
+        "الإيزوفلوران متهيج نسبياً للمجاري التنفسية وهو أقل ملاءمة للتحريض بالقناع الاستنشاقي مقارنة بالسيفوفلوران.",
 
       warnings: [
-        "Airway irritation may occur during inhalational induction.",
-        "Isoflurane causes dose-dependent vasodilation and may reduce arterial blood pressure.",
-        "MAC is not an individual anesthetic-depth target."
+        "قد يحدث تهيج في المجرى الهوائي أثناء التحريض الاستنشاقي.",
+        "يسبب الإيزوفلوران توسعاً وعائياً نظامياً اعتماداً على الجرعة وقد يخفض ضغط الدم الشرياني.",
+        "الـ MAC ليس هدفاً فردياً لعمق التخدير."
       ],
 
       references: {
@@ -787,7 +783,7 @@ export const volatileAgentsData = {
         approximateLiquidConsumptionFactor: 2.86,
 
         factorUnit:
-          "mL liquid / (L gas × vol%) per hour",
+          "mL سائل / (L غاز × vol%) لكل ساعة",
 
         formula:
           "mL/hr = FGF × dial% × MW × 60 / (2412 × density)",
@@ -814,17 +810,17 @@ export const volatileAgentsData = {
         ageGroups: [],
 
         notes:
-          "This dataset does not provide a general pediatric MAC table for desflurane. The adult model is not automatically applied below 5 years."
+          "لا يوفر ملف البيانات جدول MAC للأطفال للديسفلوران. لا يتم تطبيق نموذج البالغين تلقائياً تحت سن 5 سنوات."
       },
 
       clinicalNotes:
-        "Desflurane has very low blood-gas solubility and permits rapid changes in anesthetic concentration. It requires a dedicated vaporizer.",
+        "يمتاز الديسفلوران بإنحلالية واطئة جداً في الدم ويسمح بتغيرات سريعة في تركيز التخدير. يتطلب مبخراً خاصاً مسخناً (Tec 6).",
 
       warnings: [
-        "Not recommended for routine inhalational mask induction in pediatric patients because of airway irritation/reactivity.",
-        "Rapid increases in inspired concentration may produce sympathetic stimulation.",
-        "Do not automatically extrapolate the adult model below 5 years.",
-        "Use only a vaporizer designed for desflurane."
+        "لا يُنصح به للتحريض بالقناع الاستنشاقي لدى الأطفال بسبب تهيج المجاري التنفسية والتشنج الحنجري.",
+        "الزيادة السريعة في التركيز المستنشق قد تحفز الجهاز الودي (تسارع نبض وارتفاع ضغط الدم).",
+        "لا تطبق نموذج البالغين تلقائياً للأطفال دون سن 5 سنوات.",
+        "استخدم فقط المبخر المخصص للديسفلوران."
       ],
 
       references: {
@@ -856,60 +852,60 @@ export const volatileAgentsData = {
         id: "pediatric_priority",
 
         condition:
-          "A validated pediatric MAC reference exists for the selected agent and patient age.",
+          "وجود مرجع MAC أطفال معتمد للغاز والعمر المحدد.",
 
         action:
-          "Use the pediatric reference and do not simultaneously use the adult model."
+          "استخدام مرجع الأطفال وعدم استخدام نموذج البالغين في الوقت نفسه."
       },
 
       {
         id: "adult_model",
 
         condition:
-          "No pediatric reference applies and age is within the supported adult model range.",
+          "عدم وجود مرجع أطفال والعمر ضمن نطاق نموذج البالغين المدعوم.",
 
         action:
-          "Use the Nickalls & Mapleson age-adjustment model."
+          "استخدام نموذج Nickalls & Mapleson للتعديل العمري."
       },
 
       {
         id: "outside_model_range",
 
         condition:
-          "Age is outside the supported adult model range.",
+          "العمر خارج نطاق نموذج البالغين المدعوم.",
 
         action:
-          "Do not silently extrapolate. Return requiresClinicalReview."
+          "إرجاع طلب المراجعة السريرية (requiresClinicalReview)."
       },
 
       {
         id: "desflurane_pediatric",
 
         condition:
-          "Desflurane selected and patient age is below 5 years.",
+          "اختيار الديسفلوران وعمر المريض أقل من 5 سنوات.",
 
         action:
-          "Do not calculate MAC using the adult model."
+          "عدم حساب الـ MAC باستخدام نموذج البالغين."
       },
 
       {
         id: "mac_input",
 
         condition:
-          "Calculating volatile anesthetic MAC fraction.",
+          "حساب نسبة الـ MAC للغاز الاستنشاقي.",
 
         action:
-          "Use measured end-tidal concentration rather than vaporizer dial setting."
+          "استخدام التركيز السنخي المقاس End-Tidal بدلاً من تركيز المبخر Dial."
       },
 
       {
         id: "consumption_input",
 
         condition:
-          "Calculating liquid anesthetic consumption.",
+          "حساب استهلاك السائل المتطاير.",
 
         action:
-          "Use FGF and vaporizer dial concentration with the Dion-derived agent-specific factor."
+          "استخدام FGF وتركيز المبخر Dial مع معامل Dion الخاص بالغاز."
       }
     ]
   }
