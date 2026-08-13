@@ -5,9 +5,8 @@
  * File: js/components/abgView.js
  *
  * Architecture:
- * ES Module View Layer.
- * Handles UI rendering, user input collection, tab switching,
- * and live DOM updates across ABG, Anion Gap, Oxygenation, and Electrolyte Corrections.
+ * ES Module View Layer with Targeted Live DOM Updates.
+ * Prevents input blur and mobile soft keyboard dismissal on typing.
  *
  * Consumes:
  * - ../data/abgData.js
@@ -136,14 +135,10 @@ export function renderAbgView() {
 }
 
 // =============================================================================
-// 4. TAB PANELS BUILDERS
+// 4. TAB PANELS & CARDS BUILDERS
 // =============================================================================
 
 function renderAbgPanel(result) {
-  const ab = result.acidBase || {};
-  const ag = result.anionGap || {};
-  const ox = result.oxygenation || {};
-
   return `
     <div class="space-y-5">
       <!-- INPUTS GRID -->
@@ -180,54 +175,65 @@ function renderAbgPanel(result) {
         </div>
       </div>
 
-      <!-- ACID-BASE EVALUATION RESULT CARD -->
-      <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
-        <div class="flex justify-between items-center border-b border-slate-200 pb-2">
-          <strong class="text-slate-800">تشخيص النمط الحمضي-القاعدي الأولي:</strong>
-          <span class="px-2 py-0.5 text-xs font-bold rounded border font-mono ${getBadgeStyle(ab.primaryDisorder)}" dir="ltr">
-            ${ab.primaryDisorder || "غير محدد"}
-          </span>
-        </div>
+      <!-- ACID-BASE RESULT CONTAINER -->
+      <div id="acidBaseResultCard">${renderAcidBaseCardHTML(result)}</div>
 
-        <p class="text-slate-600 leading-relaxed text-[11px]">
-          <strong>تقييم الاستجابة التعويضية:</strong> ${ab.compensationStatus || "—"}
-        </p>
+      <!-- OXYGENATION RESULT CONTAINER -->
+      <div id="oxygenationResultCard">${renderOxygenationCardHTML(result)}</div>
+    </div>
+  `;
+}
 
-        ${ab.wintersFormula ? `
-          <div class="p-2 bg-indigo-50/70 border border-indigo-200 rounded-lg text-[11px] text-indigo-950 font-mono" dir="ltr">
-            <strong>Winter's Formula PaCO₂ Target:</strong> ${ab.wintersFormula.min} - ${ab.wintersFormula.max} mmHg
-          </div>
-        ` : ''}
+function renderAcidBaseCardHTML(result) {
+  const ab = result.acidBase || {};
+
+  return `
+    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
+      <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+        <strong class="text-slate-800">تشخيص النمط الحمضي-القاعدي الأولي:</strong>
+        <span class="px-2 py-0.5 text-xs font-bold rounded border font-mono ${getBadgeStyle(ab.primaryDisorder)}" dir="ltr">
+          ${ab.primaryDisorder || "غير محدد"}
+        </span>
       </div>
 
-      <!-- OXYGENATION & ARDS CONTEXT CARD -->
-      <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
-        <div class="flex justify-between items-center border-b border-slate-200 pb-2">
-          <strong class="text-slate-800">تقييم الأكسجة ونسبة P/F Ratio:</strong>
-          ${ox.calculated ? `
-            <span class="px-2 py-0.5 text-xs font-bold rounded border font-mono ${getBadgeStyle(ox.severityLabel)}" dir="ltr">
-              P/F: ${ox.pfRatio} (FiO₂: ${ox.fio2Percent}%)
-            </span>
-          ` : `<span class="text-slate-400 font-mono text-[11px]">${ox.message}</span>`}
-        </div>
+      <p class="text-slate-600 leading-relaxed text-[11px]">
+        <strong>تقييم الاستجابة التعويضية:</strong> ${ab.compensationStatus || "—"}
+      </p>
 
+      ${ab.wintersFormula ? `
+        <div class="p-2 bg-indigo-50/70 border border-indigo-200 rounded-lg text-[11px] text-indigo-950 font-mono" dir="ltr">
+          <strong>Winter's Formula PaCO₂ Target:</strong> ${ab.wintersFormula.min} - ${ab.wintersFormula.max} mmHg
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderOxygenationCardHTML(result) {
+  const ox = result.oxygenation || {};
+
+  return `
+    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
+      <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+        <strong class="text-slate-800">تقييم الأكسجة ونسبة P/F Ratio:</strong>
         ${ox.calculated ? `
-          <p class="text-slate-700 font-bold text-[11px]">${ox.severityLabel}</p>
-          <p class="text-amber-900 bg-amber-50 p-2 rounded-lg border border-amber-200 text-[10px] leading-relaxed">
-            ${ox.clinicalNotice}
-          </p>
-        ` : ''}
+          <span class="px-2 py-0.5 text-xs font-bold rounded border font-mono ${getBadgeStyle(ox.severityLabel)}" dir="ltr">
+            P/F: ${ox.pfRatio} (FiO₂: ${ox.fio2Percent}%)
+          </span>
+        ` : `<span class="text-slate-400 font-mono text-[11px]">${ox.message}</span>`}
       </div>
+
+      ${ox.calculated ? `
+        <p class="text-slate-700 font-bold text-[11px]">${ox.severityLabel}</p>
+        <p class="text-amber-900 bg-amber-50 p-2 rounded-lg border border-amber-200 text-[10px] leading-relaxed">
+          ${ox.clinicalNotice}
+        </p>
+      ` : ''}
     </div>
   `;
 }
 
 function renderElectrolytesPanel(result) {
-  const ag = result.anionGap || {};
-  const naResult = result.sodium || {};
-  const caResult = result.calcium || {};
-  const kAlert = result.potassiumAlert;
-
   return `
     <div class="space-y-5">
       <!-- INPUTS GRID -->
@@ -293,74 +299,110 @@ function renderElectrolytesPanel(result) {
         </div>
       </div>
 
-      <!-- ANION GAP & DELTA RATIO RESULT CARD -->
-      <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
-        <div class="flex justify-between items-center border-b border-slate-200 pb-2">
-          <strong class="text-slate-800">الفجوة الشاردية (Anion Gap) ونسبة الدلتا:</strong>
-          ${ag.calculated ? `
-            <span class="px-2 py-0.5 text-xs font-bold rounded border font-mono ${getBadgeStyle(ag.isHagma ? 'HAGMA' : 'Normal')}" dir="ltr">
-              AG: ${ag.effectiveAG} mEq/L ${ag.isAlbuminCorrected ? '(Albumin-Corrected)' : ''}
-            </span>
-          ` : `<span class="text-slate-400 font-mono text-[11px]">${ag.message}</span>`}
-        </div>
+      <!-- ANION GAP RESULT CONTAINER -->
+      <div id="anionGapResultCard">${renderAnionGapCardHTML(result)}</div>
 
+      <!-- SODIUM & CALCIUM CORRECTIONS CONTAINER -->
+      <div id="sodiumCalciumResultCard">${renderSodiumCalciumCardHTML(result)}</div>
+    </div>
+  `;
+}
+
+function renderAnionGapCardHTML(result) {
+  const ag = result.anionGap || {};
+
+  return `
+    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
+      <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+        <strong class="text-slate-800">الفجوة الشاردية (Anion Gap) ونسبة الدلتا:</strong>
         ${ag.calculated ? `
-          <p class="text-slate-600 text-[11px]">
-            <strong>الفجوة الشاردية القياسية:</strong> <bdi dir="ltr" class="font-mono">${ag.standardAG} mEq/L</bdi>
-            ${ag.isAlbuminCorrected ? ` | <strong>الفجوة المعدلة للألبومين:</strong> <bdi dir="ltr" class="font-mono">${ag.correctedAG} mEq/L</bdi>` : ''}
-          </p>
+          <span class="px-2 py-0.5 text-xs font-bold rounded border font-mono ${getBadgeStyle(ag.isHagma ? 'HAGMA' : 'Normal')}" dir="ltr">
+            AG: ${ag.effectiveAG} mEq/L ${ag.isAlbuminCorrected ? '(Albumin-Corrected)' : ''}
+          </span>
+        ` : `<span class="text-slate-400 font-mono text-[11px]">${ag.message}</span>`}
+      </div>
 
-          ${ag.deltaRatio ? `
-            <div class="p-2 bg-indigo-50 border border-indigo-200 rounded-lg text-[11px] text-indigo-900 space-y-1">
-              <p><strong>Delta Ratio:</strong> <bdi dir="ltr" class="font-mono font-bold">${ag.deltaRatio.ratio}</bdi> (ΔAG: ${ag.deltaRatio.deltaAG} / ΔHCO₃⁻: ${ag.deltaRatio.deltaHCO3})</p>
-              <p class="text-[10px]">${ag.deltaRatio.interpretation}</p>
-            </div>
-          ` : ''}
+      ${ag.calculated ? `
+        <p class="text-slate-600 text-[11px]">
+          <strong>الفجوة الشاردية القياسية:</strong> <bdi dir="ltr" class="font-mono">${ag.standardAG} mEq/L</bdi>
+          ${ag.isAlbuminCorrected ? ` | <strong>الفجوة المعدلة للألبومين:</strong> <bdi dir="ltr" class="font-mono">${ag.correctedAG} mEq/L</bdi>` : ''}
+        </p>
+
+        ${ag.deltaRatio ? `
+          <div class="p-2 bg-indigo-50 border border-indigo-200 rounded-lg text-[11px] text-indigo-900 space-y-1">
+            <p><strong>Delta Ratio:</strong> <bdi dir="ltr" class="font-mono font-bold">${ag.deltaRatio.ratio}</bdi> (ΔAG: ${ag.deltaRatio.deltaAG} / ΔHCO₃⁻: ${ag.deltaRatio.deltaHCO3})</p>
+            <p class="text-[10px]">${ag.deltaRatio.interpretation}</p>
+          </div>
+        ` : ''}
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderSodiumCalciumCardHTML(result) {
+  const naResult = result.sodium || {};
+  const caResult = result.calcium || {};
+  const kAlert = result.potassiumAlert;
+
+  return `
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+      <!-- SODIUM CORRECTION -->
+      <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
+        <strong class="text-slate-800 block border-b border-slate-200 pb-1">تصحيح الصوديوم في فرط السكر:</strong>
+        ${naResult.katzCorrectedNa !== null ? `
+          <p class="text-[11px] text-slate-700"><strong>Katz Formula (1.6):</strong> <bdi dir="ltr" class="font-mono font-bold">${naResult.katzCorrectedNa} mEq/L</bdi></p>
+          <p class="text-[11px] text-slate-700"><strong>Hillier Formula (2.4):</strong> <bdi dir="ltr" class="font-mono font-bold">${naResult.hillierCorrectedNa} mEq/L</bdi></p>
+        ` : `<p class="text-slate-500 text-[10px]">لا توجد حاجة لتصحيح الصوديوم (السكر ≤ 100 mg/dL).</p>`}
+
+        ${naResult.freeWaterDeficitLiters !== null ? `
+          <div class="mt-2 pt-2 border-t border-slate-200 text-[11px] text-amber-950 font-bold">
+            عجز الماء الحر التقديري: <bdi dir="ltr" class="font-mono">${naResult.freeWaterDeficitLiters} Liters</bdi>
+            <p class="font-normal text-[10px] text-amber-900 mt-0.5">${naResult.rateNotice}</p>
+          </div>
         ` : ''}
       </div>
 
-      <!-- SODIUM & CALCIUM CORRECTIONS CARD -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-        <!-- SODIUM CORRECTION -->
-        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
-          <strong class="text-slate-800 block border-b border-slate-200 pb-1">تصحيح الصوديوم في فرط السكر:</strong>
-          ${naResult.katzCorrectedNa !== null ? `
-            <p class="text-[11px] text-slate-700"><strong>Katz Formula (1.6):</strong> <bdi dir="ltr" class="font-mono font-bold">${naResult.katzCorrectedNa} mEq/L</bdi></p>
-            <p class="text-[11px] text-slate-700"><strong>Hillier Formula (2.4):</strong> <bdi dir="ltr" class="font-mono font-bold">${naResult.hillierCorrectedNa} mEq/L</bdi></p>
-          ` : `<p class="text-slate-500 text-[10px]">لا توجد حاجة لتصحيح الصوديوم (السكر ≤ 100 mg/dL).</p>`}
-
-          ${naResult.freeWaterDeficitLiters !== null ? `
-            <div class="mt-2 pt-2 border-t border-slate-200 text-[11px] text-amber-950 font-bold">
-              عجز الماء الحر التقديري: <bdi dir="ltr" class="font-mono">${naResult.freeWaterDeficitLiters} Liters</bdi>
-              <p class="font-normal text-[10px] text-amber-900 mt-0.5">${naResult.rateNotice}</p>
-            </div>
-          ` : ''}
+      <!-- CALCIUM CORRECTION & POTASSIUM ALERT -->
+      <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+        <div>
+          <strong class="text-slate-800 block border-b border-slate-200 pb-1 mb-1">تصحيح الكالسيوم الكلي (Payne):</strong>
+          ${caResult.calculated ? `
+            <p class="text-[11px] text-slate-700">
+              <strong>الكالسيوم المعدل بالألبومين:</strong> <bdi dir="ltr" class="font-mono font-bold">${caResult.correctedCalcium} mg/dL</bdi>
+            </p>
+            <p class="text-[10px] text-slate-500 mt-0.5">${caResult.hypoNotice}</p>
+          ` : `<p class="text-slate-400 text-[10px]">${caResult.message}</p>`}
         </div>
 
-        <!-- CALCIUM CORRECTION & POTASSIUM ALERT -->
-        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-          <div>
-            <strong class="text-slate-800 block border-b border-slate-200 pb-1 mb-1">تصحيح الكالسيوم الكلي (Payne):</strong>
-            ${caResult.calculated ? `
-              <p class="text-[11px] text-slate-700">
-                <strong>الكالسيوم المعدل بالألبومين:</strong> <bdi dir="ltr" class="font-mono font-bold">${caResult.correctedCalcium} mg/dL</bdi>
-              </p>
-              <p class="text-[10px] text-slate-500 mt-0.5">${caResult.hypoNotice}</p>
-            ` : `<p class="text-slate-400 text-[10px]">${caResult.message}</p>`}
+        ${kAlert ? `
+          <div class="p-2 border rounded-lg text-[10px] font-bold leading-relaxed ${getBadgeStyle(kAlert.alertText)}">
+            ${kAlert.alertText}
           </div>
-
-          ${kAlert ? `
-            <div class="p-2 border rounded-lg text-[10px] font-bold leading-relaxed ${getBadgeStyle(kAlert.alertText)}">
-              ${kAlert.alertText}
-            </div>
-          ` : ''}
-        </div>
+        ` : ''}
       </div>
     </div>
   `;
 }
 
 function renderSummaryPanel(result) {
+  return `
+    <div class="space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <h3 class="text-xs font-bold text-slate-800">
+          📊 التقرير السريري المدمج لغازات الدم والأملاح <bdi dir="ltr" class="font-mono text-slate-400">(Integrated ABG Summary)</bdi>
+        </h3>
+        <button id="btnPrintReport" type="button" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+          <span>🖨️</span>
+          <span>طباعة / تصدير PDF</span>
+        </button>
+      </div>
+
+      <div id="summaryResultsCard">${renderSummaryCardHTML(result)}</div>
+    </div>
+  `;
+}
+
+function renderSummaryCardHTML(result) {
   if (!result || !result.success) {
     return `
       <div class="p-4 bg-rose-50 text-rose-800 border border-rose-200 rounded-xl text-xs">
@@ -378,17 +420,6 @@ function renderSummaryPanel(result) {
 
   return `
     <div class="space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-        <h3 class="text-xs font-bold text-slate-800">
-          📊 التقرير السريري المدمج لغازات الدم والأملاح <bdi dir="ltr" class="font-mono text-slate-400">(Integrated ABG Summary)</bdi>
-        </h3>
-        <button id="btnPrintReport" type="button" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer">
-          <span>🖨️</span>
-          <span>طباعة / تصدير PDF</span>
-        </button>
-      </div>
-
-      <!-- SUMMARY CARDS GRID -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
         <!-- ACID BASE CARD -->
         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
@@ -427,7 +458,6 @@ function renderSummaryPanel(result) {
         </div>
       </div>
 
-      <!-- POTASSIUM ALERT SUMMARY IF PRESENT -->
       ${kAlert ? `
         <div class="p-3 border rounded-xl text-xs font-bold leading-relaxed ${getBadgeStyle(kAlert.alertText)}">
           ${kAlert.alertText}
@@ -437,9 +467,9 @@ function renderSummaryPanel(result) {
   `;
 }
 
-// =============================================================================
+// =========================================================
 // 5. TARGETED LIVE DOM UPDATES & EVENT BINDINGS
-// =============================================================================
+// =========================================================
 
 export function initAbgEvents() {
   const container = document.getElementById("abgContainer");
@@ -469,14 +499,14 @@ export function initAbgEvents() {
     });
   });
 
-  // ABG Live Input Listeners
+  // ABG Live Input Listeners (Targeted Updates)
   bindInput("abg-ph", "ph");
   bindInput("abg-paco2", "paco2");
   bindInput("abg-hco3", "hco3");
   bindInput("abg-pao2", "pao2");
   bindInput("abg-fio2", "fio2");
 
-  // Electrolytes Live Input Listeners
+  // Electrolytes Live Input Listeners (Targeted Updates)
   bindInput("elyte-na", "na");
   bindInput("elyte-cl", "cl");
   bindInput("elyte-k", "k");
@@ -484,7 +514,7 @@ export function initAbgEvents() {
   bindInput("elyte-glucose", "glucose");
   bindInput("elyte-calcium", "calcium");
 
-  // Demographics Input Listeners
+  // Demographics Input Listeners (Targeted Updates)
   bindInput("patient-age", "age");
   bindInput("patient-weight", "weight");
 
@@ -492,7 +522,7 @@ export function initAbgEvents() {
   if (genderSelect) {
     genderSelect.addEventListener("change", (e) => {
       state.gender = e.target.value;
-      reRenderFull();
+      updateResultsDOM();
     });
   }
 }
@@ -502,9 +532,28 @@ function bindInput(elementId, stateKey) {
   if (el) {
     el.addEventListener("input", (e) => {
       state[stateKey] = e.target.value;
-      reRenderFull();
+      updateResultsDOM();
     });
   }
+}
+
+function updateResultsDOM() {
+  const result = getCalculationResult();
+
+  const acidBaseCard = document.getElementById("acidBaseResultCard");
+  if (acidBaseCard) acidBaseCard.innerHTML = renderAcidBaseCardHTML(result);
+
+  const oxygenationCard = document.getElementById("oxygenationResultCard");
+  if (oxygenationCard) oxygenationCard.innerHTML = renderOxygenationCardHTML(result);
+
+  const anionGapCard = document.getElementById("anionGapResultCard");
+  if (anionGapCard) anionGapCard.innerHTML = renderAnionGapCardHTML(result);
+
+  const sodiumCalciumCard = document.getElementById("sodiumCalciumResultCard");
+  if (sodiumCalciumCard) sodiumCalciumCard.innerHTML = renderSodiumCalciumCardHTML(result);
+
+  const summaryCard = document.getElementById("summaryResultsCard");
+  if (summaryCard) summaryCard.innerHTML = renderSummaryCardHTML(result);
 }
 
 function reRenderFull() {
