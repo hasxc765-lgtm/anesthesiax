@@ -1,7 +1,7 @@
 /**
  * Arterial Blood Gas (ABG) & Electrolytes Reference Data
  *
- * AnesthesiaX — Phase 9.0
+ * AnesthesiaX — Phase 9.0 (Audited Edition)
  * File: js/data/abgData.js
  *
  * Primary References:
@@ -16,27 +16,20 @@
 
 export const abgData = {
   meta: {
-    version: "1.3.0-clinical-audited",
-    title: "تحليل غازات الدم الشرياني وتصحيح الأملاح (ABG & Electrolytes Analysis)",
+    version: "2.0.0-audited",
+    title: "تحليل غازات الدم الشرياني وتصحيح الأملاح (ABG & Electrolytes Center)",
     reference: "Haber RJ (1991), Kraut & Madias (2007), Katz MA (1973), Hillier et al. (1999), Berlin ARDS Definition (2012)",
-    disclaimer: "هذه الأداة مخصصة للدعم الاسترشادي والتحليل السريري المساعد فقط. النتائج الحسابية لا تُعد أوامر علاجية مباشرة لتعويض الأملاح أو تعديل المعايير التهوية، وتتطلب دائماً التقييم السريري المباشر وقراءة تخطيط القلب (ECG) ووظائف الكلى.",
-    formulasUsed: {
-      correctedSodiumKatz: "Katz Formula (Standard): Na + 1.6 * ((Glucose - 100) / 100)",
-      correctedSodiumHillier: "Hillier Formula (Severe Hyperglycemia >400 mg/dL): Na + 2.4 * ((Glucose - 100) / 100)",
-      correctedCalcium: "Payne Formula Estimate: Ca + 0.8 * (4.0 - Albumin)",
-      anionGap: "Standard Anion Gap (without K+): Na - (Cl + HCO3)",
-      correctedAG: "Albumin-Corrected AG: AG + 2.5 * (4.0 - Albumin)",
-      wintersFormula: "Winter's Formula (Metabolic Acidosis Only): Expected PaCO2 = 1.5 * HCO3 + 8 (+/- 2)",
-      freeWaterDeficit: "Free Water Deficit Estimate: TBW * ((Current Na / 140) - 1)"
-    }
+    disclaimer: "هذه الأداة مخصصة للدعم الاسترشادي والتحليل السريري المساعد فقط. النتائج الحسابية لا تُعد أوامر علاجية مباشرة لتعويض الأملاح أو تعديل المعايير التهوية، وتتطلب دائماً التقييم السريري المباشر وقراءة تخطيط القلب (ECG) ووظائف الكلى."
   },
 
   clinicalConstants: {
     normalAnionGap: 12.0,
     normalHco3: 24.0,
+    normalPaCO2: 40.0,
     normalAlbumin: 4.0,
     sodiumReference: 140.0,
-    glucoseBaseline: 100.0,
+    glucoseBaselineMgDl: 100.0,
+    mmolToMgDlFactor: 18.0,
     calciumAlbuminCoefficient: 0.8,
     anionGapAlbuminCoefficient: 2.5,
     katzCoefficientPerHundred: 1.6,
@@ -45,6 +38,30 @@ export const abgData = {
     fio2MaxDecimal: 1.00,
     fio2MinPercent: 21.0,
     fio2MaxPercent: 100.0
+  },
+
+  smartDefaults: {
+    albumin: 4.0,
+    glucose: 100.0,
+    glucoseUnit: "mg/dL",
+    k: 4.0,
+    na: 140.0,
+    cl: 100.0,
+    calcium: 9.0,
+    age: 45,
+    weight: 70,
+    gender: "male",
+    respiratoryTimeline: "acute" // "acute" | "chronic"
+  },
+
+  validRanges: {
+    ph: { min: 6.50, max: 7.80, label: "الرقم الهيدروجيني (pH)" },
+    paco2: { min: 10, max: 150, label: "ضغط ثاني أكسيد الكربون (PaCO₂)" },
+    hco3: { min: 2, max: 60, label: "البيكربونات (HCO₃⁻)" },
+    pao2: { min: 20, max: 600, label: "ضغط الأوكسجين (PaO₂)" },
+    fio2Percent: { min: 21, max: 100, label: "نسبة الأوكسجين (FiO₂ %)" },
+    glucoseMgDl: { min: 20, max: 1500, label: "جلوكوز الدم (mg/dL)" },
+    glucoseMmol: { min: 1.1, max: 83.3, label: "جلوكوز الدم (mmol/L)" }
   },
 
   normalRanges: {
@@ -62,10 +79,10 @@ export const abgData = {
   },
 
   tbwFactors: {
-    maleYoung: 0.60,    // الذكور < 65 سنة
-    maleElderly: 0.50,  // الذكور >= 65 سنة
-    femaleYoung: 0.50,  // الإناث < 65 سنة
-    femaleElderly: 0.45 // الإناث >= 65 سنة
+    maleYoung: 0.60,
+    maleElderly: 0.50,
+    femaleYoung: 0.50,
+    femaleElderly: 0.45
   },
 
   clinicalAlerts: {
