@@ -1,12 +1,11 @@
 /**
  * Arterial Blood Gas (ABG) & Electrolytes Unified UI Component
  *
- * AnesthesiaX — Phase 9.0
+ * AnesthesiaX — Phase 9.0 (Audited Edition)
  * File: js/components/abgView.js
  *
  * Architecture:
- * ES Module View Layer with Targeted Live DOM Updates.
- * Prevents input blur and mobile soft keyboard dismissal on typing.
+ * ES Module View Layer with Targeted Live DOM Updates, Unit Switcher, RTL BDI Wrappers, and ICU Note Generator.
  *
  * Consumes:
  * - ../data/abgData.js
@@ -29,6 +28,7 @@ const state = {
   hco3: "12",
   pao2: "85",
   fio2: "40",
+  respiratoryTimeline: "acute", // "acute" | "chronic"
 
   // Electrolyte Inputs
   na: "138",
@@ -36,9 +36,10 @@ const state = {
   cl: "100",
   albumin: "3.2",
   glucose: "180",
+  glucoseUnit: "mg/dL", // "mg/dL" | "mmol/L"
   calcium: "8.2",
 
-  // Patient Demographics for Free Water Deficit
+  // Patient Demographics
   age: "45",
   weight: "70",
   gender: "male" // "male" | "female"
@@ -68,11 +69,13 @@ function getCalculationResult() {
     hco3: state.hco3,
     pao2: state.pao2,
     fio2: state.fio2,
+    respiratoryTimeline: state.respiratoryTimeline,
     na: state.na,
     k: state.k,
     cl: state.cl,
     albumin: state.albumin,
     glucose: state.glucose,
+    glucoseUnit: state.glucoseUnit,
     calcium: state.calcium,
     age: state.age,
     weight: state.weight,
@@ -95,7 +98,7 @@ export function renderAbgView() {
         <div>
           <h2 class="font-bold text-base flex items-center gap-2">
             <span>🧪</span>
-            <span>تحليل غازات الدم الشرياني والأملاح</span>
+            <span>مركز تحليل غازات الدم والأملاح</span>
           </h2>
           <p class="text-[11px] opacity-80 mt-0.5" dir="ltr">ABG & Electrolytes Clinical Center (Phase 9.0)</p>
         </div>
@@ -106,15 +109,24 @@ export function renderAbgView() {
 
       <!-- PRIMARY TABS -->
       <div class="flex border border-slate-200 bg-white rounded-xl p-1 shadow-sm text-xs font-bold overflow-x-auto gap-1">
-        <button data-tab="abg" class="tab-btn flex-1 min-w-[100px] py-2 px-1 text-center rounded-lg transition cursor-pointer ${state.activeTab === 'abg' ? 'bg-teal-700 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
-          <span>1. غازات الدم (ABG)</span>
+        <button data-tab="abg" class="tab-btn flex-1 min-w-[120px] py-2 px-1 text-center rounded-lg transition cursor-pointer ${state.activeTab === 'abg' ? 'bg-teal-700 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
+          <span>غازات الدم الشرياني</span>
         </button>
-        <button data-tab="electrolytes" class="tab-btn flex-1 min-w-[110px] py-2 px-1 text-center rounded-lg transition cursor-pointer ${state.activeTab === 'electrolytes' ? 'bg-teal-700 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
-          <span>2. الأملاح والتصحيح ⚡</span>
+        <button data-tab="electrolytes" class="tab-btn flex-1 min-w-[130px] py-2 px-1 text-center rounded-lg transition cursor-pointer ${state.activeTab === 'electrolytes' ? 'bg-teal-700 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
+          <span>الأملاح والتصحيح الشاردي ⚡</span>
         </button>
-        <button data-tab="summary" class="tab-btn flex-1 min-w-[100px] py-2 px-1 text-center rounded-lg transition cursor-pointer ${state.activeTab === 'summary' ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
-          <span>3. التقرير الشامل 📊</span>
+        <button data-tab="summary" class="tab-btn flex-1 min-w-[120px] py-2 px-1 text-center rounded-lg transition cursor-pointer ${state.activeTab === 'summary' ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
+          <span>التقرير والملخص السريري 📊</span>
         </button>
+      </div>
+
+      <!-- VALIDATION ALERT CONTAINER -->
+      <div id="validationAlertContainer">
+        ${result.validationError ? `
+          <div class="p-3 bg-rose-50 border border-rose-300 text-rose-800 rounded-xl text-xs font-bold">
+            ⚠️ تنبيه صحة البيانات: ${result.validationError}
+          </div>
+        ` : ''}
       </div>
 
       <!-- TAB CONTENT PANELS -->
@@ -143,14 +155,26 @@ function renderAbgPanel(result) {
     <div class="space-y-5">
       <!-- INPUTS GRID -->
       <div>
-        <h3 class="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3">
-          1. مدخلات عينة غازات الدم الشرياني (ABG Parameters):
-        </h3>
+        <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-3">
+          <h3 class="text-xs font-bold text-slate-800">
+            مدخلات عينة غازات الدم الشرياني:
+          </h3>
+          
+          <!-- ACCUTE VS CHRONIC TOGGLE -->
+          <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[10px] font-bold">
+            <button id="btnTimelineAcute" type="button" class="px-2 py-0.5 rounded transition ${state.respiratoryTimeline === 'acute' ? 'bg-teal-700 text-white shadow' : 'text-slate-600 hover:bg-slate-200'}">
+              حاد (Acute)
+            </button>
+            <button id="btnTimelineChronic" type="button" class="px-2 py-0.5 rounded transition ${state.respiratoryTimeline === 'chronic' ? 'bg-teal-700 text-white shadow' : 'text-slate-600 hover:bg-slate-200'}">
+              مزمن (Chronic)
+            </button>
+          </div>
+        </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
           <div>
             <label class="block font-bold text-slate-700 mb-1">الرقم الهيدروجيني <bdi dir="ltr" class="font-mono">(pH)</bdi>:</label>
-            <input type="number" id="abg-ph" step="0.01" min="6.5" max="8.0" placeholder="مثال: 7.25" value="${state.ph}" class="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 font-bold font-mono text-xs">
+            <input type="number" id="abg-ph" step="0.01" min="6.5" max="7.8" placeholder="مثال: 7.25" value="${state.ph}" class="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 font-bold font-mono text-xs">
           </div>
 
           <div>
@@ -238,9 +262,22 @@ function renderElectrolytesPanel(result) {
     <div class="space-y-5">
       <!-- INPUTS GRID -->
       <div>
-        <h3 class="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3">
-          2. مدخلات الكيمياء والأملاح (Electrolytes & Lab Inputs):
-        </h3>
+        <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-3">
+          <h3 class="text-xs font-bold text-slate-800">
+            مدخلات الكيمياء والأملاح:
+          </h3>
+
+          <!-- GLUCOSE UNIT SWITCHER -->
+          <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[10px] font-bold">
+            <span class="text-slate-500 px-1">وحدة السكر:</span>
+            <button id="btnGlucoseMgDl" type="button" class="px-2 py-0.5 rounded transition ${state.glucoseUnit === 'mg/dL' ? 'bg-teal-700 text-white shadow' : 'text-slate-600 hover:bg-slate-200'}">
+              mg/dL
+            </button>
+            <button id="btnGlucoseMmol" type="button" class="px-2 py-0.5 rounded transition ${state.glucoseUnit === 'mmol/L' ? 'bg-teal-700 text-white shadow' : 'text-slate-600 hover:bg-slate-200'}">
+              mmol/L
+            </button>
+          </div>
+        </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
           <div>
@@ -260,12 +297,12 @@ function renderElectrolytesPanel(result) {
 
           <div>
             <label class="block font-bold text-slate-700 mb-1">الألبومين <bdi dir="ltr" class="font-mono">Albumin (g/dL)</bdi>:</label>
-            <input type="number" id="elyte-albumin" step="0.1" placeholder="مثال: 3.2" value="${state.albumin}" class="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 font-bold font-mono text-xs">
+            <input type="number" id="elyte-albumin" step="0.1" placeholder="مثال: 3.2 (افتراضي 4.0)" value="${state.albumin}" class="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 font-bold font-mono text-xs">
           </div>
 
           <div>
-            <label class="block font-bold text-slate-700 mb-1">السكر في الدم <bdi dir="ltr" class="font-mono">Glucose (mg/dL)</bdi>:</label>
-            <input type="number" id="elyte-glucose" step="1" placeholder="مثال: 180" value="${state.glucose}" class="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 font-bold font-mono text-xs">
+            <label class="block font-bold text-slate-700 mb-1">السكر في الدم <bdi dir="ltr" class="font-mono">Glucose (${state.glucoseUnit})</bdi>:</label>
+            <input type="number" id="elyte-glucose" step="0.1" placeholder="مثال: ${state.glucoseUnit === 'mg/dL' ? '180' : '10'}" value="${state.glucose}" class="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 font-bold font-mono text-xs">
           </div>
 
           <div>
@@ -324,7 +361,7 @@ function renderAnionGapCardHTML(result) {
 
       ${ag.calculated ? `
         <p class="text-slate-600 text-[11px]">
-          <strong>الفجوة الشاردية القياسية:</strong> <bdi dir="ltr" class="font-mono">${ag.standardAG} mEq/L</bdi>
+          <strong>الفجوة القياسية:</strong> <bdi dir="ltr" class="font-mono">${ag.standardAG} mEq/L</bdi>
           ${ag.isAlbuminCorrected ? ` | <strong>الفجوة المعدلة للألبومين:</strong> <bdi dir="ltr" class="font-mono">${ag.correctedAG} mEq/L</bdi>` : ''}
         </p>
 
@@ -389,12 +426,18 @@ function renderSummaryPanel(result) {
     <div class="space-y-4">
       <div class="flex justify-between items-center border-b border-slate-100 pb-2">
         <h3 class="text-xs font-bold text-slate-800">
-          📊 التقرير السريري المدمج لغازات الدم والأملاح <bdi dir="ltr" class="font-mono text-slate-400">(Integrated ABG Summary)</bdi>
+          التقرير السريري المدمج لغازات الدم والأملاح:
         </h3>
-        <button id="btnPrintReport" type="button" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer">
-          <span>🖨️</span>
-          <span>طباعة / تصدير PDF</span>
-        </button>
+        <div class="flex gap-2">
+          <button id="btnCopyIcuNote" type="button" class="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+            <span>📋</span>
+            <span>نسخ تقرير العناية</span>
+          </button>
+          <button id="btnPrintReport" type="button" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+            <span>🖨️</span>
+            <span>طباعة PDF</span>
+          </button>
+        </div>
       </div>
 
       <div id="summaryResultsCard">${renderSummaryCardHTML(result)}</div>
@@ -423,14 +466,14 @@ function renderSummaryCardHTML(result) {
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
         <!-- ACID BASE CARD -->
         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-          <span class="text-[10px] text-slate-500 block">1. الاضطراب الحمضي-القاعدي الأولي:</span>
+          <span class="text-[10px] text-slate-500 block">الاضطراب الحمضي-القاعدي الأولي:</span>
           <strong class="font-mono text-slate-900 text-xs block" dir="ltr">${ab.primaryDisorder || "—"}</strong>
           <p class="text-[10px] text-slate-600 mt-1">${ab.compensationStatus || "—"}</p>
         </div>
 
         <!-- ANION GAP CARD -->
         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-          <span class="text-[10px] text-slate-500 block">2. الفجوة الشاردية (Anion Gap):</span>
+          <span class="text-[10px] text-slate-500 block">الفجوة الشاردية (Anion Gap):</span>
           <strong class="font-mono text-slate-900 text-xs block" dir="ltr">
             AG: ${ag.effectiveAG || "—"} mEq/L ${ag.isAlbuminCorrected ? '(Corrected)' : ''}
           </strong>
@@ -439,7 +482,7 @@ function renderSummaryCardHTML(result) {
 
         <!-- OXYGENATION CARD -->
         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-          <span class="text-[10px] text-slate-500 block">3. تقييم الأكسجة (P/F Ratio):</span>
+          <span class="text-[10px] text-slate-500 block">تقييم الأكسجة (P/F Ratio):</span>
           <strong class="font-mono text-slate-900 text-xs block" dir="ltr">
             ${ox.calculated ? `P/F: ${ox.pfRatio} (FiO₂: ${ox.fio2Percent}%)` : 'غير محسوب'}
           </strong>
@@ -448,7 +491,7 @@ function renderSummaryCardHTML(result) {
 
         <!-- ELECTROLYTES SUMMARY -->
         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-          <span class="text-[10px] text-slate-500 block">4. تصحيحات الأملاح:</span>
+          <span class="text-[10px] text-slate-500 block">تصحيحات الأملاح:</span>
           <p class="text-[11px] text-slate-800">
             <strong>الصوديوم المعدل (Katz):</strong> <bdi dir="ltr" class="font-mono">${naResult.katzCorrectedNa || naResult.measuredNa || '—'} mEq/L</bdi>
           </p>
@@ -456,6 +499,12 @@ function renderSummaryCardHTML(result) {
             <strong>الكالسيوم المعدل:</strong> <bdi dir="ltr" class="font-mono">${caResult.correctedCalcium || '—'} mg/dL</bdi>
           </p>
         </div>
+      </div>
+
+      <!-- ICU FORMATTED TEXT PREVIEW -->
+      <div class="p-3 bg-slate-800 text-slate-100 rounded-xl text-[10px] font-mono space-y-1" dir="ltr">
+        <strong class="text-teal-400 block font-sans">Preview for ICU Progress Note:</strong>
+        <pre class="whitespace-pre-wrap leading-relaxed">${result.icuNote}</pre>
       </div>
 
       ${kAlert ? `
@@ -483,11 +532,59 @@ export function initAbgEvents() {
     });
   }
 
-  // Print / Export PDF Handler
+  // Print Handler
   const btnPrint = document.getElementById("btnPrintReport");
   if (btnPrint) {
     btnPrint.addEventListener("click", () => {
       window.print();
+    });
+  }
+
+  // Copy ICU Progress Note Handler
+  const btnCopy = document.getElementById("btnCopyIcuNote");
+  if (btnCopy) {
+    btnCopy.addEventListener("click", () => {
+      const result = getCalculationResult();
+      if (result.icuNote && navigator.clipboard) {
+        navigator.clipboard.writeText(result.icuNote).then(() => {
+          btnCopy.innerHTML = "<span>✅</span> <span>تم النسخ!</span>";
+          setTimeout(() => {
+            btnCopy.innerHTML = "<span>📋</span> <span>نسخ تقرير العناية</span>";
+          }, 2000);
+        });
+      }
+    });
+  }
+
+  // Acute vs Chronic Timeline Buttons
+  const btnAcute = document.getElementById("btnTimelineAcute");
+  const btnChronic = document.getElementById("btnTimelineChronic");
+  if (btnAcute && btnChronic) {
+    btnAcute.addEventListener("click", () => {
+      state.respiratoryTimeline = "acute";
+      reRenderFull();
+    });
+    btnChronic.addEventListener("click", () => {
+      state.respiratoryTimeline = "chronic";
+      reRenderFull();
+    });
+  }
+
+  // Glucose Unit Switcher Buttons
+  const btnMgDl = document.getElementById("btnGlucoseMgDl");
+  const btnMmol = document.getElementById("btnGlucoseMmol");
+  if (btnMgDl && btnMmol) {
+    btnMgDl.addEventListener("click", () => {
+      if (state.glucoseUnit !== "mg/dL") {
+        state.glucoseUnit = "mg/dL";
+        reRenderFull();
+      }
+    });
+    btnMmol.addEventListener("click", () => {
+      if (state.glucoseUnit !== "mmol/L") {
+        state.glucoseUnit = "mmol/L";
+        reRenderFull();
+      }
     });
   }
 
@@ -539,6 +636,15 @@ function bindInput(elementId, stateKey) {
 
 function updateResultsDOM() {
   const result = getCalculationResult();
+
+  const alertContainer = document.getElementById("validationAlertContainer");
+  if (alertContainer) {
+    alertContainer.innerHTML = result.validationError ? `
+      <div class="p-3 bg-rose-50 border border-rose-300 text-rose-800 rounded-xl text-xs font-bold">
+        ⚠️ تنبيه صحة البيانات: ${result.validationError}
+      </div>
+    ` : '';
+  }
 
   const acidBaseCard = document.getElementById("acidBaseResultCard");
   if (acidBaseCard) acidBaseCard.innerHTML = renderAcidBaseCardHTML(result);
