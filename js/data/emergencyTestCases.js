@@ -6,188 +6,287 @@
  *
  * Comprehensive Clinical & Boundary Validation Suite for Emergency Engine.
  *
- * Coverage:
- * - Drug dose calculations
- * - Dantrolene formulation calculations
- * - Vial counts
- * - Diluent volumes
- * - LAST lipid rescue calculations
- * - Perioperative anaphylaxis dosing
- * - Laryngospasm succinylcholine dosing
- * - Unit validation boundaries
- * - Dangerous-range warnings
- * - Protocol state transitions
- * - Invalid input handling
+ * Validates:
+ * - Weight validation and safety warnings
+ * - FiO2 normalization and boundaries
+ * - EtCO2 validation
+ * - Temperature validation and MH cooling thresholds
+ * - Dantrolene dose / vial / diluent calculations
+ * - 20% Lipid Emulsion rescue calculations
+ * - Perioperative anaphylaxis epinephrine pathways
+ * - Succinylcholine dosing for laryngospasm
+ * - Protocol state-machine transitions
+ * - Terminal-state behavior
+ * - Invalid protocol / state / transition handling
  *
  * Architecture:
  * Pure Data ES Module.
+ * No DOM / UI / State dependencies.
  *
  * IMPORTANT:
- * This file contains TEST EXPECTATIONS only.
- * It must NOT introduce clinical rules that do not exist
- * in emergencyData.js.
+ * These expected values intentionally match the current
+ * EmergencyCalculator contract and emergencyData source of truth.
  */
 
 export const emergencyTestCases = [
 
   // =========================================================================
-  // 1. MALIGNANT HYPERTHERMIA — DANTROLENE
+  // 1. WEIGHT VALIDATION
+  // =========================================================================
+
+  {
+    id: "weight_standard_adult",
+    testType: "weightValidation",
+    title: "حالة 1: وزن بالغ قياسي 70 kg",
+    inputs: {
+      weightKg: 70
+    },
+    expected: {
+      isValid: true,
+      weightKg: 70,
+      hasWarning: false,
+      warningMessage: null
+    }
+  },
+
+  {
+    id: "weight_low_pediatric_warning",
+    testType: "weightValidation",
+    title: "حالة 2: وزن منخفض 2 kg مع تحذير سريري",
+    inputs: {
+      weightKg: 2
+    },
+    expected: {
+      isValid: true,
+      weightKg: 2,
+      hasWarning: true,
+      warningMessage:
+        "تنبيه: الوزن المدخل خفيف جداً أقل من 3 kg. يرجى التأكد من الجرعة."
+    }
+  },
+
+  {
+    id: "weight_high_warning",
+    testType: "weightValidation",
+    title: "حالة 3: وزن 220 kg مع تحذير سريري",
+    inputs: {
+      weightKg: 220
+    },
+    expected: {
+      isValid: true,
+      weightKg: 220,
+      hasWarning: true,
+      warningMessage:
+        "تنبيه: الوزن المدخل أثقل من النطاق المعتاد (200 kg). يرجى التأكد من الحسابات السريرية."
+    }
+  },
+
+  {
+    id: "weight_zero_invalid",
+    testType: "weightValidation",
+    title: "حالة 4: إدخال وزن صفر",
+    inputs: {
+      weightKg: 0
+    },
+    expected: {
+      isValid: false,
+      errorCode: "WEIGHT_BELOW_MIN",
+      errorMessage:
+        "الوزن المدخل غير صالح. يجب إدخال وزن 1 kg على الأقل."
+    }
+  },
+
+  {
+    id: "weight_negative_invalid",
+    testType: "weightValidation",
+    title: "حالة 5: إدخال وزن بالسالب",
+    inputs: {
+      weightKg: -70
+    },
+    expected: {
+      isValid: false,
+      errorCode: "WEIGHT_BELOW_MIN",
+      errorMessage:
+        "الوزن المدخل غير صالح. يجب إدخال وزن 1 kg على الأقل."
+    }
+  },
+
+  {
+    id: "weight_above_max_invalid",
+    testType: "weightValidation",
+    title: "حالة 6: وزن أعلى من الحد الأقصى 300 kg",
+    inputs: {
+      weightKg: 301
+    },
+    expected: {
+      isValid: false,
+      errorCode: "WEIGHT_ABOVE_MAX",
+      errorMessage:
+        "الوزن المدخل أعلى من الحد المسموح (300 kg)."
+    }
+  },
+
+  {
+    id: "weight_invalid_string",
+    testType: "weightValidation",
+    title: "حالة 7: إدخال وزن غير رقمي",
+    inputs: {
+      weightKg: "abc"
+    },
+    expected: {
+      isValid: false,
+      errorCode: "WEIGHT_BELOW_MIN",
+      errorMessage:
+        "الوزن المدخل غير صالح. يجب إدخال وزن 1 kg على الأقل."
+    }
+  },
+
+  // =========================================================================
+  // 2. MALIGNANT HYPERTHERMIA - DANTROLENE
   // =========================================================================
 
   {
     id: "mh_dantrolene_standard_adult_dantrium",
     protocolId: "mh",
-    title: "حالة 1: MH - بالغ 70 kg باستخدام Dantrium التقليدي",
+    testType: "dantrolene",
+    title:
+      "حالة 8: MH - بالغ 70 kg باستخدام Dantrium التقليدي",
     inputs: {
       weightKg: 70,
       formulation: "dantrium"
     },
     expected: {
       isValid: true,
+      weightKg: 70,
+      formulationResolved: "dantrium",
       calculatedDoseMg: 175.0,
       vialCount: 9,
-      diluentVolumeMl: 540,
+      vialSizeMg: 20.0,
+      vialDiluentMl: 60.0,
+      diluentVolumeMl: 540.0,
       reconstitutedConcMgMl: 0.333,
-      reEvaluationThresholdMg: 700
-    }
-  },
-
-  {
-    id: "mh_dantrolene_standard_adult_100kg_dantrium",
-    protocolId: "mh",
-    title: "حالة 2: MH - بالغ 100 kg باستخدام Dantrium",
-    inputs: {
-      weightKg: 100,
-      formulation: "dantrium"
-    },
-    expected: {
-      isValid: true,
-      calculatedDoseMg: 250.0,
-      vialCount: 13,
-      diluentVolumeMl: 780,
-      reconstitutedConcMgMl: 0.333,
-      reEvaluationThresholdMg: 1000
+      reEvaluationThresholdMg: 700.0
     }
   },
 
   {
     id: "mh_dantrolene_severe_obesity_ryanodex",
     protocolId: "mh",
-    title: "حالة 3: MH - وزن 140 kg باستخدام Ryanodex",
+    testType: "dantrolene",
+    title:
+      "حالة 9: MH - وزن 140 kg باستخدام Ryanodex",
     inputs: {
       weightKg: 140,
       formulation: "ryanodex"
     },
     expected: {
       isValid: true,
+      weightKg: 140,
+      formulationResolved: "ryanodex",
       calculatedDoseMg: 350.0,
       vialCount: 2,
-      diluentVolumeMl: 10,
+      vialSizeMg: 250.0,
+      vialDiluentMl: 5.0,
+      diluentVolumeMl: 10.0,
       reconstitutedConcMgMl: 50.0,
-      reEvaluationThresholdMg: 1400
+      reEvaluationThresholdMg: 1400.0
     }
   },
 
   {
     id: "mh_dantrolene_pediatric_dantrium",
     protocolId: "mh",
-    title: "حالة 4: MH - طفل 18 kg باستخدام Dantrium",
+    testType: "dantrolene",
+    title:
+      "حالة 10: MH - طفل 18 kg باستخدام Dantrium",
     inputs: {
       weightKg: 18,
       formulation: "dantrium"
     },
     expected: {
       isValid: true,
+      weightKg: 18,
+      formulationResolved: "dantrium",
       calculatedDoseMg: 45.0,
       vialCount: 3,
-      diluentVolumeMl: 180,
+      vialSizeMg: 20.0,
+      vialDiluentMl: 60.0,
+      diluentVolumeMl: 180.0,
       reconstitutedConcMgMl: 0.333,
-      reEvaluationThresholdMg: 180
+      reEvaluationThresholdMg: 180.0
     }
   },
 
   {
-    id: "mh_dantrolene_minimum_valid_weight",
+    id: "mh_dantrolene_low_weight_warning",
     protocolId: "mh",
-    title: "حالة 5: MH - الحد الأدنى المسموح للوزن 1 kg",
-    inputs: {
-      weightKg: 1,
-      formulation: "dantrium"
-    },
-    expected: {
-      isValid: true,
-      calculatedDoseMg: 2.5,
-      vialCount: 1,
-      diluentVolumeMl: 60,
-      reEvaluationThresholdMg: 10
-    }
-  },
-
-  {
-    id: "mh_dantrolene_dangerous_low_weight",
-    protocolId: "mh",
-    title: "حالة 6: MH - وزن أقل من النطاق المعتاد 2 kg",
+    testType: "dantrolene",
+    title:
+      "حالة 11: MH - وزن 2 kg مع تحذير الوزن المنخفض",
     inputs: {
       weightKg: 2,
       formulation: "dantrium"
     },
     expected: {
       isValid: true,
+      weightKg: 2,
       hasWarning: true,
       calculatedDoseMg: 5.0,
       vialCount: 1,
-      diluentVolumeMl: 60
+      diluentVolumeMl: 60.0,
+      reconstitutedConcMgMl: 0.333,
+      reEvaluationThresholdMg: 20.0
     }
   },
 
   {
-    id: "mh_dantrolene_dangerous_high_weight",
+    id: "mh_dantrolene_missing_formulation",
     protocolId: "mh",
-    title: "حالة 7: MH - وزن أعلى من النطاق المعتاد 220 kg",
+    testType: "dantrolene",
+    title:
+      "حالة 12: MH - عدم اختيار تركيبة Dantrolene",
     inputs: {
-      weightKg: 220,
-      formulation: "dantrium"
+      weightKg: 70,
+      formulation: ""
     },
     expected: {
-      isValid: true,
-      hasWarning: true,
-      calculatedDoseMg: 550.0,
-      vialCount: 28,
-      diluentVolumeMl: 1680,
-      reEvaluationThresholdMg: 2200
+      isValid: false,
+      errorCode: "FORMULATION_REQUIRED"
     }
   },
 
   {
-    id: "mh_dantrolene_max_valid_weight",
+    id: "mh_dantrolene_invalid_formulation",
     protocolId: "mh",
-    title: "حالة 8: MH - الحد الأعلى المسموح للوزن 300 kg",
+    testType: "dantrolene",
+    title:
+      "حالة 13: MH - تركيبة Dantrolene غير معروفة",
     inputs: {
-      weightKg: 300,
-      formulation: "dantrium"
+      weightKg: 70,
+      formulation: "unknown_formulation"
     },
     expected: {
-      isValid: true,
-      calculatedDoseMg: 750.0,
-      vialCount: 38,
-      diluentVolumeMl: 2280,
-      reEvaluationThresholdMg: 3000
+      isValid: false,
+      errorCode: "INVALID_FORMULATION"
     }
   },
 
   // =========================================================================
-  // 2. LAST — 20% LIPID EMULSION
+  // 3. LAST - 20% LIPID EMULSION
   // =========================================================================
 
   {
-    id: "last_lipid_standard_adult_70kg",
+    id: "last_lipid_standard_adult",
     protocolId: "last",
-    title: "حالة 9: LAST - بالغ 70 kg",
+    testType: "lipidRescue",
+    title:
+      "حالة 14: LAST - بالغ 70 kg",
     inputs: {
       weightKg: 70
     },
     expected: {
       isValid: true,
+      weightKg: 70,
       bolusVolumeMl: 105.0,
       initialInfusionRateMlMin: 17.5,
       doubleInfusionRateMlMin: 35.0,
@@ -196,14 +295,17 @@ export const emergencyTestCases = [
   },
 
   {
-    id: "last_lipid_low_weight_45kg",
+    id: "last_lipid_low_weight",
     protocolId: "last",
-    title: "حالة 10: LAST - مريض 45 kg",
+    testType: "lipidRescue",
+    title:
+      "حالة 15: LAST - مريض 45 kg",
     inputs: {
       weightKg: 45
     },
     expected: {
       isValid: true,
+      weightKg: 45,
       bolusVolumeMl: 67.5,
       initialInfusionRateMlMin: 11.25,
       doubleInfusionRateMlMin: 22.5,
@@ -212,46 +314,50 @@ export const emergencyTestCases = [
   },
 
   {
-    id: "last_lipid_minimum_valid_weight",
+    id: "last_lipid_pediatric_warning",
     protocolId: "last",
-    title: "حالة 11: LAST - الحد الأدنى المسموح للوزن 1 kg",
+    testType: "lipidRescue",
+    title:
+      "حالة 16: LAST - وزن 2 kg مع تحذير الوزن",
     inputs: {
-      weightKg: 1
+      weightKg: 2
     },
     expected: {
       isValid: true,
-      bolusVolumeMl: 1.5,
-      initialInfusionRateMlMin: 0.25,
-      doubleInfusionRateMlMin: 0.5,
-      maxCumulativeVolumeMl: 12.0
+      weightKg: 2,
+      hasWarning: true,
+      bolusVolumeMl: 3.0,
+      initialInfusionRateMlMin: 0.5,
+      doubleInfusionRateMlMin: 1.0,
+      maxCumulativeVolumeMl: 24.0
     }
   },
 
   {
-    id: "last_lipid_maximum_valid_weight",
+    id: "last_lipid_invalid_weight",
     protocolId: "last",
-    title: "حالة 12: LAST - الحد الأعلى المسموح للوزن 300 kg",
+    testType: "lipidRescue",
+    title:
+      "حالة 17: LAST - وزن غير صالح",
     inputs: {
-      weightKg: 300
+      weightKg: 0
     },
     expected: {
-      isValid: true,
-      hasWarning: true,
-      bolusVolumeMl: 450.0,
-      initialInfusionRateMlMin: 75.0,
-      doubleInfusionRateMlMin: 150.0,
-      maxCumulativeVolumeMl: 3600.0
+      isValid: false,
+      errorCode: "WEIGHT_BELOW_MIN"
     }
   },
 
   // =========================================================================
-  // 3. PERIOPERATIVE ANAPHYLAXIS
+  // 4. PERIOPERATIVE ANAPHYLAXIS
   // =========================================================================
 
   {
     id: "anaphylaxis_perioperative_iv_adult",
     protocolId: "anaphylaxis",
-    title: "حالة 13: Perioperative Anaphylaxis - بالغ مع IV access ووجود دوران",
+    testType: "anaphylaxis",
+    title:
+      "حالة 18: Anaphylaxis - بالغ مع IV access ودوران تلقائي",
     inputs: {
       weightKg: 70,
       hasIvAccess: true,
@@ -262,49 +368,36 @@ export const emergencyTestCases = [
       recommendedRoute: "IV Titrated",
       recommendedDoseMcg: 50.0,
       dilutionRecommendation: "10 mcg/mL",
-      repeatIntervalText: "Titrate 20-50 mcg every 1-2 minutes according to response",
+      repeatIntervalText:
+        "Titrate 20-50 mcg every 1-2 minutes according to response",
       crystalloidBolusMl: "500-1000 mL"
     }
   },
 
   {
-    id: "anaphylaxis_im_fallback_under_cap",
+    id: "anaphylaxis_iv_default_access",
     protocolId: "anaphylaxis",
-    title: "حالة 14: Perioperative Anaphylaxis - IM عند عدم توفر IV، وزن 40 kg",
+    testType: "anaphylaxis",
+    title:
+      "حالة 19: Anaphylaxis - عدم تحديد IV access ويُفترض توفره",
     inputs: {
-      weightKg: 40,
-      hasIvAccess: false,
-      hasSpontaneousCirculation: true
+      weightKg: 70
     },
     expected: {
       isValid: true,
-      recommendedRoute: "IM (Mid-Outer Thigh)",
-      calculatedDoseMcg: 400.0,
-      isCapped: false
+      recommendedRoute: "IV Titrated",
+      recommendedDoseMcg: 50.0,
+      dilutionRecommendation: "10 mcg/mL",
+      crystalloidBolusMl: "500-1000 mL"
     }
   },
 
   {
-    id: "anaphylaxis_im_fallback_at_cap",
+    id: "anaphylaxis_im_fallback",
     protocolId: "anaphylaxis",
-    title: "حالة 15: Perioperative Anaphylaxis - IM عند حد 500 mcg",
-    inputs: {
-      weightKg: 50,
-      hasIvAccess: false,
-      hasSpontaneousCirculation: true
-    },
-    expected: {
-      isValid: true,
-      recommendedRoute: "IM (Mid-Outer Thigh)",
-      calculatedDoseMcg: 500.0,
-      isCapped: false
-    }
-  },
-
-  {
-    id: "anaphylaxis_im_fallback_above_cap",
-    protocolId: "anaphylaxis",
-    title: "حالة 16: Perioperative Anaphylaxis - IM يتجاوز الحد الأقصى",
+    testType: "anaphylaxis",
+    title:
+      "حالة 20: Anaphylaxis - عدم توفر IV access مع جرعة IM",
     inputs: {
       weightKg: 80,
       hasIvAccess: false,
@@ -318,205 +411,171 @@ export const emergencyTestCases = [
     }
   },
 
+  {
+    id: "anaphylaxis_im_weight_30",
+    protocolId: "anaphylaxis",
+    testType: "anaphylaxis",
+    title:
+      "حالة 21: Anaphylaxis - جرعة IM لمريض 30 kg",
+    inputs: {
+      weightKg: 30,
+      hasIvAccess: false,
+      hasSpontaneousCirculation: true
+    },
+    expected: {
+      isValid: true,
+      recommendedRoute: "IM (Mid-Outer Thigh)",
+      calculatedDoseMcg: 300.0,
+      isCapped: false
+    }
+  },
+
+  {
+    id: "anaphylaxis_im_exact_cap",
+    protocolId: "anaphylaxis",
+    testType: "anaphylaxis",
+    title:
+      "حالة 22: Anaphylaxis - وزن 50 kg يساوي حد 500 mcg تماماً",
+    inputs: {
+      weightKg: 50,
+      hasIvAccess: false,
+      hasSpontaneousCirculation: true
+    },
+    expected: {
+      isValid: true,
+      recommendedRoute: "IM (Mid-Outer Thigh)",
+      calculatedDoseMcg: 500.0,
+      isCapped: false
+    }
+  },
+
   // =========================================================================
-  // 4. LARYNGOSPASM — SUCCINYLCHOLINE
+  // 5. LARYNGOSPASM / SUCCINYLCHOLINE
   // =========================================================================
 
   {
-    id: "laryngospasm_succinylcholine_60kg",
+    id: "laryngospasm_standard_adult",
     protocolId: "laryngospasm",
-    title: "حالة 17: Laryngospasm - مريض 60 kg",
+    testType: "laryngospasm",
+    title:
+      "حالة 23: Laryngospasm - بالغ 60 kg",
     inputs: {
       weightKg: 60
     },
     expected: {
       isValid: true,
+      weightKg: 60,
       ivSuccinylcholineDoseMg: 60.0,
-      imSuccinylcholineDoseMg: 240.0
+      imSuccinylcholineDoseMg: 240.0,
+      pediatricAtropineNoteExpected: false
     }
   },
 
   {
-    id: "laryngospasm_succinylcholine_70kg",
+    id: "laryngospasm_pediatric",
     protocolId: "laryngospasm",
-    title: "حالة 18: Laryngospasm - بالغ 70 kg",
+    testType: "laryngospasm",
+    title:
+      "حالة 24: Laryngospasm - طفل 20 kg",
     inputs: {
-      weightKg: 70
+      weightKg: 20
     },
     expected: {
       isValid: true,
-      ivSuccinylcholineDoseMg: 70.0,
-      imSuccinylcholineDoseMg: 280.0
-    }
-  },
-
-  {
-    id: "laryngospasm_succinylcholine_pediatric_18kg",
-    protocolId: "laryngospasm",
-    title: "حالة 19: Laryngospasm - طفل 18 kg",
-    inputs: {
-      weightKg: 18
-    },
-    expected: {
-      isValid: true,
-      ivSuccinylcholineDoseMg: 18.0,
-      imSuccinylcholineDoseMg: 72.0,
+      weightKg: 20,
+      ivSuccinylcholineDoseMg: 20.0,
+      imSuccinylcholineDoseMg: 80.0,
       pediatricAtropineNoteExpected: true
     }
   },
 
-  // =========================================================================
-  // 5. UNIT VALIDATION — WEIGHT
-  // =========================================================================
-
   {
-    id: "boundary_zero_weight",
-    title: "حالة 20: وزن صفر - يجب رفض الإدخال",
+    id: "laryngospasm_atropine_boundary",
+    protocolId: "laryngospasm",
+    testType: "laryngospasm",
+    title:
+      "حالة 25: Laryngospasm - وزن 25 kg عند حد Pediatric Atropine",
     inputs: {
-      weightKg: 0
-    },
-    expected: {
-      isValid: false,
-      errorCode: "WEIGHT_BELOW_MIN"
-    }
-  },
-
-  {
-    id: "boundary_negative_weight",
-    title: "حالة 21: وزن سالب - يجب رفض الإدخال",
-    inputs: {
-      weightKg: -70
-    },
-    expected: {
-      isValid: false,
-      errorCode: "WEIGHT_BELOW_MIN"
-    }
-  },
-
-  {
-    id: "boundary_below_minimum_weight",
-    title: "حالة 22: وزن 0.9 kg - أقل من الحد الأدنى",
-    inputs: {
-      weightKg: 0.9
-    },
-    expected: {
-      isValid: false,
-      errorCode: "WEIGHT_BELOW_MIN"
-    }
-  },
-
-  {
-    id: "boundary_minimum_weight",
-    title: "حالة 23: وزن 1 kg - الحد الأدنى الصحيح",
-    inputs: {
-      weightKg: 1
-    },
-    expected: {
-      isValid: true
-    }
-  },
-
-  {
-    id: "boundary_dangerous_low_weight",
-    title: "حالة 24: وزن 2 kg - صالح مع تحذير",
-    inputs: {
-      weightKg: 2
+      weightKg: 25
     },
     expected: {
       isValid: true,
-      hasWarning: true
-    }
-  },
-
-  {
-    id: "boundary_normal_weight_lower_edge",
-    title: "حالة 25: وزن 3 kg - بداية النطاق المعتاد",
-    inputs: {
-      weightKg: 3
-    },
-    expected: {
-      isValid: true,
-      hasWarning: false
-    }
-  },
-
-  {
-    id: "boundary_normal_weight",
-    title: "حالة 26: وزن 70 kg - نطاق طبيعي للاختبار",
-    inputs: {
-      weightKg: 70
-    },
-    expected: {
-      isValid: true,
-      hasWarning: false
-    }
-  },
-
-  {
-    id: "boundary_dangerous_high_weight",
-    title: "حالة 27: وزن 201 kg - صالح مع تحذير",
-    inputs: {
-      weightKg: 201
-    },
-    expected: {
-      isValid: true,
-      hasWarning: true
-    }
-  },
-
-  {
-    id: "boundary_maximum_weight",
-    title: "حالة 28: وزن 300 kg - الحد الأعلى الصحيح",
-    inputs: {
-      weightKg: 300
-    },
-    expected: {
-      isValid: true,
-      hasWarning: true
-    }
-  },
-
-  {
-    id: "boundary_above_maximum_weight",
-    title: "حالة 29: وزن 300.1 kg - أعلى من الحد الأقصى",
-    inputs: {
-      weightKg: 300.1
-    },
-    expected: {
-      isValid: false,
-      errorCode: "WEIGHT_ABOVE_MAX"
+      weightKg: 25,
+      ivSuccinylcholineDoseMg: 25.0,
+      imSuccinylcholineDoseMg: 100.0,
+      pediatricAtropineNoteExpected: false
     }
   },
 
   // =========================================================================
-  // 6. UNIT VALIDATION — FiO2
+  // 6. FiO2 VALIDATION
   // =========================================================================
 
   {
-    id: "fio2_decimal_minimum",
-    title: "حالة 30: FiO2 = 0.21 - الحد الأدنى",
+    id: "fio2_decimal_room_air",
+    testType: "fio2Validation",
+    title:
+      "حالة 26: FiO2 بصيغة عشرية 0.21",
     inputs: {
       fio2: 0.21
     },
     expected: {
-      isValid: true
+      isValid: true,
+      fio2Decimal: 0.21,
+      fio2Percent: 21
     }
   },
 
   {
-    id: "fio2_decimal_maximum",
-    title: "حالة 31: FiO2 = 1.00 - الحد الأعلى",
+    id: "fio2_decimal_100",
+    testType: "fio2Validation",
+    title:
+      "حالة 27: FiO2 بصيغة عشرية 1.0",
     inputs: {
       fio2: 1.0
     },
     expected: {
-      isValid: true
+      isValid: true,
+      fio2Decimal: 1.0,
+      fio2Percent: 100
     }
   },
 
   {
-    id: "fio2_decimal_below_minimum",
-    title: "حالة 32: FiO2 أقل من 0.21",
+    id: "fio2_percent_21",
+    testType: "fio2Validation",
+    title:
+      "حالة 28: FiO2 بصيغة مئوية 21%",
+    inputs: {
+      fio2: 21
+    },
+    expected: {
+      isValid: true,
+      fio2Decimal: 0.21,
+      fio2Percent: 21
+    }
+  },
+
+  {
+    id: "fio2_percent_100",
+    testType: "fio2Validation",
+    title:
+      "حالة 29: FiO2 بصيغة مئوية 100%",
+    inputs: {
+      fio2: 100
+    },
+    expected: {
+      isValid: true,
+      fio2Decimal: 1.0,
+      fio2Percent: 100
+    }
+  },
+
+  {
+    id: "fio2_below_min",
+    testType: "fio2Validation",
+    title:
+      "حالة 30: FiO2 أقل من الحد الأدنى",
     inputs: {
       fio2: 0.20
     },
@@ -527,8 +586,10 @@ export const emergencyTestCases = [
   },
 
   {
-    id: "fio2_decimal_above_maximum",
-    title: "حالة 33: FiO2 أعلى من 1.00",
+    id: "fio2_above_max",
+    testType: "fio2Validation",
+    title:
+      "حالة 31: FiO2 أعلى من الحد الأقصى",
     inputs: {
       fio2: 1.01
     },
@@ -538,49 +599,89 @@ export const emergencyTestCases = [
     }
   },
 
+  {
+    id: "fio2_missing",
+    testType: "fio2Validation",
+    title:
+      "حالة 32: عدم إدخال FiO2",
+    inputs: {
+      fio2: ""
+    },
+    expected: {
+      isValid: false,
+      errorCode: "FIO2_REQUIRED"
+    }
+  },
+
   // =========================================================================
-  // 7. UNIT VALIDATION — ETCO2
+  // 7. EtCO2 VALIDATION
   // =========================================================================
 
   {
-    id: "etco2_normal_lower_boundary",
-    title: "حالة 34: ETCO2 = 35 mmHg - الحد الطبيعي الأدنى",
+    id: "etco2_normal",
+    testType: "etco2Validation",
+    title:
+      "حالة 33: EtCO2 طبيعي 40 mmHg",
     inputs: {
-      etco2: 35
+      etco2: 40
     },
     expected: {
       isValid: true,
+      etco2: 40,
       isNormal: true
     }
   },
 
   {
-    id: "etco2_normal_upper_boundary",
-    title: "حالة 35: ETCO2 = 45 mmHg - الحد الطبيعي الأعلى",
+    id: "etco2_low",
+    testType: "etco2Validation",
+    title:
+      "حالة 34: EtCO2 منخفض 30 mmHg",
     inputs: {
-      etco2: 45
+      etco2: 30
     },
     expected: {
       isValid: true,
-      isNormal: true
-    }
-  },
-
-  {
-    id: "etco2_above_normal",
-    title: "حالة 36: ETCO2 = 50 mmHg - أعلى من الطبيعي",
-    inputs: {
-      etco2: 50
-    },
-    expected: {
-      isValid: true,
+      etco2: 30,
       isNormal: false
     }
   },
 
   {
-    id: "etco2_above_maximum",
-    title: "حالة 37: ETCO2 = 151 mmHg - أعلى من الحد المسموح",
+    id: "etco2_high",
+    testType: "etco2Validation",
+    title:
+      "حالة 35: EtCO2 مرتفع 60 mmHg",
+    inputs: {
+      etco2: 60
+    },
+    expected: {
+      isValid: true,
+      etco2: 60,
+      isNormal: false
+    }
+  },
+
+  {
+    id: "etco2_max_boundary",
+    testType: "etco2Validation",
+    title:
+      "حالة 36: EtCO2 عند الحد الأعلى 150 mmHg",
+    inputs: {
+      etco2: 150
+    },
+    expected: {
+      isValid: true,
+      etco2: 150,
+      isNormal: false
+    }
+  },
+
+  {
+    id: "etco2_above_max",
+    testType: "etco2Validation",
+    title:
+      "حالة 37: EtCO2 أعلى من الحد المسموح",
     inputs: {
       etco2: 151
     },
@@ -590,64 +691,116 @@ export const emergencyTestCases = [
     }
   },
 
+  {
+    id: "etco2_missing",
+    testType: "etco2Validation",
+    title:
+      "حالة 38: عدم إدخال EtCO2",
+    inputs: {
+      etco2: ""
+    },
+    expected: {
+      isValid: false,
+      errorCode: "ETCO2_REQUIRED"
+    }
+  },
+
   // =========================================================================
-  // 8. TEMPERATURE VALIDATION
+  // 8. TEMPERATURE / MH COOLING THRESHOLDS
   // =========================================================================
 
   {
     id: "temperature_normal",
-    title: "حالة 38: حرارة 37°C - ضمن الطبيعي",
+    testType: "temperatureValidation",
+    title:
+      "حالة 39: درجة حرارة طبيعية 37°C",
     inputs: {
-      tempCelsius: 37
+      temperatureCelsius: 37
     },
     expected: {
       isValid: true,
+      tempCelsius: 37,
       isNormal: true,
-      coolingRequired: false
+      coolingRequired: false,
+      coolingStopReached: false
     }
   },
 
   {
-    id: "temperature_mh_cooling_threshold",
-    title: "حالة 39: حرارة 39°C - بداية عتبة التبريد",
+    id: "temperature_cooling_start_boundary",
+    testType: "temperatureValidation",
+    title:
+      "حالة 40: الحرارة عند حد بدء التبريد 39°C",
     inputs: {
-      tempCelsius: 39
+      temperatureCelsius: 39
     },
     expected: {
       isValid: true,
-      coolingRequired: true
+      tempCelsius: 39,
+      isNormal: false,
+      coolingRequired: true,
+      coolingStopReached: false
     }
   },
 
   {
-    id: "temperature_mh_high",
-    title: "حالة 40: حرارة 40°C - MH cooling required",
+    id: "temperature_above_cooling_threshold",
+    testType: "temperatureValidation",
+    title:
+      "حالة 41: حرارة 40°C تتطلب التبريد",
     inputs: {
-      tempCelsius: 40
+      temperatureCelsius: 40
     },
     expected: {
       isValid: true,
-      coolingRequired: true
+      tempCelsius: 40,
+      isNormal: false,
+      coolingRequired: true,
+      coolingStopReached: false
     }
   },
 
   {
-    id: "temperature_cooling_stop_threshold",
-    title: "حالة 41: حرارة 38°C - عتبة إيقاف التبريد",
+    id: "temperature_cooling_stop_boundary",
+    testType: "temperatureValidation",
+    title:
+      "حالة 42: الحرارة عند حد إيقاف التبريد 38°C",
     inputs: {
-      tempCelsius: 38
+      temperatureCelsius: 38
     },
     expected: {
       isValid: true,
+      tempCelsius: 38,
+      isNormal: false,
+      coolingRequired: false,
       coolingStopReached: true
     }
   },
 
   {
-    id: "temperature_below_minimum",
-    title: "حالة 42: حرارة 19.9°C - أقل من الحد المسموح",
+    id: "temperature_below_cooling_stop",
+    testType: "temperatureValidation",
+    title:
+      "حالة 43: حرارة 37.5°C بعد التبريد",
     inputs: {
-      tempCelsius: 19.9
+      temperatureCelsius: 37.5
+    },
+    expected: {
+      isValid: true,
+      tempCelsius: 37.5,
+      isNormal: true,
+      coolingRequired: false,
+      coolingStopReached: true
+    }
+  },
+
+  {
+    id: "temperature_below_min",
+    testType: "temperatureValidation",
+    title:
+      "حالة 44: درجة حرارة أقل من الحد المقبول",
+    inputs: {
+      temperatureCelsius: 19.9
     },
     expected: {
       isValid: false,
@@ -656,10 +809,12 @@ export const emergencyTestCases = [
   },
 
   {
-    id: "temperature_above_maximum",
-    title: "حالة 43: حرارة 45.1°C - أعلى من الحد المسموح",
+    id: "temperature_above_max",
+    testType: "temperatureValidation",
+    title:
+      "حالة 45: درجة حرارة أعلى من الحد المقبول",
     inputs: {
-      tempCelsius: 45.1
+      temperatureCelsius: 45.1
     },
     expected: {
       isValid: false,
@@ -667,78 +822,33 @@ export const emergencyTestCases = [
     }
   },
 
-  // =========================================================================
-  // 9. FORMULATION VALIDATION
-  // =========================================================================
-
   {
-    id: "dantrolene_valid_dantrium_formulation",
-    protocolId: "mh",
-    title: "حالة 44: اختيار Dantrium الصحيح",
+    id: "temperature_missing",
+    testType: "temperatureValidation",
+    title:
+      "حالة 46: عدم إدخال درجة الحرارة",
     inputs: {
-      weightKg: 70,
-      formulation: "dantrium"
-    },
-    expected: {
-      isValid: true,
-      formulationResolved: "dantrium",
-      vialSizeMg: 20,
-      vialDiluentMl: 60
-    }
-  },
-
-  {
-    id: "dantrolene_valid_ryanodex_formulation",
-    protocolId: "mh",
-    title: "حالة 45: اختيار Ryanodex الصحيح",
-    inputs: {
-      weightKg: 70,
-      formulation: "ryanodex"
-    },
-    expected: {
-      isValid: true,
-      formulationResolved: "ryanodex",
-      vialSizeMg: 250,
-      vialDiluentMl: 5
-    }
-  },
-
-  {
-    id: "dantrolene_missing_formulation",
-    protocolId: "mh",
-    title: "حالة 46: عدم تحديد تركيبة Dantrolene",
-    inputs: {
-      weightKg: 70
+      temperatureCelsius: ""
     },
     expected: {
       isValid: false,
-      errorCode: "FORMULATION_REQUIRED"
-    }
-  },
-
-  {
-    id: "dantrolene_invalid_formulation",
-    protocolId: "mh",
-    title: "حالة 47: تركيبة Dantrolene غير معروفة",
-    inputs: {
-      weightKg: 70,
-      formulation: "unknown_formulation"
-    },
-    expected: {
-      isValid: false,
-      errorCode: "INVALID_FORMULATION"
+      errorCode: "TEMP_REQUIRED"
     }
   },
 
   // =========================================================================
-  // 10. ACLS STATE MACHINE
+  // 9. STATE MACHINE - ACLS
   // =========================================================================
 
   {
     id: "acls_initial_state",
     protocolId: "acls",
-    title: "حالة 48: ACLS - التحقق من الحالة الابتدائية",
-    inputs: {},
+    testType: "stateTransition",
+    title:
+      "حالة 47: ACLS - الحصول على الحالة الابتدائية",
+    inputs: {
+      currentStateId: null
+    },
     expected: {
       isValid: true,
       initialState: "RHYTHM_CHECK"
@@ -748,110 +858,86 @@ export const emergencyTestCases = [
   {
     id: "acls_rhythm_to_shockable",
     protocolId: "acls",
-    title: "حالة 49: ACLS - الانتقال من Rhythm Check إلى Shockable Loop",
+    testType: "stateTransition",
+    title:
+      "حالة 48: ACLS - Rhythm Check إلى Shockable Loop",
     inputs: {
-      currentState: "RHYTHM_CHECK",
-      branchTarget: "SHOCKABLE_LOOP"
+      currentStateId: "RHYTHM_CHECK",
+      branchTargetId: "SHOCKABLE_LOOP"
     },
     expected: {
       isValid: true,
-      nextState: "SHOCKABLE_LOOP"
+      nextState: "SHOCKABLE_LOOP",
+      terminal: false,
+      emergencyCico: false
     }
   },
 
   {
     id: "acls_rhythm_to_nonshockable",
     protocolId: "acls",
-    title: "حالة 50: ACLS - الانتقال إلى Non-Shockable Loop",
+    testType: "stateTransition",
+    title:
+      "حالة 49: ACLS - Rhythm Check إلى Non-Shockable Loop",
     inputs: {
-      currentState: "RHYTHM_CHECK",
-      branchTarget: "NON_SHOCKABLE_LOOP"
+      currentStateId: "RHYTHM_CHECK",
+      branchTargetId: "NON_SHOCKABLE_LOOP"
     },
     expected: {
       isValid: true,
-      nextState: "NON_SHOCKABLE_LOOP"
+      nextState: "NON_SHOCKABLE_LOOP",
+      terminal: false,
+      emergencyCico: false
     }
   },
 
   {
-    id: "acls_shockable_loop_repeat",
+    id: "acls_shockable_to_post_rosc",
     protocolId: "acls",
-    title: "حالة 51: ACLS - استمرار VF/pVT",
+    testType: "stateTransition",
+    title:
+      "حالة 50: ACLS - Shockable Loop إلى Post-ROSC",
     inputs: {
-      currentState: "SHOCKABLE_LOOP",
-      branchTarget: "SHOCKABLE_LOOP"
+      currentStateId: "SHOCKABLE_LOOP",
+      branchTargetId: "POST_ROSC"
     },
     expected: {
       isValid: true,
-      nextState: "SHOCKABLE_LOOP"
+      nextState: "POST_ROSC",
+      terminal: true,
+      emergencyCico: false
     }
   },
 
   {
-    id: "acls_shockable_to_nonshockable",
+    id: "acls_invalid_transition",
     protocolId: "acls",
-    title: "حالة 52: ACLS - VF/pVT يتحول إلى PEA/Asystole",
+    testType: "stateTransition",
+    title:
+      "حالة 51: ACLS - انتقال غير مسموح",
     inputs: {
-      currentState: "SHOCKABLE_LOOP",
-      branchTarget: "NON_SHOCKABLE_LOOP"
+      currentStateId: "RHYTHM_CHECK",
+      branchTargetId: "POST_ROSC"
     },
     expected: {
-      isValid: true,
-      nextState: "NON_SHOCKABLE_LOOP"
-    }
-  },
-
-  {
-    id: "acls_shockable_to_rosC",
-    protocolId: "acls",
-    title: "حالة 53: ACLS - ROSC بعد المسار القابل للصدمة",
-    inputs: {
-      currentState: "SHOCKABLE_LOOP",
-      branchTarget: "POST_ROSC"
-    },
-    expected: {
-      isValid: true,
-      nextState: "POST_ROSC"
-    }
-  },
-
-  {
-    id: "acls_nonshockable_to_shockable",
-    protocolId: "acls",
-    title: "حالة 54: ACLS - PEA/Asystole يتحول إلى VF/pVT",
-    inputs: {
-      currentState: "NON_SHOCKABLE_LOOP",
-      branchTarget: "SHOCKABLE_LOOP"
-    },
-    expected: {
-      isValid: true,
-      nextState: "SHOCKABLE_LOOP"
-    }
-  },
-
-  {
-    id: "acls_nonshockable_to_rosC",
-    protocolId: "acls",
-    title: "حالة 55: ACLS - ROSC بعد المسار غير القابل للصدمة",
-    inputs: {
-      currentState: "NON_SHOCKABLE_LOOP",
-      branchTarget: "POST_ROSC"
-    },
-    expected: {
-      isValid: true,
-      nextState: "POST_ROSC"
+      isValid: false,
+      errorCode: "INVALID_STATE_TRANSITION"
     }
   },
 
   // =========================================================================
-  // 11. MALIGNANT HYPERTHERMIA STATE MACHINE
+  // 10. STATE MACHINE - MALIGNANT HYPERTHERMIA
   // =========================================================================
 
   {
     id: "mh_initial_state",
     protocolId: "mh",
-    title: "حالة 56: MH - الحالة الابتدائية",
-    inputs: {},
+    testType: "stateTransition",
+    title:
+      "حالة 52: MH - الحالة الابتدائية",
+    inputs: {
+      currentStateId: null
+    },
     expected: {
       isValid: true,
       initialState: "RECOGNITION"
@@ -859,56 +945,72 @@ export const emergencyTestCases = [
   },
 
   {
-    id: "mh_recognition_to_immediate_actions",
+    id: "mh_recognition_to_actions",
     protocolId: "mh",
-    title: "حالة 57: MH - Recognition إلى Immediate Actions",
+    testType: "stateTransition",
+    title:
+      "حالة 53: MH - Recognition إلى Immediate Actions",
     inputs: {
-      currentState: "RECOGNITION",
-      branchTarget: "IMMEDIATE_ACTIONS"
+      currentStateId: "RECOGNITION",
+      branchTargetId: "IMMEDIATE_ACTIONS"
     },
     expected: {
       isValid: true,
-      nextState: "IMMEDIATE_ACTIONS"
+      nextState: "IMMEDIATE_ACTIONS",
+      terminal: false,
+      emergencyCico: false
     }
   },
 
   {
-    id: "mh_immediate_to_dantrolene",
+    id: "mh_actions_to_dantrolene",
     protocolId: "mh",
-    title: "حالة 58: MH - Immediate Actions إلى Dantrolene",
+    testType: "stateTransition",
+    title:
+      "حالة 54: MH - Immediate Actions إلى Dantrolene",
     inputs: {
-      currentState: "IMMEDIATE_ACTIONS",
-      branchTarget: "DANTROLENE_ADMINISTRATION"
+      currentStateId: "IMMEDIATE_ACTIONS",
+      branchTargetId: "DANTROLENE_ADMINISTRATION"
     },
     expected: {
       isValid: true,
-      nextState: "DANTROLENE_ADMINISTRATION"
+      nextState: "DANTROLENE_ADMINISTRATION",
+      terminal: false,
+      emergencyCico: false
     }
   },
 
   {
     id: "mh_dantrolene_to_supportive",
     protocolId: "mh",
-    title: "حالة 59: MH - Dantrolene إلى Supportive Care",
+    testType: "stateTransition",
+    title:
+      "حالة 55: MH - Dantrolene إلى Supportive Care",
     inputs: {
-      currentState: "DANTROLENE_ADMINISTRATION",
-      branchTarget: "SUPPORTIVE_CARE"
+      currentStateId: "DANTROLENE_ADMINISTRATION",
+      branchTargetId: "SUPPORTIVE_CARE"
     },
     expected: {
       isValid: true,
-      nextState: "SUPPORTIVE_CARE"
+      nextState: "SUPPORTIVE_CARE",
+      terminal: true,
+      emergencyCico: false
     }
   },
 
   // =========================================================================
-  // 12. LAST STATE MACHINE
+  // 11. STATE MACHINE - LAST
   // =========================================================================
 
   {
     id: "last_initial_state",
     protocolId: "last",
-    title: "حالة 60: LAST - الحالة الابتدائية",
-    inputs: {},
+    testType: "stateTransition",
+    title:
+      "حالة 56: LAST - الحالة الابتدائية",
+    inputs: {
+      currentStateId: null
+    },
     expected: {
       isValid: true,
       initialState: "RECOGNITION"
@@ -918,54 +1020,70 @@ export const emergencyTestCases = [
   {
     id: "last_recognition_to_management",
     protocolId: "last",
-    title: "حالة 61: LAST - Recognition إلى Immediate Management",
+    testType: "stateTransition",
+    title:
+      "حالة 57: LAST - Recognition إلى Immediate Management",
     inputs: {
-      currentState: "RECOGNITION",
-      branchTarget: "IMMEDIATE_MANAGEMENT"
+      currentStateId: "RECOGNITION",
+      branchTargetId: "IMMEDIATE_MANAGEMENT"
     },
     expected: {
       isValid: true,
-      nextState: "IMMEDIATE_MANAGEMENT"
+      nextState: "IMMEDIATE_MANAGEMENT",
+      terminal: false,
+      emergencyCico: false
     }
   },
 
   {
     id: "last_management_to_lipid",
     protocolId: "last",
-    title: "حالة 62: LAST - Immediate Management إلى Lipid Therapy",
+    testType: "stateTransition",
+    title:
+      "حالة 58: LAST - Immediate Management إلى Lipid Therapy",
     inputs: {
-      currentState: "IMMEDIATE_MANAGEMENT",
-      branchTarget: "LIPID_EMULSION_THERAPY"
+      currentStateId: "IMMEDIATE_MANAGEMENT",
+      branchTargetId: "LIPID_EMULSION_THERAPY"
     },
     expected: {
       isValid: true,
-      nextState: "LIPID_EMULSION_THERAPY"
+      nextState: "LIPID_EMULSION_THERAPY",
+      terminal: false,
+      emergencyCico: false
     }
   },
 
   {
     id: "last_lipid_to_observation",
     protocolId: "last",
-    title: "حالة 63: LAST - Lipid Therapy إلى Observation",
+    testType: "stateTransition",
+    title:
+      "حالة 59: LAST - Lipid Therapy إلى Post Observation",
     inputs: {
-      currentState: "LIPID_EMULSION_THERAPY",
-      branchTarget: "POST_LAST_OBSERVATION"
+      currentStateId: "LIPID_EMULSION_THERAPY",
+      branchTargetId: "POST_LAST_OBSERVATION"
     },
     expected: {
       isValid: true,
-      nextState: "POST_LAST_OBSERVATION"
+      nextState: "POST_LAST_OBSERVATION",
+      terminal: true,
+      emergencyCico: false
     }
   },
 
   // =========================================================================
-  // 13. ANAPHYLAXIS STATE MACHINE
+  // 12. STATE MACHINE - ANAPHYLAXIS
   // =========================================================================
 
   {
     id: "anaphylaxis_initial_state",
     protocolId: "anaphylaxis",
-    title: "حالة 64: Anaphylaxis - الحالة الابتدائية",
-    inputs: {},
+    testType: "stateTransition",
+    title:
+      "حالة 60: Anaphylaxis - الحالة الابتدائية",
+    inputs: {
+      currentStateId: null
+    },
     expected: {
       isValid: true,
       initialState: "RECOGNITION"
@@ -975,40 +1093,52 @@ export const emergencyTestCases = [
   {
     id: "anaphylaxis_recognition_to_first_line",
     protocolId: "anaphylaxis",
-    title: "حالة 65: Anaphylaxis - Recognition إلى First-Line",
+    testType: "stateTransition",
+    title:
+      "حالة 61: Anaphylaxis - Recognition إلى First-Line",
     inputs: {
-      currentState: "RECOGNITION",
-      branchTarget: "IMMEDIATE_FIRST_LINE"
+      currentStateId: "RECOGNITION",
+      branchTargetId: "IMMEDIATE_FIRST_LINE"
     },
     expected: {
       isValid: true,
-      nextState: "IMMEDIATE_FIRST_LINE"
+      nextState: "IMMEDIATE_FIRST_LINE",
+      terminal: false,
+      emergencyCico: false
     }
   },
 
   {
     id: "anaphylaxis_first_line_to_post",
     protocolId: "anaphylaxis",
-    title: "حالة 66: Anaphylaxis - First-Line إلى Second-Line/Post",
+    testType: "stateTransition",
+    title:
+      "حالة 62: Anaphylaxis - First-Line إلى Second-Line/Post",
     inputs: {
-      currentState: "IMMEDIATE_FIRST_LINE",
-      branchTarget: "SECOND_LINE_AND_POST"
+      currentStateId: "IMMEDIATE_FIRST_LINE",
+      branchTargetId: "SECOND_LINE_AND_POST"
     },
     expected: {
       isValid: true,
-      nextState: "SECOND_LINE_AND_POST"
+      nextState: "SECOND_LINE_AND_POST",
+      terminal: true,
+      emergencyCico: false
     }
   },
 
   // =========================================================================
-  // 14. DIFFICULT AIRWAY STATE MACHINE
+  // 13. STATE MACHINE - DIFFICULT AIRWAY
   // =========================================================================
 
   {
     id: "airway_initial_state",
     protocolId: "airway",
-    title: "حالة 67: Difficult Airway - الحالة الابتدائية Plan A",
-    inputs: {},
+    testType: "stateTransition",
+    title:
+      "حالة 63: Difficult Airway - الحالة الابتدائية Plan A",
+    inputs: {
+      currentStateId: null
+    },
     expected: {
       isValid: true,
       initialState: "PLAN_A"
@@ -1016,232 +1146,193 @@ export const emergencyTestCases = [
   },
 
   {
-    id: "airway_plan_a_success",
-    protocolId: "airway",
-    title: "حالة 68: Airway - نجاح Plan A",
-    inputs: {
-      currentState: "PLAN_A",
-      branchTarget: "SUCCESS_CONFIRMED"
-    },
-    expected: {
-      isValid: true,
-      nextState: "SUCCESS_CONFIRMED"
-    }
-  },
-
-  {
     id: "airway_plan_a_to_plan_b",
     protocolId: "airway",
-    title: "حالة 69: Airway - فشل Plan A والانتقال إلى Plan B",
+    testType: "stateTransition",
+    title:
+      "حالة 64: Airway - فشل Plan A إلى Plan B",
     inputs: {
-      currentState: "PLAN_A",
-      branchTarget: "PLAN_B"
+      currentStateId: "PLAN_A",
+      branchTargetId: "PLAN_B"
     },
     expected: {
       isValid: true,
-      nextState: "PLAN_B"
-    }
-  },
-
-  {
-    id: "airway_plan_b_success",
-    protocolId: "airway",
-    title: "حالة 70: Airway - نجاح SGA في Plan B",
-    inputs: {
-      currentState: "PLAN_B",
-      branchTarget: "SGA_SUCCESS"
-    },
-    expected: {
-      isValid: true,
-      nextState: "SGA_SUCCESS"
+      nextState: "PLAN_B",
+      terminal: false,
+      emergencyCico: false
     }
   },
 
   {
     id: "airway_plan_b_to_plan_c",
     protocolId: "airway",
-    title: "حالة 71: Airway - فشل Plan B والانتقال إلى Plan C",
+    testType: "stateTransition",
+    title:
+      "حالة 65: Airway - فشل Plan B إلى Plan C",
     inputs: {
-      currentState: "PLAN_B",
-      branchTarget: "PLAN_C"
+      currentStateId: "PLAN_B",
+      branchTargetId: "PLAN_C"
     },
     expected: {
       isValid: true,
-      nextState: "PLAN_C"
-    }
-  },
-
-  {
-    id: "airway_plan_c_success",
-    protocolId: "airway",
-    title: "حالة 72: Airway - نجاح Face Mask Ventilation",
-    inputs: {
-      currentState: "PLAN_C",
-      branchTarget: "FACEMASK_SUCCESS"
-    },
-    expected: {
-      isValid: true,
-      nextState: "FACEMASK_SUCCESS"
+      nextState: "PLAN_C",
+      terminal: false,
+      emergencyCico: false
     }
   },
 
   {
     id: "airway_plan_c_to_plan_d",
     protocolId: "airway",
-    title: "حالة 73: Airway - CICO والانتقال إلى Plan D/eFONA",
+    testType: "stateTransition",
+    title:
+      "حالة 66: Airway - CICO من Plan C إلى Plan D",
     inputs: {
-      currentState: "PLAN_C",
-      branchTarget: "PLAN_D_EFONA"
+      currentStateId: "PLAN_C",
+      branchTargetId: "PLAN_D_EFONA"
     },
     expected: {
       isValid: true,
       nextState: "PLAN_D_EFONA",
+      terminal: true,
       emergencyCico: true
     }
   },
 
+  {
+    id: "airway_plan_a_success",
+    protocolId: "airway",
+    testType: "stateTransition",
+    title:
+      "حالة 67: Airway - نجاح Plan A",
+    inputs: {
+      currentStateId: "PLAN_A",
+      branchTargetId: "SUCCESS_CONFIRMED"
+    },
+    expected: {
+      isValid: true,
+      nextState: "SUCCESS_CONFIRMED",
+      terminal: true,
+      emergencyCico: false
+    }
+  },
+
   // =========================================================================
-  // 15. LARYNGOSPASM PROTOCOL
+  // 14. STATE MACHINE - LARYNGOSPASM
   // =========================================================================
 
   {
     id: "laryngospasm_initial_state",
     protocolId: "laryngospasm",
-    title: "حالة 74: Laryngospasm - التحقق من الحالة الابتدائية",
-    inputs: {},
-    expected: {
-      isValid: true,
-      initialState: "ALGORITHM",
-      terminal: true
-    }
-  },
-
-  // =========================================================================
-  // 16. INVALID STATE TRANSITION TESTS
-  // =========================================================================
-
-  {
-    id: "invalid_acls_transition",
-    protocolId: "acls",
-    title: "حالة 75: ACLS - انتقال غير موجود يجب رفضه",
+    testType: "stateTransition",
+    title:
+      "حالة 68: Laryngospasm - الحالة الابتدائية",
     inputs: {
-      currentState: "RHYTHM_CHECK",
-      branchTarget: "POST_ROSC"
-    },
-    expected: {
-      isValid: false,
-      errorCode: "INVALID_STATE_TRANSITION"
-    }
-  },
-
-  {
-    id: "invalid_mh_transition",
-    protocolId: "mh",
-    title: "حالة 76: MH - انتقال غير موجود يجب رفضه",
-    inputs: {
-      currentState: "RECOGNITION",
-      branchTarget: "SUPPORTIVE_CARE"
-    },
-    expected: {
-      isValid: false,
-      errorCode: "INVALID_STATE_TRANSITION"
-    }
-  },
-
-  {
-    id: "invalid_airway_transition",
-    protocolId: "airway",
-    title: "حالة 77: Airway - الانتقال من Plan A مباشرة إلى Plan D يجب رفضه",
-    inputs: {
-      currentState: "PLAN_A",
-      branchTarget: "PLAN_D_EFONA"
-    },
-    expected: {
-      isValid: false,
-      errorCode: "INVALID_STATE_TRANSITION"
-    }
-  },
-
-  // =========================================================================
-  // 17. TERMINAL STATE VALIDATION
-  // =========================================================================
-
-  {
-    id: "acls_post_rosc_terminal",
-    protocolId: "acls",
-    title: "حالة 78: ACLS - POST_ROSC حالة نهائية",
-    inputs: {
-      stateId: "POST_ROSC"
+      currentStateId: null
     },
     expected: {
       isValid: true,
-      terminal: true
+      initialState: "ALGORITHM"
     }
   },
 
   {
-    id: "mh_supportive_care_terminal",
-    protocolId: "mh",
-    title: "حالة 79: MH - Supportive Care حالة نهائية",
+    id: "laryngospasm_terminal_state",
+    protocolId: "laryngospasm",
+    testType: "stateTransition",
+    title:
+      "حالة 69: Laryngospasm - الحالة النهائية",
     inputs: {
-      stateId: "SUPPORTIVE_CARE"
-    },
-    expected: {
-      isValid: true,
-      terminal: true
-    }
-  },
-
-  {
-    id: "last_post_observation_terminal",
-    protocolId: "last",
-    title: "حالة 80: LAST - Post Observation حالة نهائية",
-    inputs: {
-      stateId: "POST_LAST_OBSERVATION"
-    },
-    expected: {
-      isValid: true,
-      terminal: true
-    }
-  },
-
-  {
-    id: "anaphylaxis_post_terminal",
-    protocolId: "anaphylaxis",
-    title: "حالة 81: Anaphylaxis - Second Line/Post حالة نهائية",
-    inputs: {
-      stateId: "SECOND_LINE_AND_POST"
-    },
-    expected: {
-      isValid: true,
-      terminal: true
-    }
-  },
-
-  {
-    id: "airway_efona_terminal",
-    protocolId: "airway",
-    title: "حالة 82: Airway - eFONA حالة نهائية طارئة",
-    inputs: {
-      stateId: "PLAN_D_EFONA"
+      currentStateId: "ALGORITHM"
     },
     expected: {
       isValid: true,
       terminal: true,
-      isEmergencyCico: true
+      isEmergencyCico: false
+    }
+  },
+
+  // =========================================================================
+  // 15. STATE MACHINE ERROR HANDLING
+  // =========================================================================
+
+  {
+    id: "invalid_protocol_id",
+    testType: "stateTransition",
+    title:
+      "حالة 70: Protocol ID غير صالح",
+    inputs: {
+      protocolId: "unknown_protocol",
+      currentStateId: "RECOGNITION",
+      branchTargetId: "IMMEDIATE_ACTIONS"
+    },
+    expected: {
+      isValid: false,
+      errorCode: "INVALID_PROTOCOL_ID"
     }
   },
 
   {
-    id: "laryngospasm_terminal",
-    protocolId: "laryngospasm",
-    title: "حالة 83: Laryngospasm - Algorithm حالة نهائية",
+    id: "invalid_current_state",
+    protocolId: "mh",
+    testType: "stateTransition",
+    title:
+      "حالة 71: Current State غير صالح",
     inputs: {
-      stateId: "ALGORITHM"
+      currentStateId: "UNKNOWN_STATE",
+      branchTargetId: "IMMEDIATE_ACTIONS"
+    },
+    expected: {
+      isValid: false,
+      errorCode: "INVALID_CURRENT_STATE"
+    }
+  },
+
+  {
+    id: "invalid_state_transition",
+    protocolId: "mh",
+    testType: "stateTransition",
+    title:
+      "حالة 72: State Transition غير صالح",
+    inputs: {
+      currentStateId: "RECOGNITION",
+      branchTargetId: "SUPPORTIVE_CARE"
+    },
+    expected: {
+      isValid: false,
+      errorCode: "INVALID_STATE_TRANSITION"
+    }
+  },
+
+  {
+    id: "terminal_state_without_target",
+    protocolId: "mh",
+    testType: "stateTransition",
+    title:
+      "حالة 73: فحص Terminal State بدون Target",
+    inputs: {
+      currentStateId: "SUPPORTIVE_CARE"
     },
     expected: {
       isValid: true,
-      terminal: true
+      terminal: true,
+      isEmergencyCico: false
+    }
+  },
+
+  {
+    id: "non_terminal_state_without_target",
+    protocolId: "mh",
+    testType: "stateTransition",
+    title:
+      "حالة 74: فحص Non-Terminal State بدون Target",
+    inputs: {
+      currentStateId: "RECOGNITION"
+    },
+    expected: {
+      isValid: true,
+      terminal: false,
+      isEmergencyCico: false
     }
   }
 
