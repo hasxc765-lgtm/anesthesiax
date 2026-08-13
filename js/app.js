@@ -13,6 +13,7 @@ import { renderVaporizerView, initVaporizerEvents } from './components/vaporizer
 import { renderPreOpRiskView, initPreOpRiskEvents } from './components/preOpRiskView.js';
 import { renderAbgView, initAbgEvents } from './components/abgView.js';
 import { renderEmergencyView, initEmergencyEvents } from './components/emergencyView.js';
+import { renderDrugInteractionsView, initDrugInteractionsEvents } from './components/drugInteractionsView.js';
 
 // =========================================================
 // INITIALIZATION & GLOBAL HANDLERS
@@ -140,6 +141,8 @@ function render() {
       renderAbgLayout(contentContainer);
     } else if (currentView === 'emergencyProtocols') {
       renderEmergencyLayout(contentContainer);
+    } else if (currentView === 'drugInteractions') {
+      renderDrugInteractionsLayout(contentContainer);
     } else {
       renderDashboardView(contentContainer);
     }
@@ -165,7 +168,7 @@ function renderDashboardView(container) {
     { id: 'preOpRisk', title: 'تقييم المخاطر قبل العملية', subtitle: 'تصنيف ASA وتقييم القلب والتنفس', icon: '📋', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
     { id: 'abgElectrolytes', title: 'غازات الدم والأملاح', subtitle: 'تفسير ABG وتصحيح الصوديوم والبوتاسيوم', icon: '🧪', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
     { id: 'emergencyProtocols', title: 'بروتوكولات الطوارئ', subtitle: 'خوارزميات ACLS والحساسية والملايجنانت', icon: '🚨', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-    { id: 'drugInteractions', title: 'التداخلات الدوائية', subtitle: 'دليل الأدوية المزمنة والتفاعلات', icon: '📚', status: 'coming_soon', badge: 'قريباً', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' }
+    { id: 'drugInteractions', title: 'التداخلات الدوائية', subtitle: 'دليل الأدوية المزمنة والتفاعلات حول الجراحة', icon: '📚', status: 'active', badge: 'جاهز للاستخدام', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' }
   ];
 
   container.innerHTML = `
@@ -201,13 +204,26 @@ function renderDashboardView(container) {
   `;
 
   // Dynamic Routing Bindings
-  const toolIds = ['drugCenter', 'airway', 'fluidAbl', 'regionalLast', 'infusionTci', 'pediatric', 'vaporizers', 'preOpRisk', 'abgElectrolytes', 'emergencyProtocols'];
+  const toolIds = ['drugCenter', 'airway', 'fluidAbl', 'regionalLast', 'infusionTci', 'pediatric', 'vaporizers', 'preOpRisk', 'abgElectrolytes', 'emergencyProtocols', 'drugInteractions'];
   toolIds.forEach(id => {
     const card = container.querySelector(`[data-tool-id="${id}"]`);
     if (card) {
       card.addEventListener('click', () => window.navigateTo(id));
     }
   });
+}
+
+// =========================================================
+// DRUG INTERACTIONS CALCULATOR LAYOUT
+// =========================================================
+
+function renderDrugInteractionsLayout(container) {
+  if (typeof renderDrugInteractionsView === 'function') {
+    container.innerHTML = renderDrugInteractionsView();
+    if (typeof initDrugInteractionsEvents === 'function') {
+      initDrugInteractionsEvents();
+    }
+  }
 }
 
 // =========================================================
@@ -909,4 +925,4 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
   init();
-}
+        }
