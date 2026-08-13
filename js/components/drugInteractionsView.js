@@ -1,13 +1,13 @@
 /**
  * Perioperative Chronic Medications & Drug Interactions Unified UI Component
  *
- * AnesthesiaX — Phase 11.0 (Clinical View v11.0.0)
+ * AnesthesiaX — Phase 11.0 (Clinical View v11.0.0 - Production Audited)
  * File: js/components/drugInteractionsView.js
  *
  * Architecture:
  * ES Module View Layer.
  * Perioperative Decision Engine UI with Multi-Drug Selection, Patient Context Bar,
- * ASRA Neuraxial Safety Badges, Chronic-to-Intraop Interaction Alerts, and Targeted DOM Updates.
+ * Targeted DOM Updates (No Scroll Jump), and Empty State Placeholders.
  *
  * Consumes:
  * - ../data/drugInteractionsData.js
@@ -24,8 +24,8 @@ import { DrugInteractionsCalculator } from "../calculators/drugInteractionsCalcu
 const state = {
   searchQuery: "",
   selectedClassId: "ALL", // "ALL" or medication class ID
-  selectedMedicationIds: ["empagliflozin", "semaglutide"], // Default active medication list for demonstration
-  activeTabMedId: "empagliflozin",
+  selectedMedicationIds: [], // Empty state by default for clinical realism
+  activeTabMedId: null,
 
   // Patient Context Factors
   surgeryUrgency: "elective", // "elective" | "emergency"
@@ -84,7 +84,6 @@ export function renderDrugInteractionsView() {
   return `
     <div class="space-y-4 max-w-3xl mx-auto font-sans dir-rtl text-right" id="drugInteractionsContainer">
 
-      <!-- HEADER -->
       <div class="p-4 bg-gradient-to-r from-teal-900 via-indigo-900 to-slate-900 text-white rounded-2xl shadow-md flex justify-between items-center">
         <div>
           <div class="flex items-center gap-2">
@@ -98,13 +97,10 @@ export function renderDrugInteractionsView() {
         </button>
       </div>
 
-      <!-- PATIENT CONTEXT BAR -->
       ${renderPatientContextBarHTML()}
 
-      <!-- SEARCH & CLASS FILTER BAR -->
       ${renderSearchAndFilterSectionHTML()}
 
-      <!-- SELECTED MEDICATIONS CHIPS & DETAIL EVALUATION -->
       <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-4">
         ${renderSelectedMedsBarHTML()}
         <div id="medicationEvaluationDetailContainer">
@@ -112,7 +108,6 @@ export function renderDrugInteractionsView() {
         </div>
       </div>
 
-      <!-- INTRAOPERATIVE AGENT SELECTOR & INTERACTION ALERTS -->
       <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-4">
         <h3 class="font-bold text-xs text-slate-800 border-b border-slate-100 pb-2">
           ⚡ فحص التداخلات مع أدوية غرفة العمليات (Intraoperative Drug Interactions):
@@ -123,7 +118,6 @@ export function renderDrugInteractionsView() {
         </div>
       </div>
 
-      <!-- CLINICAL DISCLAIMER -->
       <div class="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-[11px] text-amber-900 leading-relaxed">
         <strong class="font-bold block mb-0.5">⚠️ تنبيه واستثناء سريري:</strong>
         ${drugInteractionsData.meta.disclaimer}
@@ -143,7 +137,6 @@ function renderPatientContextBarHTML() {
       <strong class="text-slate-800 block text-[11px] font-bold">📋 سياق وسيرة المريض الجراحية (Patient Context Factors):</strong>
       
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        <!-- SURGERY URGENCY TOGGLE -->
         <div>
           <label class="block text-[10px] text-slate-600 mb-1">نوع الجراحة:</label>
           <div class="flex bg-white p-0.5 rounded-lg border border-slate-300 text-[11px] font-bold">
@@ -156,7 +149,6 @@ function renderPatientContextBarHTML() {
           </div>
         </div>
 
-        <!-- NEURAXIAL BLOCK TOGGLE -->
         <div>
           <label class="block text-[10px] text-slate-600 mb-1">التخطيط لتخدير نصفي (Neuraxial):</label>
           <label class="flex items-center gap-2 p-1.5 bg-white border border-slate-300 rounded-lg cursor-pointer h-[29px]">
@@ -165,7 +157,6 @@ function renderPatientContextBarHTML() {
           </label>
         </div>
 
-        <!-- eGFR INPUT -->
         <div>
           <label class="block text-[10px] text-slate-600 mb-1">وظيفة الكلى <bdi dir="ltr" class="font-mono">(eGFR mL/min/1.73m²)</bdi>:</label>
           <input type="number" id="egfrInput" min="5" max="150" placeholder="مثال: 45 (اختياري)" value="${state.egfrValue}" class="w-full p-1 border border-slate-300 rounded bg-white text-center font-mono font-bold text-xs">
@@ -189,7 +180,7 @@ function renderSearchAndFilterSectionHTML() {
           type="text" 
           id="medSearchInput" 
           value="${state.searchQuery}"
-          placeholder="🔍 ابحث عن دواء مزمن بالاسم العلمي أو التجاري (Ozempic, Jardiance, Eliquis, Plavix, Metformin)..." 
+          placeholder="🔍 ابحث عن دواء مزمن (Ozempic, Jardiance, Eliquis, Plavix, Metformin)..." 
           class="w-full p-2.5 bg-white border-2 border-indigo-500 rounded-xl text-xs font-bold shadow-sm focus:outline-none text-slate-900"
         >
         ${state.searchQuery ? `
@@ -197,13 +188,7 @@ function renderSearchAndFilterSectionHTML() {
         ` : ''}
       </div>
 
-      <!-- SEARCH AUTOCOMPLETE RESULTS -->
-      <div id="searchResultsDropdown">
-        ${renderSearchResultsDropdownHTML()}
-      </div>
-
-      <!-- CLASS FILTERS -->
-      <div class="flex gap-1 overflow-x-auto pb-1 text-[11px] font-bold">
+      <div class="flex gap-1 overflow-x-auto pb-1 text-[11px] font-bold" id="classFiltersContainer">
         <button data-class="ALL" class="class-filter-btn px-2.5 py-1 rounded-lg border transition whitespace-nowrap cursor-pointer ${state.selectedClassId === 'ALL' ? 'bg-indigo-700 text-white border-indigo-700' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
           جميع الفئات
         </button>
@@ -213,38 +198,49 @@ function renderSearchAndFilterSectionHTML() {
           </button>
         `).join('')}
       </div>
+
+      <div id="searchResultsDropdown">
+        ${renderSearchResultsDropdownHTML()}
+      </div>
     </div>
   `;
 }
 
 function renderSearchResultsDropdownHTML() {
-  if (!state.searchQuery.trim()) return '';
-
   const cleanQuery = DrugInteractionsCalculator.normalizeString(state.searchQuery);
   const allMeds = drugInteractionsData.medications;
   const matched = [];
 
   Object.keys(allMeds).forEach(mId => {
     const med = allMeds[mId];
-    const nameMatch = DrugInteractionsCalculator.normalizeString(med.genericName).includes(cleanQuery);
-    const aliasMatch = Array.isArray(med.aliases) && med.aliases.some(a => DrugInteractionsCalculator.normalizeString(a).includes(cleanQuery));
+    
+    // Filter by Search Query
+    const nameMatch = cleanQuery ? DrugInteractionsCalculator.normalizeString(med.genericName).includes(cleanQuery) : true;
+    const aliasMatch = cleanQuery && Array.isArray(med.aliases) ? med.aliases.some(a => DrugInteractionsCalculator.normalizeString(a).includes(cleanQuery)) : false;
 
-    if (nameMatch || aliasMatch) {
+    // Filter by Class
+    const classMatch = state.selectedClassId === "ALL" || med.classId === state.selectedClassId;
+
+    if ((cleanQuery ? (nameMatch || aliasMatch) : (state.selectedClassId !== "ALL")) && classMatch) {
       matched.push(med);
     }
   });
 
+  if (!cleanQuery && state.selectedClassId === "ALL") {
+    return ''; // Hide dropdown if no search query and no specific class selected
+  }
+
   if (matched.length === 0) {
     return `
       <div class="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 text-xs text-center shadow-sm">
-        لا توجد أدوية مطابقة للبحث الحالي.
+        لا توجد أدوية مطابقة للبحث أو الفئة المختارة.
       </div>
     `;
   }
 
   return `
     <div class="p-2 bg-white border border-indigo-200 rounded-xl text-xs space-y-1 shadow-md max-h-48 overflow-y-auto">
-      <span class="text-[10px] text-slate-400 font-bold block px-1">انقر لإضافة الدواء إلى قائمة التقييم:</span>
+      <span class="text-[10px] text-slate-400 font-bold block px-1">انقر لإضافة الدواء إلى ملف المريض للتقييم:</span>
       ${matched.map(m => `
         <button data-add-med-id="${m.id}" type="button" class="add-med-btn w-full text-right p-1.5 hover:bg-indigo-50 rounded flex justify-between items-center transition cursor-pointer">
           <span class="font-bold text-indigo-900">${m.genericName} <bdi dir="ltr" class="text-slate-500 font-normal">(${m.aliases.join(', ')})</bdi></span>
@@ -262,9 +258,11 @@ function renderSearchResultsDropdownHTML() {
 function renderSelectedMedsBarHTML() {
   return `
     <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-      <strong class="text-xs font-bold text-slate-800">الأدوية المزمنة المحددة للتقييم:</strong>
+      <strong class="text-xs font-bold text-slate-800">الأدوية المزمنة المحددة للمريض:</strong>
       <div class="flex gap-1 overflow-x-auto">
-        ${state.selectedMedicationIds.map(mId => {
+        ${state.selectedMedicationIds.length === 0 ? `
+          <span class="text-[11px] text-slate-400">لم يتم إضافة أدوية بعد</span>
+        ` : state.selectedMedicationIds.map(mId => {
           const med = drugInteractionsData.medications[mId];
           if (!med) return '';
           const isActive = state.activeTabMedId === mId;
@@ -284,8 +282,20 @@ function renderSelectedMedsBarHTML() {
 }
 
 function renderActiveMedicationDetailHTML() {
+  if (state.selectedMedicationIds.length === 0) {
+    return `
+      <div class="p-6 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-center space-y-2">
+        <span class="text-3xl block">📋</span>
+        <strong class="text-xs font-bold text-slate-800 block">ملف أدوية المريض فارغ حالياً</strong>
+        <p class="text-[11px] text-slate-500 max-w-md mx-auto">
+          ابحث عن دواء مزمن في الأعلى (مثل: <bdi dir="ltr" class="font-bold text-indigo-700">Lisinopril, Plavix, Metformin</bdi>) أو اختر من الفئات لإضافته وتقييم تداخلاته حول الجراحة.
+        </p>
+      </div>
+    `;
+  }
+
   if (!state.activeTabMedId) {
-    return `<div class="p-4 text-slate-400 text-xs text-center">يرجى البحث واختيار دواء مزمن للتقييم.</div>`;
+    return `<div class="p-4 text-slate-400 text-xs text-center">اختر دواءً من الشريط أعلاه لعرض التفاصيل.</div>`;
   }
 
   const evalResult = DrugInteractionsCalculator.evaluateMedication({
@@ -307,7 +317,6 @@ function renderActiveMedicationDetailHTML() {
 
   return `
     <div class="space-y-3 text-xs">
-      <!-- DECISION HEADER CARD -->
       <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
         <div class="flex justify-between items-center border-b border-slate-200 pb-2">
           <div>
@@ -331,7 +340,6 @@ function renderActiveMedicationDetailHTML() {
         ` : ''}
       </div>
 
-      <!-- PRE-OP HOLD & POST-OP RESTART -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
         <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
           <strong class="text-slate-800 block border-b border-slate-200 pb-1">تعليمات ما قبل الجراحة (PreOp Hold):</strong>
@@ -344,7 +352,6 @@ function renderActiveMedicationDetailHTML() {
         </div>
       </div>
 
-      <!-- ASRA NEURAXIAL SAFETY CARD IF PLANNED -->
       ${evalResult.neuraxialSafety ? `
         <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl space-y-1 text-[11px]">
           <strong class="text-indigo-950 block border-b border-indigo-200 pb-1">💉 سلامة التخدير النصفي (ASRA 5th Edition Neuraxial Safety):</strong>
@@ -355,7 +362,6 @@ function renderActiveMedicationDetailHTML() {
         </div>
       ` : ''}
 
-      <!-- GLP-1 / SGLT2 SPECIFIC RISK CONTROLS -->
       ${med.category.includes('GLP-1') ? renderGlp1ControlsHTML(evalResult) : ''}
       ${med.category.includes('SGLT2') ? renderSglt2ControlsHTML(evalResult) : ''}
     </div>
@@ -372,21 +378,20 @@ function renderGlp1ControlsHTML(evalResult) {
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[10px]">
         <label class="flex items-center gap-1 cursor-pointer">
           <input type="checkbox" id="glp1GiCheck" ${state.glp1HasGiSymptoms ? 'checked' : ''} class="glp1-risk-check">
-          <span>وجود أعراض هضمية (غثيان/قيء)</span>
+          <span>أعراض هضمية (غثيان/قيء)</span>
         </label>
         <label class="flex items-center gap-1 cursor-pointer">
           <input type="checkbox" id="glp1EscalationCheck" ${state.glp1IsDoseEscalation ? 'checked' : ''} class="glp1-risk-check">
-          <span>مرحلة تصعيد الجرعة (Escalation)</span>
+          <span>تصعيد الجرعة (Escalation)</span>
         </label>
         <label class="flex items-center gap-1 cursor-pointer">
           <input type="checkbox" id="glp1ParesisCheck" ${state.glp1HasGastroparesis ? 'checked' : ''} class="glp1-risk-check">
-          <span>تشخيص شلل معدة معروف</span>
+          <span>شلل معدة معروف (Gastroparesis)</span>
         </label>
       </div>
 
       <div class="p-2 bg-white rounded border border-blue-200">
         <span class="font-bold text-blue-900 block">درجة الخطر: ${risk.riskLevel === 'HIGH' ? '🚨 مرتفع الاستنشاق (HIGH)' : '✅ اعتيادي (STANDARD)'}</span>
-        <p class="text-[10px] text-slate-700 mt-0.5">${risk.mitigationStrategy}</p>
       </div>
     </div>
   `;
@@ -398,7 +403,7 @@ function renderSglt2ControlsHTML(evalResult) {
   return `
     <div class="p-3 bg-red-50 border border-red-200 rounded-xl space-y-1 text-[11px] text-red-950">
       <strong class="text-red-900 block border-b border-red-200 pb-1 font-bold">🧪 خطر الحُماض الكيتوني السكري الطبيعي (Euglycemic DKA):</strong>
-      <p class="text-red-900">${risk.warningText}</p>
+      <p class="text-red-900">${risk.isEmergency ? 'جراحة إسعافية: افحص الكيتونات وفجوة الشوارد فوراً.' : `يتطلب إيقاف الدواء ${risk.holdDaysRequired || 3} أيام قبل الجراحة.`}</p>
     </div>
   `;
 }
@@ -435,6 +440,14 @@ function renderIntraopAgentSelectorHTML() {
 }
 
 function renderInteractionAlertsHTML() {
+  if (state.selectedMedicationIds.length === 0) {
+    return `
+      <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-xs text-center">
+        أضف أدوية مزمنة إلى ملف المريض أعلاه لفحص تداخلاتها الدوائية.
+      </div>
+    `;
+  }
+
   const alerts = DrugInteractionsCalculator.checkInteractions(
     state.selectedMedicationIds,
     state.selectedIntraopAgents
@@ -443,7 +456,7 @@ function renderInteractionAlertsHTML() {
   if (alerts.length === 0) {
     return `
       <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs font-bold text-center">
-        ✅ لا توجد تداخلات دوائية حادة مسجلة بين الأدوية المزمنة وأدوية العمليات المحددة.
+        ✅ لا توجد تداخلات دوائية حادة مسجلة بين الأدوية المزمنة والأدوية المحددة.
       </div>
     `;
   }
@@ -491,11 +504,15 @@ export function initDrugInteractionsEvents() {
   if (btnElective && btnEmergency) {
     btnElective.addEventListener("click", () => {
       state.surgeryUrgency = "elective";
-      reRenderFull();
+      updateDetailAndInteractionsDOM();
+      btnElective.className = "flex-1 py-1 rounded transition bg-indigo-700 text-white font-bold";
+      btnEmergency.className = "flex-1 py-1 rounded transition text-slate-700 hover:bg-slate-100 font-bold";
     });
     btnEmergency.addEventListener("click", () => {
       state.surgeryUrgency = "emergency";
-      reRenderFull();
+      updateDetailAndInteractionsDOM();
+      btnEmergency.className = "flex-1 py-1 rounded transition bg-purple-700 text-white font-bold";
+      btnElective.className = "flex-1 py-1 rounded transition text-slate-700 hover:bg-slate-100 font-bold";
     });
   }
 
@@ -531,36 +548,34 @@ export function initDrugInteractionsEvents() {
   if (btnClearSearch) {
     btnClearSearch.addEventListener("click", () => {
       state.searchQuery = "";
-      reRenderFull();
+      const searchInput = document.getElementById("medSearchInput");
+      if (searchInput) searchInput.value = "";
+      updateSearchResultsDOM();
     });
   }
 
-  // Class Filter Buttons
+  // Class Filter Buttons (Targeted update - No Page Jump)
   container.querySelectorAll(".class-filter-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
       state.selectedClassId = e.currentTarget.getAttribute("data-class");
-      reRenderFull();
+      
+      // Update Button Styles
+      container.querySelectorAll(".class-filter-btn").forEach(b => {
+        b.className = "class-filter-btn px-2.5 py-1 rounded-lg border transition whitespace-nowrap cursor-pointer bg-white text-slate-700 border-slate-200 hover:bg-slate-100";
+      });
+      e.currentTarget.className = "class-filter-btn px-2.5 py-1 rounded-lg border transition whitespace-nowrap cursor-pointer bg-indigo-700 text-white border-indigo-700";
+
+      updateSearchResultsDOM();
     });
   });
 
-  // Dynamic Add Medication from Search Results
-  container.querySelectorAll(".add-med-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const medId = e.currentTarget.getAttribute("data-add-med-id");
-      if (medId && !state.selectedMedicationIds.includes(medId)) {
-        state.selectedMedicationIds.push(medId);
-        state.activeTabMedId = medId;
-        state.searchQuery = "";
-        reRenderFull();
-      }
-    });
-  });
+  bindDynamicAddButtons();
 
   // Select Tab Medication
   container.querySelectorAll(".select-tab-med-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
       state.activeTabMedId = e.currentTarget.getAttribute("data-select-tab-med");
-      updateDetailAndInteractionsDOM();
+      reRenderFull();
     });
   });
 
@@ -590,6 +605,32 @@ export function initDrugInteractionsEvents() {
   });
 
   // GLP-1 Risk Checkboxes
+  bindGlp1Checkboxes();
+}
+
+function bindDynamicAddButtons() {
+  const container = document.getElementById("drugInteractionsContainer");
+  if (!container) return;
+
+  container.querySelectorAll(".add-med-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const medId = e.currentTarget.getAttribute("data-add-med-id");
+      if (medId && !state.selectedMedicationIds.includes(medId)) {
+        state.selectedMedicationIds.push(medId);
+        state.activeTabMedId = medId;
+        state.searchQuery = "";
+        const searchInput = document.getElementById("medSearchInput");
+        if (searchInput) searchInput.value = "";
+        reRenderFull();
+      }
+    });
+  });
+}
+
+function bindGlp1Checkboxes() {
+  const container = document.getElementById("drugInteractionsContainer");
+  if (!container) return;
+
   container.querySelectorAll(".glp1-risk-check").forEach(cb => {
     cb.addEventListener("change", () => {
       const giCheck = document.getElementById("glp1GiCheck");
@@ -609,18 +650,7 @@ function updateSearchResultsDOM() {
   const container = document.getElementById("searchResultsDropdown");
   if (container) {
     container.innerHTML = renderSearchResultsDropdownHTML();
-    // Rebind add buttons
-    container.querySelectorAll(".add-med-btn").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        const medId = e.currentTarget.getAttribute("data-add-med-id");
-        if (medId && !state.selectedMedicationIds.includes(medId)) {
-          state.selectedMedicationIds.push(medId);
-          state.activeTabMedId = medId;
-          state.searchQuery = "";
-          reRenderFull();
-        }
-      });
-    });
+    bindDynamicAddButtons();
   }
 }
 
@@ -628,6 +658,7 @@ function updateDetailAndInteractionsDOM() {
   const detailContainer = document.getElementById("medicationEvaluationDetailContainer");
   if (detailContainer) {
     detailContainer.innerHTML = renderActiveMedicationDetailHTML();
+    bindGlp1Checkboxes();
   }
   updateInteractionsDOM();
 }
