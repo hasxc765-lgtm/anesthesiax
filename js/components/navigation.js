@@ -18,14 +18,12 @@ const FIREBASE_DB_URL = "https://anesthesiax-15012-default-rtdb.asia-southeast1.
 window.updateRealVisitors = async function() {
   const countElements = document.querySelectorAll('.live-visitor-count');
   
-  // عرض آخر رقم مسجل في ذاكرة الجهاز فوراً
   const cached = localStorage.getItem('anesthesiax_real_visitors');
   if (cached) {
     countElements.forEach(el => el.textContent = cached);
   }
 
   try {
-    // جلب الرقم الحالي من السيرفر
     const getRes = await fetch(`${FIREBASE_DB_URL}/visitors.json`);
     let currentCount = 0;
     if (getRes.ok) {
@@ -33,7 +31,6 @@ window.updateRealVisitors = async function() {
       currentCount = (typeof data === 'number' && !isNaN(data)) ? data : 0;
     }
 
-    // زيادة العداد العالمي +1 وإرساله للقاعدة السحابية
     const newCount = currentCount + 1;
     await fetch(`${FIREBASE_DB_URL}/visitors.json`, {
       method: 'PUT',
@@ -41,12 +38,11 @@ window.updateRealVisitors = async function() {
       body: JSON.stringify(newCount)
     });
 
-    // تحديث الشاشة وتخزين الرقم الحقيقي في ذاكرة الهاتف
     const formatted = Number(newCount).toLocaleString('en-US');
     localStorage.setItem('anesthesiax_real_visitors', formatted);
     countElements.forEach(el => el.textContent = formatted);
   } catch (err) {
-    // في حال العمل أوفلاين في صالة العمليات: يتم الحفاظ على العمل بدون أي أخطاء
+    // تجاوز هادئ في وضع صالة العمليات الأوفلاين
   }
 };
 
@@ -78,35 +74,38 @@ export function renderNavigation(currentView) {
   const initialVisitors = (typeof localStorage !== 'undefined' && localStorage.getItem('anesthesiax_real_visitors')) || '1';
 
   return `
-    <header class="max-w-2xl mx-auto flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-800 mb-4 transition-colors duration-200" dir="rtl">
-      <div class="flex items-center gap-2">
+    <header class="w-full max-w-2xl mx-auto flex justify-between items-center py-2.5 px-1 border-b border-slate-200 dark:border-slate-800 mb-3 transition-colors duration-200 select-none" dir="rtl">
+      
+      <div class="flex items-center gap-1.5 shrink-0">
         ${!isDashboard ? `
-          <button id="btnBackToDashboard" class="px-2.5 py-1.5 bg-blue-50 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-slate-700 text-blue-700 dark:text-blue-300 rounded-xl text-xs font-bold transition flex items-center gap-1 border border-blue-200 dark:border-slate-700 active:scale-95">
+          <button id="btnBackToDashboard" class="px-2 py-1 bg-blue-50 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-slate-700 text-blue-700 dark:text-blue-300 rounded-lg text-[10px] sm:text-xs font-bold transition flex items-center gap-1 border border-blue-200 dark:border-slate-700 active:scale-95 shrink-0">
             <span>➔</span> <span>الرئيسية</span>
           </button>
         ` : ''}
         <div>
-          <h1 class="text-xl font-bold text-blue-600 dark:text-indigo-400 flex items-center gap-1">
+          <h1 class="text-base sm:text-lg font-bold text-blue-600 dark:text-indigo-400 flex items-center gap-0.5 leading-tight">
             AnesthesiaX 💉
           </h1>
-          <p class="text-[9px] text-slate-500 dark:text-slate-400">Professional Anesthesia Toolkit</p>
+          ${isDashboard ? `<p class="text-[8px] sm:text-[9px] text-slate-500 dark:text-slate-400">Professional Toolkit</p>` : ''}
         </div>
       </div>
 
-      <div class="flex items-center gap-1.5 sm:gap-2">
+      <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
         
         <a 
           href="https://instagram.com/u8cb" 
           target="_blank" 
           rel="noopener noreferrer"
-          class="flex items-center gap-1 text-[10px] sm:text-[11px] bg-gradient-to-r from-purple-50 via-pink-50 to-amber-50 dark:from-purple-950/40 dark:via-pink-950/40 dark:to-amber-950/40 text-pink-700 dark:text-pink-300 font-bold px-2 py-1 rounded-lg border border-pink-200 dark:border-pink-800/50 hover:opacity-90 transition active:scale-95 shadow-sm"
-          title="تواصل مع المطور على إنستغرام @u8cb"
+          class="flex items-center gap-1 text-[9px] sm:text-[10px] bg-gradient-to-r from-purple-50 via-pink-50 to-amber-50 dark:from-purple-950/50 dark:via-pink-950/50 dark:to-amber-950/50 text-pink-700 dark:text-pink-300 font-bold px-1.5 py-1 rounded-lg border border-pink-200 dark:border-pink-800/50 hover:opacity-90 transition active:scale-95 shrink-0 shadow-sm"
+          title="حساب المطور @u8cb"
         >
-          <span>📸</span>
+          <svg class="w-3 h-3 fill-current text-pink-600 dark:text-pink-400 shrink-0" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+          </svg>
           <span class="font-sans">@u8cb</span>
         </a>
 
-        <div class="flex items-center gap-1 text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm" title="عدد الزيارات الحقيقية للمنصة">
+        <div class="flex items-center gap-0.5 text-[9px] sm:text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-1.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm shrink-0" title="عدد الزيارات الحقيقية للمنصة">
           <span>👥</span>
           <span class="live-visitor-count font-mono">${initialVisitors}</span>
         </div>
@@ -115,13 +114,13 @@ export function renderNavigation(currentView) {
           id="btnToggleDarkMode" 
           type="button" 
           onclick="window.toggleDarkMode()"
-          class="flex items-center gap-1 text-[10px] sm:text-[11px] bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold px-2 sm:px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-800/50 transition cursor-pointer active:scale-95 shadow-sm"
+          class="flex items-center gap-0.5 text-[9px] sm:text-[10px] bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold px-1.5 py-1 rounded-lg border border-amber-200 dark:border-amber-800/50 transition cursor-pointer active:scale-95 shadow-sm shrink-0"
         >
           <span id="darkIcon">${isDark ? '☀️' : '🌙'}</span>
           <span id="darkText">${isDark ? 'المضيء' : 'المظلم'}</span>
         </button>
 
-        <span class="text-[10px] bg-blue-100 dark:bg-indigo-950 text-blue-800 dark:text-indigo-300 font-bold px-2 py-1 rounded-lg border border-blue-200 dark:border-indigo-800">
+        <span class="text-[9px] sm:text-[10px] bg-blue-100 dark:bg-indigo-950 text-blue-800 dark:text-indigo-300 font-bold px-1.5 sm:px-2 py-1 rounded-lg border border-blue-200 dark:border-indigo-800 shrink-0">
           ${pageTitle}
         </span>
       </div>
