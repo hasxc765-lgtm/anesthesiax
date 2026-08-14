@@ -18,7 +18,7 @@ const FIREBASE_DB_URL = "https://anesthesiax-15012-default-rtdb.asia-southeast1.
 window.updateRealVisitors = async function() {
   const countElements = document.querySelectorAll('.live-visitor-count');
   
-  // عرض آخر رقم مسجل في ذاكرة الجهاز فوراً لتجنب الانتظار
+  // عرض آخر رقم مسجل في ذاكرة الجهاز فوراً
   const cached = localStorage.getItem('anesthesiax_real_visitors');
   if (cached) {
     countElements.forEach(el => el.textContent = cached);
@@ -41,7 +41,7 @@ window.updateRealVisitors = async function() {
       body: JSON.stringify(newCount)
     });
 
-    // تحديث الشاشة وتخزين الرقم الحقيقي في ذاكرة الجهاز
+    // تحديث الشاشة وتخزين الرقم الحقيقي في ذاكرة الهاتف
     const formatted = Number(newCount).toLocaleString('en-US');
     localStorage.setItem('anesthesiax_real_visitors', formatted);
     countElements.forEach(el => el.textContent = formatted);
@@ -95,6 +95,17 @@ export function renderNavigation(currentView) {
 
       <div class="flex items-center gap-1.5 sm:gap-2">
         
+        <a 
+          href="https://instagram.com/u8cb" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="flex items-center gap-1 text-[10px] sm:text-[11px] bg-gradient-to-r from-purple-50 via-pink-50 to-amber-50 dark:from-purple-950/40 dark:via-pink-950/40 dark:to-amber-950/40 text-pink-700 dark:text-pink-300 font-bold px-2 py-1 rounded-lg border border-pink-200 dark:border-pink-800/50 hover:opacity-90 transition active:scale-95 shadow-sm"
+          title="تواصل مع المطور على إنستغرام @u8cb"
+        >
+          <span>📸</span>
+          <span class="font-sans">@u8cb</span>
+        </a>
+
         <div class="flex items-center gap-1 text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm" title="عدد الزيارات الحقيقية للمنصة">
           <span>👥</span>
           <span class="live-visitor-count font-mono">${initialVisitors}</span>
