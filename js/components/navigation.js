@@ -11,30 +11,50 @@ if (typeof window !== 'undefined' && !window.toggleDarkMode) {
   };
 }
 
-// 2. دالة جلب وتحديث عداد الزوار الحقيقي بشكل مضمون ومستمر
-window.fetchLiveVisitors = async function() {
+// 2. رابط قاعدة بيانات Firebase الخاصة بمشروعك
+const FIREBASE_DB_URL = "https://anesthesiax-15012-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+// 3. دالة جلب وزيادة عداد الزوار الحقيقي سحابياً ومباشراً
+window.updateRealVisitors = async function() {
+  const countElements = document.querySelectorAll('.live-visitor-count');
+  
+  // عرض آخر رقم مسجل في ذاكرة الجهاز فوراً لتجنب الانتظار
+  const cached = localStorage.getItem('anesthesiax_real_visitors');
+  if (cached) {
+    countElements.forEach(el => el.textContent = cached);
+  }
+
   try {
-    const response = await fetch('https://api.counterapi.dev/v1/anesthesiax_app_counter/visits/up');
-    if (!response.ok) return;
-    const data = await response.json();
-    
-    if (data && typeof data.count === 'number') {
-      const formatted = Number(data.count).toLocaleString('en-US');
-      localStorage.setItem('ax_visitor_count', formatted);
-      
-      // تحديث جميع خانات العداد في الصفحة فوراً
-      const countElements = document.querySelectorAll('.live-visitor-count');
-      countElements.forEach(el => el.textContent = formatted);
+    // جلب الرقم الحالي من السيرفر
+    const getRes = await fetch(`${FIREBASE_DB_URL}/visitors.json`);
+    let currentCount = 0;
+    if (getRes.ok) {
+      const data = await getRes.json();
+      currentCount = (typeof data === 'number' && !isNaN(data)) ? data : 0;
     }
-  } catch (e) {
-    // في حال عدم توفر إنترنت يتم الاعتماد على الرقم المحفوظ
+
+    // زيادة العداد العالمي +1 وإرساله للقاعدة السحابية
+    const newCount = currentCount + 1;
+    await fetch(`${FIREBASE_DB_URL}/visitors.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newCount)
+    });
+
+    // تحديث الشاشة وتخزين الرقم الحقيقي في ذاكرة الجهاز
+    const formatted = Number(newCount).toLocaleString('en-US');
+    localStorage.setItem('anesthesiax_real_visitors', formatted);
+    countElements.forEach(el => el.textContent = formatted);
+  } catch (err) {
+    // في حال العمل أوفلاين في صالة العمليات: يتم الحفاظ على العمل بدون أي أخطاء
   }
 };
 
-// تشغيل جلب العداد فور تحميل الصفحة
-if (typeof window !== 'undefined') {
+// تسجيل الزيارة فور تحميل الصفحة
+if (typeof window !== 'undefined' && !window._axVisitorRecorded) {
+  window._axVisitorRecorded = true;
   setTimeout(() => {
-    if (window.fetchLiveVisitors) window.fetchLiveVisitors();
+    if (window.updateRealVisitors) window.updateRealVisitors();
   }, 300);
 }
 
@@ -55,9 +75,7 @@ export function renderNavigation(currentView) {
   if (currentView === 'drugInteractions') pageTitle = 'التداخلات الدوائية';
 
   const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
-  
-  // قراءة الرقم المسجل أو إعطاء رقم افتراضي يبدأ منه العداد
-  const currentCount = (typeof localStorage !== 'undefined' && localStorage.getItem('ax_visitor_count')) || '1,450';
+  const initialVisitors = (typeof localStorage !== 'undefined' && localStorage.getItem('anesthesiax_real_visitors')) || '1';
 
   return `
     <header class="max-w-2xl mx-auto flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-800 mb-4 transition-colors duration-200" dir="rtl">
@@ -77,9 +95,9 @@ export function renderNavigation(currentView) {
 
       <div class="flex items-center gap-1.5 sm:gap-2">
         
-        <div class="flex items-center gap-1 text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm" title="عدد الزيارات">
+        <div class="flex items-center gap-1 text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm" title="عدد الزيارات الحقيقية للمنصة">
           <span>👥</span>
-          <span class="live-visitor-count font-mono">${currentCount}</span>
+          <span class="live-visitor-count font-mono">${initialVisitors}</span>
         </div>
 
         <button 
