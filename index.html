@@ -57,11 +57,6 @@
         <p class="text-[9px] text-slate-400" dir="ltr">Clinical Decision Support</p>
       </div>
     </div>
-
-    <div id="btnToggleDarkMode" class="flex items-center gap-1.5 text-xs text-amber-300 font-medium cursor-pointer hover:opacity-80 transition px-2 py-1 rounded-lg active:scale-95">
-      <span id="darkIcon">🌙</span>
-      <span id="darkText">الوضع المظلم</span>
-    </div>
   </header>
 
   <div id="pwaInstallBanner" class="hidden mb-4 bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 text-white p-3 rounded-2xl shadow-xl border border-indigo-500/30 flex justify-between items-center transition-all duration-300">
@@ -88,36 +83,20 @@
   <script type="module" src="js/app.js"></script>
 
   <script>
-    // أ. إدارة زر الوضع المظلم الموثوقة
-    function initDarkModeToggle() {
-      const btn = document.getElementById('btnToggleDarkMode');
-      const icon = document.getElementById('darkIcon');
-      const text = document.getElementById('darkText');
-
-      function updateUI() {
-        const isDark = document.documentElement.classList.contains('dark');
+    // أ. كود إدارة الوضع المظلم العام (يعمل تلقائياً عند الضغط على الزر/النص في أي مكان داخل التطبيق)
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('#btnToggleDarkMode');
+      if (btn) {
+        e.preventDefault();
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        
+        const icon = document.getElementById('darkIcon');
+        const text = document.getElementById('darkText');
         if (icon) icon.textContent = isDark ? '☀️' : '🌙';
         if (text) text.textContent = isDark ? 'الوضع المضيء' : 'الوضع المظلم';
       }
-
-      updateUI();
-
-      if (btn && !btn.dataset.initialized) {
-        btn.dataset.initialized = 'true';
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const isDark = document.documentElement.classList.toggle('dark');
-          localStorage.setItem('theme', isDark ? 'dark' : 'light');
-          updateUI();
-        });
-      }
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initDarkModeToggle);
-    } else {
-      initDarkModeToggle();
-    }
+    });
 
     // ب. إدارة إشعار التثبيت الذكي (Android & iOS)
     let deferredPrompt;
@@ -130,10 +109,9 @@
     const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
 
     if (isIos && !isStandalone) {
-      // إظهار الشريط بأسلوب الآيفون
       if (installBanner) installBanner.classList.remove('hidden');
       if (pwaSubText) pwaSubText.textContent = "اضغط زر المشاركة 📤 ثم 'إضافة إلى الشاشة الرئيسية'";
-      if (installBtn) installBtn.style.display = 'none'; // إخفاء الزر الآلي للآيفون
+      if (installBtn) installBtn.style.display = 'none';
     }
 
     window.addEventListener('beforeinstallprompt', (e) => {
