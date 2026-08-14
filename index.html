@@ -47,14 +47,29 @@
   </script>
 </head>
 
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen p-3 transition-colors duration-200 antialiased font-sans select-none">
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen p-3 pt-20 transition-colors duration-200 antialiased font-sans select-none">
 
-  <div id="pwaInstallBanner" class="hidden sticky top-0 z-50 mb-3 bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 text-white p-3 rounded-2xl shadow-xl border border-indigo-500/30 flex justify-between items-center">
+  <header class="fixed top-0 left-0 right-0 z-40 bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-md text-white p-3 shadow-lg flex justify-between items-center border-b border-slate-800">
+    <div class="flex items-center gap-2 cursor-pointer" onclick="window.navigateTo && window.navigateTo('dashboard')">
+      <span class="text-xl">💉</span>
+      <div>
+        <h1 class="font-bold text-sm text-indigo-400">AnesthesiaX</h1>
+        <p class="text-[9px] text-slate-400" dir="ltr">Clinical Decision Support</p>
+      </div>
+    </div>
+
+    <button id="btnToggleDarkMode" type="button" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-xl font-bold text-xs flex items-center gap-1.5 transition border border-slate-700 cursor-pointer shadow-sm">
+      <span id="darkIcon">🌙</span>
+      <span id="darkText">الوضع المظلم</span>
+    </button>
+  </header>
+
+  <div id="pwaInstallBanner" class="hidden mb-4 bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 text-white p-3 rounded-2xl shadow-xl border border-indigo-500/30 flex justify-between items-center">
     <div class="flex items-center gap-3">
       <img src="./icon.png" alt="AnesthesiaX" class="w-10 h-10 rounded-xl shadow border border-indigo-400/30 object-cover">
       <div>
         <h4 class="font-bold text-xs text-indigo-300">تثبيت تطبيق AnesthesiaX</h4>
-        <p class="text-[10px] text-slate-300">استخدمه فوراً وبدون إنترنت في صالة العمليات</p>
+        <p id="pwaSubText" class="text-[10px] text-slate-300">استخدمه فوراً وبدون إنترنت في صالة العمليات</p>
       </div>
     </div>
     <div class="flex items-center gap-2">
@@ -67,21 +82,6 @@
     </div>
   </div>
 
-  <header class="sticky top-0 z-40 bg-slate-900/90 dark:bg-slate-900/95 backdrop-blur-md text-white p-3 rounded-2xl mb-4 shadow-md flex justify-between items-center border border-slate-800">
-    <div class="flex items-center gap-2 cursor-pointer" onclick="window.navigateTo && window.navigateTo('dashboard')">
-      <span class="text-xl">💉</span>
-      <div>
-        <h1 class="font-bold text-sm text-indigo-400">AnesthesiaX</h1>
-        <p class="text-[9px] text-slate-400" dir="ltr">Clinical Decision Support</p>
-      </div>
-    </div>
-
-    <button id="btnToggleDarkMode" type="button" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-xl font-bold text-xs flex items-center gap-1.5 transition border border-slate-700 cursor-pointer">
-      <span id="darkIcon">🌙</span>
-      <span id="darkText">الوضع المظلم</span>
-    </button>
-  </header>
-
   <div id="app-nav"></div>
 
   <div id="app-content"></div>
@@ -89,10 +89,21 @@
   <script type="module" src="js/app.js"></script>
 
   <script>
-    // 1. كود إشعار التثبيت الفوري PWA
+    // 1. كود إشعار التثبيت الذكي PWA (Android & iOS)
     let deferredPrompt;
     const installBanner = document.getElementById('pwaInstallBanner');
     const installBtn = document.getElementById('btnInstallPWA');
+    const pwaSubText = document.getElementById('pwaSubText');
+
+    // فحص إذا كان الجهاز آيفون والتطبيق غير مثبّت
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+
+    if (isIos && !isStandalone) {
+      if (installBanner) installBanner.classList.remove('hidden');
+      if (pwaSubText) pwaSubText.textContent = "اضغط زر المشاركة 📤 ثم 'إضافة إلى الشاشة الرئيسية'";
+      if (installBtn) installBtn.style.display = 'none'; // إخفاء زر التثبيت الآلي لأن الآيفون يتطلب الشير
+    }
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
