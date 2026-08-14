@@ -29,14 +29,14 @@
   <link rel="stylesheet" href="css/style.css">
 
   <script>
-    // 1. فحص تفضيل الوضع المظلم وتطبيقه
+    // 1. فحص وتطبيق الوضع المظلم مبكراً لمنع الوميض
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
 
-    // 2. تسجيل الـ Service Worker ليعمل الموقع بدون إنترنت (Offline Mode)
+    // 2. تسجيل الـ Service Worker ليعمل بدون إنترنت
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js')
@@ -47,9 +47,9 @@
   </script>
 </head>
 
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen p-3 pt-20 transition-colors duration-200 antialiased font-sans select-none">
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen p-3 transition-colors duration-200 antialiased font-sans select-none">
 
-  <header class="fixed top-0 left-0 right-0 z-40 bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-md text-white p-3 shadow-lg flex justify-between items-center border-b border-slate-800">
+  <header class="sticky top-0 z-50 bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-md text-white p-3 rounded-2xl mb-3 shadow-lg flex justify-between items-center border border-slate-800">
     <div class="flex items-center gap-2 cursor-pointer" onclick="window.navigateTo && window.navigateTo('dashboard')">
       <span class="text-xl">💉</span>
       <div>
@@ -58,13 +58,13 @@
       </div>
     </div>
 
-    <button id="btnToggleDarkMode" type="button" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-xl font-bold text-xs flex items-center gap-1.5 transition border border-slate-700 cursor-pointer shadow-sm">
+    <button id="btnToggleDarkMode" type="button" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-xl font-bold text-xs flex items-center gap-1.5 transition border border-slate-700 cursor-pointer shadow-sm active:scale-95">
       <span id="darkIcon">🌙</span>
       <span id="darkText">الوضع المظلم</span>
     </button>
   </header>
 
-  <div id="pwaInstallBanner" class="hidden mb-4 bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 text-white p-3 rounded-2xl shadow-xl border border-indigo-500/30 flex justify-between items-center">
+  <div id="pwaInstallBanner" class="hidden mb-4 bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 text-white p-3 rounded-2xl shadow-xl border border-indigo-500/30 flex justify-between items-center transition-all duration-300">
     <div class="flex items-center gap-3">
       <img src="./icon.png" alt="AnesthesiaX" class="w-10 h-10 rounded-xl shadow border border-indigo-400/30 object-cover">
       <div>
@@ -83,26 +83,57 @@
   </div>
 
   <div id="app-nav"></div>
-
   <div id="app-content"></div>
 
   <script type="module" src="js/app.js"></script>
 
   <script>
-    // 1. كود إشعار التثبيت الذكي PWA (Android & iOS)
+    // أ. إدارة زر الوضع المظلم الموثوقة
+    function initDarkModeToggle() {
+      const btn = document.getElementById('btnToggleDarkMode');
+      const icon = document.getElementById('darkIcon');
+      const text = document.getElementById('darkText');
+
+      function updateUI() {
+        const isDark = document.documentElement.classList.contains('dark');
+        if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+        if (text) text.textContent = isDark ? 'الوضع المضيء' : 'الوضع المظلم';
+      }
+
+      updateUI();
+
+      if (btn && !btn.dataset.initialized) {
+        btn.dataset.initialized = 'true';
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const isDark = document.documentElement.classList.toggle('dark');
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          updateUI();
+        });
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initDarkModeToggle);
+    } else {
+      initDarkModeToggle();
+    }
+
+    // ب. إدارة إشعار التثبيت الذكي (Android & iOS)
     let deferredPrompt;
     const installBanner = document.getElementById('pwaInstallBanner');
     const installBtn = document.getElementById('btnInstallPWA');
     const pwaSubText = document.getElementById('pwaSubText');
 
-    // فحص إذا كان الجهاز آيفون والتطبيق غير مثبّت
+    // كشف أجهزة الآيفون والآيباد iOS
     const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
 
     if (isIos && !isStandalone) {
+      // إظهار الشريط بأسلوب الآيفون
       if (installBanner) installBanner.classList.remove('hidden');
       if (pwaSubText) pwaSubText.textContent = "اضغط زر المشاركة 📤 ثم 'إضافة إلى الشاشة الرئيسية'";
-      if (installBtn) installBtn.style.display = 'none'; // إخفاء زر التثبيت الآلي لأن الآيفون يتطلب الشير
+      if (installBtn) installBtn.style.display = 'none'; // إخفاء الزر الآلي للآيفون
     }
 
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -122,29 +153,6 @@
         if (installBanner) installBanner.classList.add('hidden');
       });
     }
-
-    // 2. كود تبديل الوضع المظلم الخاص بملفك الأصلي
-    document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('btnToggleDarkMode');
-      const icon = document.getElementById('darkIcon');
-      const text = document.getElementById('darkText');
-
-      function updateUI() {
-        const isDark = document.documentElement.classList.contains('dark');
-        if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-        if (text) text.textContent = isDark ? 'الوضع المضيء' : 'الوضع المظلم';
-      }
-
-      updateUI();
-
-      if (btn) {
-        btn.addEventListener('click', () => {
-          const isDark = document.documentElement.classList.toggle('dark');
-          localStorage.setItem('theme', isDark ? 'dark' : 'light');
-          updateUI();
-        });
-      }
-    });
   </script>
 
 </body>
