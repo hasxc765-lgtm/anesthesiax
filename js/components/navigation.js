@@ -1,3 +1,17 @@
+// تعريف وظيفة التبديل الفوري للوضع المظلم بشكل عام ومستقل
+if (typeof window !== 'undefined' && !window.toggleDarkMode) {
+  window.toggleDarkMode = () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    
+    // تحديث الأيقونة والنص فوراً على الشاشة
+    const icon = document.getElementById('darkIcon');
+    const text = document.getElementById('darkText');
+    if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+    if (text) text.textContent = isDark ? 'الوضع المضيء' : 'الوضع المظلم';
+  };
+}
+
 export function renderNavigation(currentView) {
   const isDashboard = currentView === 'dashboard';
   let pageTitle = 'لوحة التحكم';
@@ -14,7 +28,7 @@ export function renderNavigation(currentView) {
   if (currentView === 'emergencyProtocols') pageTitle = 'بروتوكولات الطوارئ';
   if (currentView === 'drugInteractions') pageTitle = 'التداخلات الدوائية';
 
-  // فحص حالة الوضع المظلم الحالية لتحديد الأيقونة والنص المناسبين
+  // فحص حالة الوضع الحالية لتحديد الأيقونة والنص المبدئي
   const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
 
   return `
@@ -34,7 +48,12 @@ export function renderNavigation(currentView) {
       </div>
 
       <div class="flex items-center gap-2">
-        <button id="btnToggleDarkMode" type="button" class="flex items-center gap-1 text-[11px] bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-800/50 transition cursor-pointer active:scale-95 shadow-sm">
+        <button 
+          id="btnToggleDarkMode" 
+          type="button" 
+          onclick="window.toggleDarkMode()"
+          class="flex items-center gap-1 text-[11px] bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-800/50 transition cursor-pointer active:scale-95 shadow-sm"
+        >
           <span id="darkIcon">${isDark ? '☀️' : '🌙'}</span>
           <span id="darkText">${isDark ? 'الوضع المضيء' : 'الوضع المظلم'}</span>
         </button>
