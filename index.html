@@ -29,12 +29,9 @@
   <link rel="stylesheet" href="css/style.css">
 
   <script>
-    // 1. فحص وتطبيق الوضع المظلم مبكراً لمنع الوميض
-    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // 1. إعادة ضبط الموقع إلى الوضع المضيء الطبيعي ومنع السواد التلقائي
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
 
     // 2. تسجيل الـ Service Worker ليعمل بدون إنترنت
     if ('serviceWorker' in navigator) {
@@ -48,16 +45,6 @@
 </head>
 
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen p-3 transition-colors duration-200 antialiased font-sans select-none">
-
-  <header class="sticky top-0 z-50 bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-md text-white p-3 rounded-2xl mb-3 shadow-lg flex justify-between items-center border border-slate-800">
-    <div class="flex items-center gap-2 cursor-pointer" onclick="window.navigateTo && window.navigateTo('dashboard')">
-      <span class="text-xl">💉</span>
-      <div>
-        <h1 class="font-bold text-sm text-indigo-400">AnesthesiaX</h1>
-        <p class="text-[9px] text-slate-400" dir="ltr">Clinical Decision Support</p>
-      </div>
-    </div>
-  </header>
 
   <div id="pwaInstallBanner" class="hidden mb-4 bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 text-white p-3 rounded-2xl shadow-xl border border-indigo-500/30 flex justify-between items-center transition-all duration-300">
     <div class="flex items-center gap-3">
@@ -83,28 +70,12 @@
   <script type="module" src="js/app.js"></script>
 
   <script>
-    // أ. كود إدارة الوضع المظلم العام (يعمل تلقائياً عند الضغط على الزر/النص في أي مكان داخل التطبيق)
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest('#btnToggleDarkMode');
-      if (btn) {
-        e.preventDefault();
-        const isDark = document.documentElement.classList.toggle('dark');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        
-        const icon = document.getElementById('darkIcon');
-        const text = document.getElementById('darkText');
-        if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-        if (text) text.textContent = isDark ? 'الوضع المضيء' : 'الوضع المظلم';
-      }
-    });
-
-    // ب. إدارة إشعار التثبيت الذكي (Android & iOS)
+    // إدارة إشعار التثبيت الذكي (Android & iOS)
     let deferredPrompt;
     const installBanner = document.getElementById('pwaInstallBanner');
     const installBtn = document.getElementById('btnInstallPWA');
     const pwaSubText = document.getElementById('pwaSubText');
 
-    // كشف أجهزة الآيفون والآيباد iOS
     const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
 
