@@ -92,3 +92,34 @@ input, select, textarea {
   align-items: center;
   gap: 0.25rem;
 }
+/* إصلاح عام للوضع المظلم لجميع البطاقات والكروت */
+.dark .bg-white {
+  background-color: #0f172a !important; /* خلفية داكنة للبطاقات */
+  color: #f8fafc !important;
+}
+
+.dark .bg-slate-50, 
+.dark .bg-slate-100, 
+.dark .bg-slate-200 {
+  background-color: #1e293b !important; /* خلفية داكنة فرعية */
+  color: #f1f5f9 !important;
+}
+
+.dark .text-slate-800, 
+.dark .text-slate-900, 
+.dark .text-indigo-900 {
+  color: #f8fafc !important; /* تحويل النصوص للون الأبيض الناصع */
+}
+
+.dark .border-slate-100, 
+.dark .border-slate-200, 
+.dark .border-slate-300 {
+  border-color: #334155 !important; /* حدود داكنة مريحة للعين */
+}
+
+.dark input, 
+.dark select {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+}
