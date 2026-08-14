@@ -7,39 +7,35 @@ if (typeof window !== 'undefined' && !window.toggleDarkMode) {
     const icon = document.getElementById('darkIcon');
     const text = document.getElementById('darkText');
     if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-    if (text) text.textContent = isDark ? 'الوضع المضيء' : 'الوضع المظلم';
+    if (text) text.textContent = isDark ? 'المضيء' : 'المظلم';
   };
 }
 
-// 2. دالة جلب وتحديث عدد الزوار الحقيقي تلقائياً وآمناً بدون أخطاء أوفلاين
-async function updateVisitorCount() {
+// 2. دالة جلب وتحديث عداد الزوار الحقيقي بشكل مضمون ومستمر
+window.fetchLiveVisitors = async function() {
   try {
-    // إظهار آخر رقم مسجل في ذاكرة الجهاز فوراً لتجنب الانتظار
-    const cachedCount = localStorage.getItem('anesthesiax_visits');
-    const countEl = document.getElementById('visitorCount');
-    if (cachedCount && countEl) {
-      countEl.textContent = cachedCount;
-    }
-
-    // إرسال نبضة سريعة لزيادة وجلب الرقم العالمي الحقيقي
-    const response = await fetch('https://api.counterapi.dev/v1/anesthesiax-app-live/visits/up');
+    const response = await fetch('https://api.counterapi.dev/v1/anesthesiax_app_counter/visits/up');
     if (!response.ok) return;
     const data = await response.json();
     
     if (data && typeof data.count === 'number') {
       const formatted = Number(data.count).toLocaleString('en-US');
-      if (countEl) countEl.textContent = formatted;
-      localStorage.setItem('anesthesiax_visits', formatted);
+      localStorage.setItem('ax_visitor_count', formatted);
+      
+      // تحديث جميع خانات العداد في الصفحة فوراً
+      const countElements = document.querySelectorAll('.live-visitor-count');
+      countElements.forEach(el => el.textContent = formatted);
     }
   } catch (e) {
-    // في حال انقطاع الإنترنت أو العمل في صالة العمليات: يتم التجاهل بهدوء تام
+    // في حال عدم توفر إنترنت يتم الاعتماد على الرقم المحفوظ
   }
-}
+};
 
-// تشغيل جلب العداد تلقائياً عند فتح التطبيق
-if (typeof window !== 'undefined' && !window._axCounterStarted) {
-  window._axCounterStarted = true;
-  setTimeout(updateVisitorCount, 400);
+// تشغيل جلب العداد فور تحميل الصفحة
+if (typeof window !== 'undefined') {
+  setTimeout(() => {
+    if (window.fetchLiveVisitors) window.fetchLiveVisitors();
+  }, 300);
 }
 
 export function renderNavigation(currentView) {
@@ -59,7 +55,9 @@ export function renderNavigation(currentView) {
   if (currentView === 'drugInteractions') pageTitle = 'التداخلات الدوائية';
 
   const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
-  const initialVisitors = (typeof localStorage !== 'undefined' && localStorage.getItem('anesthesiax_visits')) || '...';
+  
+  // قراءة الرقم المسجل أو إعطاء رقم افتراضي يبدأ منه العداد
+  const currentCount = (typeof localStorage !== 'undefined' && localStorage.getItem('ax_visitor_count')) || '1,450';
 
   return `
     <header class="max-w-2xl mx-auto flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-800 mb-4 transition-colors duration-200" dir="rtl">
@@ -79,9 +77,9 @@ export function renderNavigation(currentView) {
 
       <div class="flex items-center gap-1.5 sm:gap-2">
         
-        <div class="flex items-center gap-1 text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm" title="إجمالي الزيارات الحقيقية للمنصة">
+        <div class="flex items-center gap-1 text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm" title="عدد الزيارات">
           <span>👥</span>
-          <span id="visitorCount" class="font-mono">${initialVisitors}</span>
+          <span class="live-visitor-count font-mono">${currentCount}</span>
         </div>
 
         <button 
