@@ -5,9 +5,7 @@ if (typeof window !== 'undefined' && !window.toggleDarkMode) {
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
     
     const icon = document.getElementById('darkIcon');
-    const text = document.getElementById('darkText');
     if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-    if (text) text.textContent = isDark ? 'المضيء' : 'المظلم';
   };
 }
 
@@ -42,7 +40,7 @@ window.updateRealVisitors = async function() {
     localStorage.setItem('anesthesiax_real_visitors', formatted);
     countElements.forEach(el => el.textContent = formatted);
   } catch (err) {
-    // تجاوز هادئ في وضع صالة العمليات الأوفلاين
+    // وضع الأوفلاين لصالات العمليات
   }
 };
 
@@ -60,29 +58,28 @@ export function renderNavigation(currentView) {
   const initialVisitors = (typeof localStorage !== 'undefined' && localStorage.getItem('anesthesiax_real_visitors')) || '1';
 
   return `
-    <header class="w-full max-w-2xl mx-auto flex justify-between items-center py-2.5 px-1 border-b border-slate-200 dark:border-slate-800 mb-3 transition-colors duration-200 select-none" dir="rtl">
+    <header class="w-full max-w-full mx-auto flex justify-between items-center py-2 px-1 border-b border-slate-200 dark:border-slate-800 mb-3 transition-colors duration-200 select-none overflow-hidden" dir="rtl">
       
       <div class="flex items-center gap-1.5 shrink-0">
         ${!isDashboard ? `
-          <button id="btnBackToDashboard" class="px-2.5 py-1.5 bg-blue-50 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-slate-700 text-blue-700 dark:text-blue-300 rounded-xl text-xs font-bold transition flex items-center gap-1 border border-blue-200 dark:border-slate-700 active:scale-95 shrink-0">
+          <button id="btnBackToDashboard" class="px-2 py-1 bg-blue-50 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-slate-700 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold transition flex items-center gap-1 border border-blue-200 dark:border-slate-700 active:scale-95 shrink-0">
             <span>➔</span> <span>الرئيسية</span>
           </button>
         ` : ''}
-        <div>
-          <h1 class="text-lg font-bold text-blue-600 dark:text-indigo-400 flex items-center gap-1 leading-tight">
+        <div class="shrink-0">
+          <h1 class="text-base sm:text-lg font-bold text-blue-600 dark:text-indigo-400 flex items-center gap-0.5 leading-none">
             AnesthesiaX 💉
           </h1>
-          ${isDashboard ? `<p class="text-[9px] text-slate-500 dark:text-slate-400">Professional Toolkit</p>` : ''}
         </div>
       </div>
 
-      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      <div class="flex items-center gap-1 shrink-0">
         
         <a 
           href="https://instagram.com/u8cb" 
           target="_blank" 
           rel="noopener noreferrer"
-          class="flex items-center gap-1 text-[10px] sm:text-xs bg-gradient-to-r from-purple-50 via-pink-50 to-amber-50 dark:from-purple-950/50 dark:via-pink-950/50 dark:to-amber-950/50 text-pink-700 dark:text-pink-300 font-bold px-2 py-1 rounded-lg border border-pink-200 dark:border-pink-800/50 hover:opacity-90 transition active:scale-95 shrink-0 shadow-sm"
+          class="flex items-center gap-1 text-[10px] bg-gradient-to-r from-purple-50 via-pink-50 to-amber-50 dark:from-purple-950/50 dark:via-pink-950/50 dark:to-amber-950/50 text-pink-700 dark:text-pink-300 font-bold px-1.5 py-1 rounded-lg border border-pink-200 dark:border-pink-800/50 hover:opacity-90 transition active:scale-95 shrink-0 shadow-sm"
           title="حساب المطور @u8cb"
         >
           <svg class="w-3.5 h-3.5 fill-current text-pink-600 dark:text-pink-400 shrink-0" viewBox="0 0 24 24">
@@ -91,7 +88,7 @@ export function renderNavigation(currentView) {
           <span class="font-sans">@u8cb</span>
         </a>
 
-        <div class="flex items-center gap-1 text-[10px] sm:text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm shrink-0" title="عدد الزيارات الحقيقية للمنصة">
+        <div class="flex items-center gap-0.5 text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-1.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm shrink-0" title="عدد الزيارات الحقيقية للمنصة">
           <span>👥</span>
           <span class="live-visitor-count font-mono">${initialVisitors}</span>
         </div>
@@ -100,10 +97,10 @@ export function renderNavigation(currentView) {
           id="btnToggleDarkMode" 
           type="button" 
           onclick="window.toggleDarkMode()"
-          class="flex items-center gap-1 text-[10px] sm:text-xs bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold px-2 py-1 rounded-lg border border-amber-200 dark:border-amber-800/50 transition cursor-pointer active:scale-95 shadow-sm shrink-0"
+          class="flex items-center justify-center text-xs bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold w-7 h-7 rounded-lg border border-amber-200 dark:border-amber-800/50 transition cursor-pointer active:scale-95 shadow-sm shrink-0"
+          title="تبديل الوضع المظلم والمضيء"
         >
           <span id="darkIcon">${isDark ? '☀️' : '🌙'}</span>
-          <span id="darkText">${isDark ? 'المضيء' : 'المظلم'}</span>
         </button>
       </div>
     </header>
