@@ -1,20 +1,9 @@
 /**
  * AnesthesiaX — Drug Center & Clinical Dosing View Component
- * Component: Drug Center UI (Triad-based Categorization & Reactive Calculations)
  * File: js/components/drugCenterView.js
- *
- * Architecture:
- * ES Module View Layer.
- * Renders interactive drug cards, triad filters, patient parameter inputs,
- * live syringe volume calculations, and safety ceiling alerts without DOM destroy.
- *
- * Consumes:
- * - ../data/drugsData.js
- * - ../logic/doseCalculator.js
- * - ../data/common/doseUnits.js
  */
 
-import { drugsData } from "../data/drugsData.js";
+import { drugsData } from "../data/drugs.js";
 import { calculateDose } from "../logic/doseCalculator.js";
 import { DOSE_UNITS } from "../data/common/doseUnits.js";
 
@@ -23,18 +12,16 @@ import { DOSE_UNITS } from "../data/common/doseUnits.js";
 // =============================================================================
 
 const state = {
-  activeTriadFilter: "ALL", // "ALL" | "analgesia" | "hypnosis" | "muscle_relaxation" | "supporting"
+  activeTriadFilter: "ALL",
   searchQuery: "",
   patientWeight: "",
   patientAge: "40",
   patientGender: "male",
   allergyReviewed: true,
   monitoringConfirmed: true,
-  
-  // حفظ الخيارات التفاعلية لكل دواء { drugId: contextId / presentationIndex }
   selectedContexts: {},
   selectedPresentations: {},
-  openAccordions: {} // { "acc-admin-fentanyl": true }
+  openAccordions: {}
 };
 
 // =============================================================================
@@ -87,6 +74,7 @@ export function renderDrugCenterView() {
   return `
     <div class="space-y-4 max-w-3xl mx-auto font-sans dir-rtl text-right" id="drugCenterContainer">
 
+      <!-- HEADER -->
       <div class="p-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-2xl shadow-md flex justify-between items-center">
         <div>
           <div class="flex items-center gap-2">
@@ -100,6 +88,7 @@ export function renderDrugCenterView() {
         </button>
       </div>
 
+      <!-- PATIENT CONTEXT & PARAMETERS BAR -->
       <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
         <div class="flex justify-between items-center border-b border-slate-100 pb-2">
           <strong class="text-slate-800 text-xs flex items-center gap-1.5">
@@ -110,6 +99,7 @@ export function renderDrugCenterView() {
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <!-- Weight Input -->
           <div>
             <label class="block font-bold text-slate-700 mb-1">الوزن الفعلي <bdi dir="ltr">(kg)</bdi>:</label>
             <div class="flex gap-1">
@@ -118,11 +108,13 @@ export function renderDrugCenterView() {
             </div>
           </div>
 
+          <!-- Age Input -->
           <div>
             <label class="block font-bold text-slate-700 mb-1">العمر <bdi dir="ltr">(Years)</bdi>:</label>
             <input type="number" id="dcPatientAge" min="0" max="120" placeholder="مثال: 40" value="${state.patientAge}" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold font-mono text-center text-slate-900 focus:bg-white focus:border-blue-500 focus:outline-none">
           </div>
 
+          <!-- Safety Confirmations -->
           <div class="flex flex-col justify-end space-y-1.5 pt-1">
             <label class="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-700 font-semibold">
               <input type="checkbox" id="dcAllergyCheck" ${state.allergyReviewed ? 'checked' : ''} class="rounded text-blue-600">
@@ -136,6 +128,7 @@ export function renderDrugCenterView() {
         </div>
       </div>
 
+      <!-- SEARCH & TRIAD CATEGORY TABS -->
       <div class="space-y-2">
         <div class="relative">
           <input type="text" id="dcSearchInput" value="${state.searchQuery}" placeholder="🔍 ابحث عن دواء (Propofol, Fentanyl, Rocuronium, Ephedrine, بوبيفاكايين)..." class="w-full p-3 bg-white border-2 border-blue-500/80 rounded-2xl text-xs font-bold shadow-sm focus:outline-none text-slate-900">
@@ -163,10 +156,12 @@ export function renderDrugCenterView() {
         </div>
       </div>
 
+      <!-- DRUG CARDS LIST CONTAINER -->
       <div id="drugCardsListContainer" class="space-y-3">
         ${renderDrugCardsListHTML()}
       </div>
 
+      <!-- FOOTER DISCLAIMER -->
       <div class="p-3 bg-slate-100 border border-slate-200 rounded-2xl text-[11px] text-slate-600 leading-relaxed text-center">
         <strong>⚠️ تنبيه سريري وقانوني:</strong> جميع الجرعات والأحجام المحسوبة هي لأغراض الاسترشاد الأكاديمي والتدريبي؛ يجب دائماً مطابقة تركيز الأمبولة الفعلي وحالة المريض السريرية قبل الحقن.
       </div>
@@ -175,20 +170,18 @@ export function renderDrugCenterView() {
   `;
 }
 
-// =============================================================================
+// =============================================================
 // 4. DRUG CARDS BUILDER
-// =============================================================================
+// =============================================================
 
 function getFilteredDrugs() {
   const allDrugs = drugsData.all || [];
   const cleanQuery = state.searchQuery.toLowerCase().trim();
 
   return allDrugs.filter(drug => {
-    // 1. Triad Filter
     const matchesTriad = state.activeTriadFilter === "ALL" || drug.classification?.triadComponent === state.activeTriadFilter;
     if (!matchesTriad) return false;
 
-    // 2. Search Query Match
     if (!cleanQuery) return true;
 
     const genericMatch = drug.name?.generic?.toLowerCase().includes(cleanQuery);
@@ -232,15 +225,12 @@ function renderSingleDrugCardHTML(drug) {
   const selectedContextId = state.selectedContexts[drug.id] || (contexts.find(c => c.isDefault)?.id) || contexts[0]?.id;
   const activeContext = contexts.find(c => c.id === selectedContextId) || contexts[0];
 
-  // Presentations / Concentrations
   const presentations = drug.presentations || drug.concentrations || [];
   const selectedPresIndex = state.selectedPresentations[drug.id] !== undefined ? state.selectedPresentations[drug.id] : 0;
   const activePresentation = presentations[selectedPresIndex] || presentations[0];
 
-  // Calculate live dose via Logic Engine
   const calcResult = calculateDose(drug, selectedContextId, patient, activePresentation);
 
-  // Accordion open states
   const isAccAdminOpen = state.openAccordions[`acc-admin-${drug.id}`];
   const isAccWarnOpen = state.openAccordions[`acc-warn-${drug.id}`];
   const isAccNmtOpen = state.openAccordions[`acc-nmt-${drug.id}`];
@@ -248,6 +238,7 @@ function renderSingleDrugCardHTML(drug) {
   return `
     <article class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3 transition hover:border-slate-300" id="card-${drug.id}">
       
+      <!-- DRUG CARD HEADER -->
       <div class="flex justify-between items-start gap-2 border-b border-slate-100 pb-2.5">
         <div>
           <div class="flex items-center gap-2 flex-wrap">
@@ -267,6 +258,7 @@ function renderSingleDrugCardHTML(drug) {
         </span>
       </div>
 
+      <!-- CLINICAL FLAGS BADGES -->
       ${drug.clinicalFlags?.length ? `
         <div class="flex flex-wrap gap-1">
           ${drug.clinicalFlags.map(flag => `
@@ -277,6 +269,7 @@ function renderSingleDrugCardHTML(drug) {
         </div>
       ` : ''}
 
+      <!-- CONTROLS: CONTEXT & PRESENTATION SELECTORS -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
         
         ${contexts.length > 0 ? `
@@ -317,8 +310,10 @@ function renderSingleDrugCardHTML(drug) {
 
       </div>
 
+      <!-- LIVE CALCULATION RESULT BOX -->
       ${renderCalculationResultBoxHTML(calcResult, patient)}
 
+      <!-- COLLAPSIBLE ACCORDIONS -->
       <div class="border-t border-slate-100 pt-2 space-y-1 text-xs">
         
         <button type="button" data-acc-id="acc-admin-${drug.id}" class="acc-toggle-btn w-full font-bold text-blue-700 py-1.5 hover:underline flex justify-between items-center text-right cursor-pointer">
@@ -383,7 +378,6 @@ function renderSingleDrugCardHTML(drug) {
 function renderCalculationResultBoxHTML(calcResult, patient) {
   if (!calcResult) return '';
 
-  // 1) حالة الحجب بسبب نقص المدخلات الإلزامية (Hard Safety Gate)
   if (calcResult.status === "BLOCKED") {
     return `
       <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs space-y-1">
@@ -396,7 +390,6 @@ function renderCalculationResultBoxHTML(calcResult, patient) {
     `;
   }
 
-  // 2) نتائج الغازات الاستنشاقية (Age-adjusted MAC)
   if (calcResult.macResults) {
     const mac = calcResult.macResults;
     return `
@@ -414,7 +407,6 @@ function renderCalculationResultBoxHTML(calcResult, patient) {
     `;
   }
 
-  // 3) نتائج المشاركة الدوائية (Pairing)
   if (calcResult.pairingResult) {
     const pair = calcResult.pairingResult;
     return `
@@ -432,7 +424,6 @@ function renderCalculationResultBoxHTML(calcResult, patient) {
     `;
   }
 
-  // 4) نتائج الجرعات الدفعية والتسريب العادي
   const dose = calcResult.calculatedDose;
   const vol = calcResult.calculatedVolume;
   const pump = calcResult.infusionPumpRate;
@@ -442,7 +433,6 @@ function renderCalculationResultBoxHTML(calcResult, patient) {
 
   return `
     <div class="p-3 bg-blue-50/80 border border-blue-200 rounded-xl space-y-2 text-xs">
-      
       <div class="flex justify-between items-center font-bold text-blue-950">
         <span>🎯 الجرعة المحسوبة ${patient.weight > 0 ? `(${calcResult.weightResolution.selectedWeight} kg ${calcResult.weightResolution.actualTypeUsed})` : ''}:</span>
         <span class="font-mono text-blue-900 text-sm" dir="ltr">${doseDisplay}</span>
@@ -474,7 +464,6 @@ function renderCalculationResultBoxHTML(calcResult, patient) {
           ⚠️ تم تقييد الجرعة القصوى بالسقف الأماني المعتمد للنيوستيغمين (5.0 mg).
         </div>
       ` : ''}
-
     </div>
   `;
 }
@@ -495,7 +484,6 @@ function bindDrugCardInternalEvents() {
   const container = document.getElementById("drugCenterContainer");
   if (!container) return;
 
-  // Context Selectors
   container.querySelectorAll(".context-select").forEach(sel => {
     sel.addEventListener("change", e => {
       const drugId = e.target.getAttribute("data-drug-id");
@@ -504,7 +492,6 @@ function bindDrugCardInternalEvents() {
     });
   });
 
-  // Presentation Selectors
   container.querySelectorAll(".presentation-select").forEach(sel => {
     sel.addEventListener("change", e => {
       const drugId = e.target.getAttribute("data-drug-id");
@@ -513,7 +500,6 @@ function bindDrugCardInternalEvents() {
     });
   });
 
-  // Accordion Toggles
   container.querySelectorAll(".acc-toggle-btn").forEach(btn => {
     btn.addEventListener("click", e => {
       const accId = e.currentTarget.getAttribute("data-acc-id");
@@ -533,7 +519,6 @@ export function initDrugCenterEvents() {
   const container = document.getElementById("drugCenterContainer");
   if (!container) return;
 
-  // Back Button
   const btnBack = document.getElementById("btnBackToDashboard");
   if (btnBack) {
     btnBack.addEventListener("click", () => {
@@ -541,7 +526,6 @@ export function initDrugCenterEvents() {
     });
   }
 
-  // Patient Weight Input (Targeted update without focus loss)
   const weightInput = document.getElementById("dcPatientWeight");
   if (weightInput) {
     weightInput.addEventListener("input", e => {
@@ -550,7 +534,6 @@ export function initDrugCenterEvents() {
     });
   }
 
-  // Clear Weight Button
   const btnClearWeight = document.getElementById("btnClearWeight");
   if (btnClearWeight && weightInput) {
     btnClearWeight.addEventListener("click", () => {
@@ -560,7 +543,6 @@ export function initDrugCenterEvents() {
     });
   }
 
-  // Patient Age Input
   const ageInput = document.getElementById("dcPatientAge");
   if (ageInput) {
     ageInput.addEventListener("input", e => {
@@ -569,7 +551,6 @@ export function initDrugCenterEvents() {
     });
   }
 
-  // Safety Confirmation Checkboxes
   const allergyCheck = document.getElementById("dcAllergyCheck");
   if (allergyCheck) {
     allergyCheck.addEventListener("change", e => {
@@ -586,7 +567,6 @@ export function initDrugCenterEvents() {
     });
   }
 
-  // Search Input
   const searchInput = document.getElementById("dcSearchInput");
   if (searchInput) {
     searchInput.addEventListener("input", e => {
@@ -595,7 +575,6 @@ export function initDrugCenterEvents() {
     });
   }
 
-  // Clear Search Button
   const btnClearSearch = document.getElementById("btnClearSearch");
   if (btnClearSearch && searchInput) {
     btnClearSearch.addEventListener("click", () => {
@@ -605,7 +584,6 @@ export function initDrugCenterEvents() {
     });
   }
 
-  // Triad Tabs Switching
   container.querySelectorAll(".triad-tab-btn").forEach(btn => {
     btn.addEventListener("click", e => {
       state.activeTriadFilter = e.currentTarget.getAttribute("data-triad");
@@ -613,7 +591,6 @@ export function initDrugCenterEvents() {
     });
   });
 
-  // Bind initial card selectors & accordions
   bindDrugCardInternalEvents();
 }
 
