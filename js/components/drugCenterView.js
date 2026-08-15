@@ -2,7 +2,7 @@
  * AnesthesiaX — Drug Center & Clinical Dosing View Component
  * File: js/components/drugCenterView.js
  * 
- * High-Performance View Layer (Instant 0ms Mount & Progressive Card Loading)
+ * High-Performance View Layer (Instant 0ms Mount & Compact Cards)
  */
 
 import { drugsData } from "../data/drugs.js";
@@ -14,7 +14,7 @@ import { DOSE_UNITS } from "../data/common/doseUnits.js";
 // =============================================================================
 
 const state = {
-  activeTriadFilter: "analgesia", // البدء المباشر بتبويب المسكنات بدلاً من "ALL"
+  activeTriadFilter: "analgesia",
   searchQuery: "",
   patientWeight: "",
   patientAge: "40",
@@ -47,6 +47,7 @@ function getFlagBadgeStyle(flag) {
     case "hofmann_elimination":
     case "hemodynamic_stability":
     case "bronchodilation":
+    case "bronchodilator":
       return "bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold";
     default:
       return "bg-blue-100 text-blue-800 border-blue-200";
@@ -54,6 +55,7 @@ function getFlagBadgeStyle(flag) {
 }
 
 function getFlagLabel(flag) {
+  const normalized = String(flag).toLowerCase().replace(/[\s-]+/g, "_");
   const labels = {
     black_box_warning: "⚠️ Black Box Warning",
     mh_trigger: "🔥 محرض فرط الحرارة الخبيث (MH Trigger)",
@@ -61,21 +63,21 @@ function getFlagLabel(flag) {
     resp_depression: "🫁 تثبيط تنفسي",
     hypotension_risk: "📉 خطر هبوط الضغط",
     bradycardia_risk: "❤️‍🩹 بطء قلب",
-    chest_wall_rigidity_risk: "🛑 خطر صلابة جدار الصدر",
+    chest_wall_rigidity_risk: "🛑 صلابة جدار الصدر",
     reversal_with_sugammadex: "🔄 يُعكس بالسوجاماديكس",
     hofmann_elimination: "🧬 استقلاب هوفمان (آمن كلوياً/كبداً)",
     hemodynamic_stability: "🛡️ ثبات قلبي وعائي",
     bronchodilation: "🫁 موسع للقصبات",
+    bronchodilator: "🫁 موسع للقصبات",
+    compound_a_risk: "⚠️ خطر تكوّن المركب A مع الجير الجاف",
+    emergence_agitation: "⚡ هياج الإفاقة لدى الأطفال",
     cardiotoxicity_high_risk: "💔 سمية قلبية عالية",
     last_risk: "🧪 خطر سمية التخدير الموضعي (LAST)",
     pure_vasoconstrictor: "💉 قابض وعائي نقي",
     central_line_preferred: "🎯 يفضل خط وريدي مركزي",
-    ponv_prophylaxis: "✨ وقاية من القيء",
-    analgesics: "مسكن أفيوني",
-    hypnotics: "منوم وريدي",
-    sedatives: "مهدئ ومزيل قلق"
+    ponv_prophylaxis: "✨ وقاية من القيء"
   };
-  return labels[flag] || flag.replace(/_/g, " ");
+  return labels[normalized] || flag;
 }
 
 // =============================================================================
@@ -137,7 +139,7 @@ export function renderDrugCenterView() {
         </div>
       </div>
 
-      <!-- SEARCH & CATEGORY TABS (مفصولة بدقة وبدون تبويب جميع الأدوية) -->
+      <!-- SEARCH & CATEGORY TABS -->
       <div class="space-y-2">
         <div class="relative">
           <input type="text" id="dcSearchInput" value="${state.searchQuery}" placeholder="🔍 ابحث عن دواء (Propofol, Fentanyl, Rocuronium, Midazolam, Ephedrine)..." class="w-full p-3 bg-white border-2 border-blue-500/80 rounded-2xl text-xs font-bold shadow-sm focus:outline-none text-slate-900">
@@ -193,7 +195,6 @@ function getFilteredDrugs() {
   return allDrugs.filter(drug => {
     if (!drug) return false;
     
-    // فلترة الفئات الست المستقلة
     const filter = state.activeTriadFilter;
     const triad = drug.classification?.triadComponent || "";
     const cat = (drug.classification?.category || "").toLowerCase();
@@ -273,7 +274,6 @@ function renderSingleDrugCardHTML(drug) {
 
   const contexts = Array.isArray(drug.clinicalContexts) ? drug.clinicalContexts : [];
   
-  // توجيه تلقائي ذكي بحسب العمر للبروبوفول
   let defaultContextId = (contexts.find(c => c.isDefault)?.id) || contexts[0]?.id;
   if (drug.id === "propofol" && patient.age) {
     if (patient.age < 16) {
@@ -301,27 +301,12 @@ function renderSingleDrugCardHTML(drug) {
     console.error(`Calculation error for drug [${drug.id}]:`, e);
   }
 
-  const isAccAdminOpen = state.openAccordions[`acc-admin-${drug.id}`];
   const isAccWarnOpen = state.openAccordions[`acc-warn-${drug.id}`];
   const isAccNmtOpen = state.openAccordions[`acc-nmt-${drug.id}`];
 
-  // استخراج طريقة الإعطاء والتخفيف من كافة المصادر المتاحة بالكائن لضمان عدم ظهورها فارغة
-  const adminMethod = activeContext?.administration?.method || 
-                      drug.administration?.method || 
-                      drug.administrationGuide?.method || 
-                      activeContext?.route || 
-                      "حقن وريدي مباشر (IV Bolus)";
-
-  const dilutionInfo = activeContext?.administration?.dilutionRequirement || 
-                       activeContext?.administration?.dilutionProtocol || 
-                       drug.administration?.dilution || 
-                       drug.administrationGuide?.dilution || 
-                       "جاهز للحقن المباشر وفق التركيز المختار أعلاه.";
-
-  const injectionRate = activeContext?.administration?.rate || 
-                        activeContext?.administration?.speed || 
-                        drug.administration?.speed || 
-                        "يُحقن ببطء مع مراقبة العلامات الحيوية.";
+  // استخراج زمن بدء المفعول ومدة التأثير بدقة
+  const onset = drug.pharmacodynamics?.onset || drug.onset || (drug.macModel ? "سريع (استنشاقي)" : "سريع");
+  const duration = drug.pharmacodynamics?.clinicalDuration || drug.pharmacodynamics?.duration || drug.duration || (drug.macModel ? "حسب الإيقاف" : "N/A");
 
   return `
     <article class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3 transition hover:border-slate-300" id="card-${drug.id}">
@@ -398,33 +383,25 @@ function renderSingleDrugCardHTML(drug) {
 
       </div>
 
-      <!-- LIVE CALCULATION RESULT BOX (نظام البوكسات البارزة) -->
+      <!-- LIVE CALCULATION RESULT BOX (ACTION BOXES) -->
       ${renderCalculationResultBoxHTML(calcResult, patient)}
 
-      <!-- COLLAPSIBLE ACCORDIONS (طريقة الإعطاء وموانع الاستعمال) -->
-      <div class="border-t border-slate-100 pt-2 space-y-1 text-xs">
-        
-        <!-- خانة طريقة الإعطاء، سرعة الحقن، والتخفيف -->
-        <button type="button" data-acc-id="acc-admin-${drug.id}" class="acc-toggle-btn w-full font-bold text-blue-700 py-1.5 hover:underline flex justify-between items-center text-right cursor-pointer">
-          <span>💉 طريقة الإعطاء، سرعة الحقن، والتخفيف</span>
-          <span class="text-slate-400 text-[10px]">${isAccAdminOpen ? '▲' : '▼'}</span>
-        </button>
-        <div id="acc-admin-${drug.id}" class="${isAccAdminOpen ? '' : 'hidden'} p-3 bg-slate-50 rounded-xl space-y-2 border border-slate-200 text-[11px] text-slate-800 leading-relaxed">
-          <div class="space-y-1">
-            <p><strong>طريقة الحقن المعتمدة:</strong> <span class="text-slate-900 font-semibold">${adminMethod}</span></p>
-            <p><strong>سرعة الحقن الموصى بها:</strong> <span class="text-slate-900 font-semibold">${injectionRate}</span></p>
-          </div>
-          <div class="text-indigo-950 bg-indigo-50 p-2.5 rounded-lg border border-indigo-200 space-y-0.5">
-            <strong class="block text-indigo-900">تعليمات التخفيف والحل:</strong>
-            <p>${dilutionInfo}</p>
-          </div>
-          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200 font-mono text-[10px]">
-            <div><span class="text-slate-500">زمن بدء المفعول (Onset):</span> <strong>${drug.pharmacodynamics?.onset || 'سريع'}</strong></div>
-            <div><span class="text-slate-500">مدة التأثير (Duration):</span> <strong>${drug.pharmacodynamics?.clinicalDuration || drug.pharmacodynamics?.duration || 'N/A'}</strong></div>
-          </div>
+      <!-- ⏱️ شريط زمن بدء المفعول ومدة التأثير الأنيق والمدمج -->
+      <div class="p-2 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-[11px] font-mono text-slate-800">
+        <div class="flex items-center gap-1">
+          <span class="text-blue-700 font-sans font-bold">⏱️ بدء المفعول (Onset):</span>
+          <strong class="text-slate-900 font-extrabold" dir="ltr">${onset}</strong>
         </div>
+        <div class="flex items-center gap-1 border-r border-slate-200 pr-2">
+          <span class="text-indigo-700 font-sans font-bold">⏳ مدة التأثير (Duration):</span>
+          <strong class="text-slate-900 font-extrabold" dir="ltr">${duration}</strong>
+        </div>
+      </div>
 
-        <!-- خانة التحذيرات وموانع الاستعمال -->
+      <!-- COLLAPSIBLE ACCORDIONS (التحذيرات وموانع الاستعمال) -->
+      <div class="border-t border-slate-100 pt-1 space-y-1 text-xs">
+        
+        <!-- زر التحذيرات وموانع الاستعمال -->
         <button type="button" data-acc-id="acc-warn-${drug.id}" class="acc-toggle-btn w-full font-bold text-rose-700 py-1.5 hover:underline flex justify-between items-center text-right cursor-pointer">
           <span>⚠️ التحذيرات وموانع الاستعمال (Contraindications)</span>
           <span class="text-slate-400 text-[10px]">${isAccWarnOpen ? '▲' : '▼'}</span>
@@ -448,7 +425,7 @@ function renderSingleDrugCardHTML(drug) {
           ` : ''}
         </div>
 
-        <!-- خانة المراقبة العضلية NMT للمرخيات -->
+        <!-- زر المراقبة العضلية NMT للمرخيات -->
         ${drug.neuromuscularMonitoring || drug.classification?.triadComponent === "muscle_relaxation" ? `
           <button type="button" data-acc-id="acc-nmt-${drug.id}" class="acc-toggle-btn w-full font-bold text-amber-800 py-1.5 hover:underline flex justify-between items-center text-right cursor-pointer">
             <span>⚡ المراقبة العضلية وتوصيات الإفاقة (NMT Monitoring)</span>
@@ -537,7 +514,6 @@ function renderCalculationResultBoxHTML(calcResult, patient) {
   return `
     <div class="space-y-2">
       
-      <!-- بوكسات الجرعة والحجم البارزة -->
       <div class="grid grid-cols-2 gap-2">
         
         ${dose ? `
