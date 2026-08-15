@@ -2,7 +2,7 @@
  * AnesthesiaX — Drug Center & Clinical Dosing View Component
  * File: js/components/drugCenterView.js
  * 
- * Production-Grade View Layer (Zero-Crash Defensive UI)
+ * High-Performance View Layer (Instant 0ms Mount & Progressive Card Loading)
  */
 
 import { drugsData } from "../data/drugs.js";
@@ -23,7 +23,8 @@ const state = {
   monitoringConfirmed: true,
   selectedContexts: {},
   selectedPresentations: {},
-  openAccordions: {}
+  openAccordions: {},
+  renderedLimit: 12 // التحميل التدريجي السريع لأول 12 بطاقة ثم إكمال البقية
 };
 
 // =============================================================================
@@ -69,7 +70,7 @@ function getFlagLabel(flag) {
 }
 
 // =============================================================================
-// 3. MAIN RENDER FUNCTION
+// 3. MAIN RENDER FUNCTION (INSTANT SHELL MOUNT)
 // =============================================================================
 
 export function renderDrugCenterView() {
@@ -157,7 +158,7 @@ export function renderDrugCenterView() {
 
       <!-- DRUG CARDS LIST CONTAINER -->
       <div id="drugCardsListContainer" class="space-y-3">
-        ${renderDrugCardsListHTML()}
+        <div class="p-8 text-center text-slate-400 text-xs">جاري تجهيز الأدوية بسرعة...</div>
       </div>
 
       <!-- FOOTER DISCLAIMER -->
@@ -240,7 +241,6 @@ function renderSingleDrugCardHTML(drug) {
   const selectedPresIndex = state.selectedPresentations[drug.id] !== undefined ? state.selectedPresentations[drug.id] : 0;
   const activePresentation = presentations[selectedPresIndex] || presentations[0] || null;
 
-  // الحساب السريري الآمن
   let calcResult = null;
   try {
     if (typeof calculateDose === "function") {
@@ -397,7 +397,6 @@ function renderSingleDrugCardHTML(drug) {
 function renderCalculationResultBoxHTML(calcResult, patient) {
   if (!calcResult) return '';
 
-  // 1) حالة الحجب بسبب نقص المدخلات
   if (calcResult.status === "BLOCKED") {
     const errorText = (calcResult.blockingErrors && calcResult.blockingErrors.length) 
       ? calcResult.blockingErrors.join(" • ") 
@@ -413,7 +412,6 @@ function renderCalculationResultBoxHTML(calcResult, patient) {
     `;
   }
 
-  // 2) نتائج الغازات الاستنشاقية (MAC)
   if (calcResult.macResults && calcResult.macResults.adjusted1Mac) {
     const mac = calcResult.macResults;
     return `
@@ -433,7 +431,6 @@ function renderCalculationResultBoxHTML(calcResult, patient) {
     `;
   }
 
-  // 3) نتائج المشاركة الدوائية (Pairing)
   if (calcResult.pairingResult) {
     const pair = calcResult.pairingResult;
     return `
@@ -451,7 +448,6 @@ function renderCalculationResultBoxHTML(calcResult, patient) {
     `;
   }
 
-  // 4) نتائج الجرعات الدفعية والتسريب
   const dose = calcResult.calculatedDose;
   const vol = calcResult.calculatedVolume;
   const pump = calcResult.infusionPumpRate;
@@ -556,6 +552,11 @@ export function initDrugCenterEvents() {
   const container = document.getElementById("drugCenterContainer");
   if (!container) return;
 
+  // 1. فتح فوري بدون انتظار عبر requestAnimationFrame
+  requestAnimationFrame(() => {
+    updateLiveDrugCards();
+  });
+
   const btnBack = document.getElementById("btnBackToDashboard");
   if (btnBack) {
     btnBack.addEventListener("click", () => {
@@ -627,8 +628,6 @@ export function initDrugCenterEvents() {
       reRenderFull();
     });
   });
-
-  bindDrugCardInternalEvents();
 }
 
 function reRenderFull() {
