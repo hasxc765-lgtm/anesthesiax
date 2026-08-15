@@ -4,7 +4,8 @@
  * File: js/data/drugs/hypnosisData.js
  *
  * Advanced Clinical Decision Support (CDS) Dataset
- * Canonical Schema — Validated against FDA Approved Prescribing Information (2024–2026).
+ * Canonical Schema — Validated against FDA Approved Prescribing Information (2024–2026),
+ * Miller's Anesthesia 9th Ed, and Pediatric Anesthesia Guidelines.
  */
 
 import { DOSE_UNITS } from "../common/doseUnits.js";
@@ -55,11 +56,11 @@ export const hypnosisData = [
     indications: [
       {
         id: "ga_induction",
-        label: { en: "Induction of general anesthesia", ar: "تحريض التخدير العام" }
+        label: { en: "Induction of general anesthesia (Adult & Pediatric)", ar: "استحثاث التخدير العام للبالغين والأطفال" }
       },
       {
         id: "ga_maintenance",
-        label: { en: "Maintenance of general anesthesia (TIVA / Balanced)", ar: "المحافظة على التخدير العام" }
+        label: { en: "Maintenance of general anesthesia (TIVA / Balanced)", ar: "المداومة على التخدير العام بالتسريب المستمر" }
       },
       {
         id: "monitored_sedation",
@@ -71,8 +72,8 @@ export const hypnosisData = [
       }
     ],
     presentations: [
-      { concentration: 10, unit: DOSE_UNITS.MG_PER_ML, label: "10 mg/mL (1% Emulsion)", isDefault: true },
-      { concentration: 20, unit: DOSE_UNITS.MG_PER_ML, label: "20 mg/mL (2% Emulsion - High Concentration)" }
+      { value: 10, concentration: 10, unit: DOSE_UNITS.MG_PER_ML, label: "10 mg/mL (مستحلب 1% جاهز)", isDefault: true },
+      { value: 20, concentration: 20, unit: DOSE_UNITS.MG_PER_ML, label: "20 mg/mL (مستحلب 2% عالي التركيز)", isDefault: false }
     ],
     pharmacodynamics: {
       onset: "30 – 45 ثانية (زمن دوران ذراع - دماغ)",
@@ -94,7 +95,7 @@ export const hypnosisData = [
         id: "healthy_adult_induction",
         population: "adult_healthy_under_65",
         route: "IV",
-        label: "تحريض التخدير للبالغين الأصحاء (<65 سنة / ASA I-II)",
+        label: "جرعة الاستحثاث للبالغين الأصحاء (< 65 عاماً / ASA I-II)",
         doseMin: 2.0,
         doseMax: 2.5,
         unit: DOSE_UNITS.MG_PER_KG,
@@ -120,10 +121,36 @@ export const hypnosisData = [
         note: "الاستخدام المسبق للمسكنات الأفيونية يقلل الجرعة المطلوبة بشكل ملحوظ."
       },
       {
+        id: "pediatric_induction",
+        population: "pediatric_3_to_16",
+        route: "IV",
+        label: "جرعة الاستحثاث للأطفال (Pediatric Induction: 3 – 16 سنة)",
+        doseMin: 2.5,
+        doseMax: 3.5,
+        unit: DOSE_UNITS.MG_PER_KG,
+        doseType: "weight_bolus",
+        basis: "weight_and_age_adjusted",
+        administration: {
+          method: "titrated_push",
+          typicalIncrement: "حقن وريدي معاير ببطء على مدى 20 – 30 ثانية"
+        },
+        weightPolicy: {
+          allowed: ["TBW"],
+          note: "يحتاج الأطفال لجرعات استحثاث أعلى (2.5 – 3.5 mg/kg) لكبر حجم التوزيع (Vd) وسرعة الاستقلاب مقارنة بالبالغين."
+        },
+        validation: {
+          requireAge: true,
+          requireWeight: true,
+          requireAllergyReview: true,
+          requireMonitoringConfirmation: true
+        },
+        note: "تُعاير الجرعة ببطء مع مراقبة استقرار ضغط الدم؛ قد يتطلب الرضع جرعات تصل إلى 3.5 - 4.0 mg/kg."
+      },
+      {
         id: "elderly_debilitated_induction",
         population: "elderly_or_asa_3_4",
         route: "IV",
-        label: "كبار السن، المرضى الواهنون، أو ASA III-IV",
+        label: "جرعة الاستحثاث لكبار السن (≥ 65 عاماً) أو ASA III-IV",
         doseMin: 1.0,
         doseMax: 1.5,
         unit: DOSE_UNITS.MG_PER_KG,
@@ -148,7 +175,7 @@ export const hypnosisData = [
         id: "tiva_maintenance",
         population: "adult",
         route: "IV",
-        label: "المحافظة على التخدير العام (Maintenance Infusion)",
+        label: "جرعة المداومة بالتسريب المستمر (TIVA Maintenance Infusion)",
         doseMin: 100,
         doseMax: 200,
         unit: DOSE_UNITS.MCG_PER_KG_MIN,
@@ -173,7 +200,7 @@ export const hypnosisData = [
     warnings: [
       "هبوط الجهد الشرياني وبطء القلب، خصوصاً في مرضى نقص الحجم الدموي.",
       "تثبيط تنفسي عميق وانقطاع نفس (Apnea).",
-      "ألم عند الحقن الوريدي.",
+      "ألم عند الحقن الوريدي (يمكن تخفيفه بالحقن المسبق لليدوكايين أو استخدام الأوردة الكبيرة).",
       "⚠️ متلازمة تسريب البروبوفول (PRIS): خطر نادر وقاتل مرتبط بالتسريب المطول بجرعات عالية."
     ],
     precautions: [
@@ -235,11 +262,11 @@ export const hypnosisData = [
     indications: [
       {
         id: "hemodynamic_unstable_induction",
-        label: { en: "Induction of general anesthesia in hemodynamically compromised patients", ar: "تحريض التخدير العام في حالات عدم الاستقرار الديناميكي الوعائي وأمراض القلب" }
+        label: { en: "Induction of general anesthesia in hemodynamically compromised patients", ar: "استحثاث التخدير العام في حالات عدم الاستقرار الديناميكي الوعائي وأمراض القلب" }
       }
     ],
     presentations: [
-      { concentration: 2, unit: DOSE_UNITS.MG_PER_ML, label: "2 mg/mL (20 mg / 10 mL)", isDefault: true }
+      { value: 2, concentration: 2, unit: DOSE_UNITS.MG_PER_ML, label: "2 mg/mL (أمبولة 20 ملغ في 10 مل)", isDefault: true }
     ],
     pharmacodynamics: {
       onset: "30 – 60 ثانية",
@@ -251,7 +278,7 @@ export const hypnosisData = [
         id: "induction_standard",
         population: "adult",
         route: "IV",
-        label: "جرعة تحريض التخدير (Standard Induction Bolus)",
+        label: "جرعة الاستحثاث القياسية (Standard Induction Bolus)",
         doseMin: 0.2,
         doseMax: 0.3,
         unit: DOSE_UNITS.MG_PER_KG,
@@ -280,14 +307,14 @@ export const hypnosisData = [
     ],
     toxicitySignals: ["adrenal_insufficiency"],
     warnings: [
-      "⚠️ التثبيط الكظري (Adrenocortical Suppression): تثبيط مؤقت لأنزيم 11-beta-hydroxylase يستمر لساعات حتى بعد جرعة تحريض مفردة.",
+      "⚠️ التثبيط الكظري (Adrenocortical Suppression): تثبيط مؤقت لأنزيم 11-beta-hydroxylase يستمر لساعات حتى بعد جرعة استحثاث مفردة.",
       "الرمع العضلي (Myoclonus) شائع جداً أثناء التحريض.",
       "ألم موضعي عند الحقن الوريدي بسبب مذيب البروبيلين غليكول.",
       "معدل مرتفع نسبياً للغثيان والقيء بعد العمليات (PONV)."
     ],
     precautions: [
       "غير موصى به تماماً للتسريب المستمر (Not recommended for continuous infusion) لتفادي القصور الكظري الممتد.",
-      "الإنتان الحاد (Severe Sepsis): موضوع جدل سريري؛ يُقيّم استخدام الإيتوميدات بحذر شديد مع موازنة الفائدة في الثبات الوعائي مقابل مخاطر التثبيط الكظري المؤقت."
+      "الإنتان الحاد (Severe Sepsis): يُقيّم بحذر مع موازنة الفائدة في الثبات الوعائي مقابل مخاطر التثبيط الكظري المؤقت."
     ],
     contraindications: [
       "فرط الحساسية المثبتة للإيتوميدات."
@@ -344,7 +371,7 @@ export const hypnosisData = [
     indications: [
       {
         id: "induction_shock_bronchospasm",
-        label: { en: "Induction in hemodynamically unstable patients or severe bronchospasm", ar: "التحريض عند عدم الاستقرار الوعائي، الصدمة، أو تشنج القصبات" }
+        label: { en: "Induction in hemodynamically unstable patients or severe bronchospasm", ar: "الاستحثاث عند عدم الاستقرار الوعائي، الصدمة، أو تشنج القصبات" }
       },
       {
         id: "short_procedures",
@@ -352,9 +379,9 @@ export const hypnosisData = [
       }
     ],
     presentations: [
-      { concentration: 10, unit: DOSE_UNITS.MG_PER_ML, label: "10 mg/mL", isDefault: true },
-      { concentration: 50, unit: DOSE_UNITS.MG_PER_ML, label: "50 mg/mL" },
-      { concentration: 100, unit: DOSE_UNITS.MG_PER_ML, label: "100 mg/mL (يتطلب التخفيف الإلزامي للحقن الوريدي)" }
+      { value: 10, concentration: 10, unit: DOSE_UNITS.MG_PER_ML, label: "10 mg/mL (تخفيف 50 ملغ في 5 مل سالاين)", isDefault: true },
+      { value: 50, concentration: 50, unit: DOSE_UNITS.MG_PER_ML, label: "50 mg/mL (أمبولة أصلية 500 ملغ في 10 مل)" },
+      { value: 100, concentration: 100, unit: DOSE_UNITS.MG_PER_ML, label: "100 mg/mL (أمبولة مركزة - تتطلب التخفيف الإلزامي للحقن الوريدي)" }
     ],
     pharmacodynamics: {
       onset: "30 – 60 ثانية (IV) / 3 – 4 دقائق (IM)",
@@ -366,7 +393,7 @@ export const hypnosisData = [
         id: "iv_induction_typical",
         population: "adult_pediatric",
         route: "IV",
-        label: "التحريض الوريدي النموذجي (Typical IV Induction)",
+        label: "جرعة الاستحثاث الوريدي النموذجي (Typical IV Induction)",
         doseMin: 1.0,
         doseMax: 2.0,
         unit: DOSE_UNITS.MG_PER_KG,
@@ -394,7 +421,7 @@ export const hypnosisData = [
         id: "im_induction_surgical",
         population: "pediatric_uncooperative",
         route: "IM",
-        label: "التحريض العضلي للتخدير الجراحي (IM Surgical Induction - FDA Labeled)",
+        label: "جرعة الاستحثاث العضلي للتخدير الجراحي (IM Surgical Induction)",
         doseMin: 6.5,
         doseMax: 13.0,
         unit: DOSE_UNITS.MG_PER_KG,
@@ -418,7 +445,7 @@ export const hypnosisData = [
         id: "im_procedural_sedation",
         population: "pediatric_adult",
         route: "IM",
-        label: "التهدئة والتسكين العضلي للإجراءات غير الجراحية (IM Procedural/Sedation)",
+        label: "التهدئة والتسكين العضلي للإجراءات غير الجراحية (IM Procedural Sedation)",
         doseMin: 2.0,
         doseMax: 4.0,
         unit: DOSE_UNITS.MG_PER_KG,
@@ -446,7 +473,7 @@ export const hypnosisData = [
     ],
     precautions: [
       "في جراحة الأعصاب وارتفاع الضغط القحفي (ICP): قد يُستخدم وفق تقييم اختصاصي مع تأمين التهوية وضبط اعتدال غازات الدم (Normocapnia).",
-      "الذهان والاضطرابات النفسية: يُستخدم بحذر وموازنة سريرية دقيقة (Precaution)."
+      "الذهان والاضطرابات النفسية: يُستخدم بحذر وموازنة سريرية دقيقة."
     ],
     contraindications: [
       "الحالات التي يشكل فيها ارتفاع ضغط الدم خطراً جسيماً مهدداً للحياة (مثل تسلخ الأبهر، التمدد الوعائي غير المعالج).",
@@ -477,7 +504,7 @@ export const hypnosisData = [
     availability: {
       status: "institution_dependent",
       regionDependent: true,
-      note: "توفر المستحضر متفاوت جداً ومقيد في العديد من البلدان والمستشفيات."
+      note: "توفر المستحضر متفاوت ومقيد في العديد من المراكز."
     },
     evidence: {
       sourceOrganization: "Historical Regulatory",
@@ -506,7 +533,7 @@ export const hypnosisData = [
     indications: [
       {
         id: "ga_induction",
-        label: { en: "Induction of general anesthesia", ar: "تحريض التخدير العام" }
+        label: { en: "Induction of general anesthesia", ar: "استحثاث التخدير العام" }
       },
       {
         id: "status_epilepticus",
@@ -514,7 +541,7 @@ export const hypnosisData = [
       }
     ],
     presentations: [
-      { concentration: 25, unit: DOSE_UNITS.MG_PER_ML, label: "25 mg/mL (2.5% Solution)", isDefault: true }
+      { value: 25, concentration: 25, unit: DOSE_UNITS.MG_PER_ML, label: "25 mg/mL (محلول 2.5% محضر حديثاً)", isDefault: true }
     ],
     pharmacodynamics: {
       onset: "20 – 30 ثانية",
@@ -526,7 +553,7 @@ export const hypnosisData = [
         id: "adult_induction",
         population: "adult",
         route: "IV",
-        label: "جرعة التحريض الوريدية (Standard Adult Induction)",
+        label: "جرعة الاستحثاث الوريدية للبالغين (Standard Adult Induction)",
         doseMin: 3.0,
         doseMax: 5.0,
         unit: DOSE_UNITS.MG_PER_KG,
@@ -622,8 +649,8 @@ export const hypnosisData = [
       }
     ],
     presentations: [
-      { concentration: 1, unit: DOSE_UNITS.MG_PER_ML, label: "1 mg/mL", isDefault: true },
-      { concentration: 5, unit: DOSE_UNITS.MG_PER_ML, label: "5 mg/mL (يتطلب حذراً إضافياً في المعايرة)" }
+      { value: 1, concentration: 1, unit: DOSE_UNITS.MG_PER_ML, label: "1 mg/mL (أمبولة مخففة جاهزة)", isDefault: true },
+      { value: 5, concentration: 5, unit: DOSE_UNITS.MG_PER_ML, label: "5 mg/mL (أمبولة مركزة 5 ملغ / 1 مل)" }
     ],
     pharmacodynamics: {
       onset: "1 – 2 دقيقة (IV) / 10 – 15 دقيقة (IM)",
@@ -635,7 +662,7 @@ export const hypnosisData = [
         id: "procedural_sedation_adult",
         population: "adult_healthy_under_60",
         route: "IV",
-        label: "التهدئة الإجرائية للبالغين (<60 سنة)",
+        label: "التهدئة الإجرائية للبالغين (< 60 عاماً)",
         doseType: "incremental_weight_based",
         initialDose: { min: 0.01, max: 0.02, unit: DOSE_UNITS.MG_PER_KG },
         incrementalDose: { min: 0.5, max: 1.0, unit: DOSE_UNITS.MG_FIXED, reassessmentMinutes: 3 },
@@ -661,7 +688,7 @@ export const hypnosisData = [
         id: "elderly_debilitated_sedation",
         population: "elderly_or_chronically_ill",
         route: "IV",
-        label: "كبار السن (≥60 سنة) أو المرضى الواهنون",
+        label: "كبار السن (≥ 60 عاماً) أو المرضى الواهنون",
         doseType: "incremental_weight_based",
         initialDose: { min: 0.005, max: 0.01, unit: DOSE_UNITS.MG_PER_KG },
         incrementalDose: { min: 0.25, max: 0.5, unit: DOSE_UNITS.MG_FIXED, reassessmentMinutes: 5 },
@@ -756,17 +783,19 @@ export const hypnosisData = [
     ],
     presentations: [
       {
-        concentration: 100,
-        unit: DOSE_UNITS.MCG_PER_ML,
-        label: "100 mcg/mL Concentrate (يتطلب التخفيف الإلزامي في 0.9% سالاين)",
-        requiresDilution: true
-      },
-      {
+        value: 4,
         concentration: 4,
         unit: DOSE_UNITS.MCG_PER_ML,
-        label: "4 mcg/mL Ready-to-Use (RTU في 0.9% سالاين)",
+        label: "4 mcg/mL Ready-to-Use (محلول جاهز للحقن RTU في سالاين 0.9%)",
         requiresDilution: false,
         isDefault: true
+      },
+      {
+        value: 100,
+        concentration: 100,
+        unit: DOSE_UNITS.MCG_PER_ML,
+        label: "100 mcg/mL Concentrate (مركز - يتطلب التخفيف الإلزامي في سالاين 0.9%)",
+        requiresDilution: true
       }
     ],
     pharmacodynamics: {
@@ -916,14 +945,17 @@ export const hypnosisData = [
     indications: [
       {
         id: "induction_and_maintenance",
-        label: { en: "Induction and maintenance of general anesthesia in adult and pediatric patients", ar: "تحريض والمحافظة على التخدير العام للبالغين والأطفال" }
+        label: { en: "Induction and maintenance of general anesthesia in adult and pediatric patients", ar: "استحثاث والمداومة على التخدير العام للبالغين والأطفال" }
       }
     ],
     presentations: [
       {
+        value: 100,
         concentration: 100,
         unit: DOSE_UNITS.PERCENT_LIQUID,
-        administrationDevice: "agent_specific_vaporizer (Yellow)"
+        label: "100% Volatile Liquid (سائل استنشاقي مخصص للمبخرة الصفراء)",
+        administrationDevice: "agent_specific_vaporizer (Yellow)",
+        isDefault: true
       }
     ],
     displayWarning: {
@@ -958,7 +990,7 @@ export const hypnosisData = [
     warnings: [
       "⚠️ محرض قوي لمتلازمة فرط الحرارة الخبيث (Malignant Hyperthermia Trigger).",
       "تثبيط تنفسي وتوسع وعائي وهبوط ضغط شرياني معتمد على الجرعة.",
-      "تشكل المركب A (Compound A): اتبع نشرة المنتج وبروتوكول المؤسسة ونوع ممتص ثاني أكسيد الكربون؛ لا تفرض حداً ثابتاً عالمياً لتدفق الغاز دون توثيق محلي.",
+      "تشكل المركب A (Compound A): اتبع نشرة المنتج وبروتوكول المؤسسة ونوع ممتص ثاني أكسيد الكربون.",
       "هياج الإفاقة (Emergence Agitation) شائع لدى الأطفال بعد الإفاقة السريعة."
     ],
     precautions: [
@@ -1027,14 +1059,17 @@ export const hypnosisData = [
     indications: [
       {
         id: "maintenance_rapid_emergence",
-        label: { en: "Maintenance of general anesthesia in adults and children", ar: "المحافظة على التخدير العام للبالغين والأطفال مع إفاقة فائقة السرعة" }
+        label: { en: "Maintenance of general anesthesia in adults and children", ar: "المداومة على التخدير العام للبالغين والأطفال مع إفاقة فائقة السرعة" }
       }
     ],
     presentations: [
       {
+        value: 100,
         concentration: 100,
         unit: DOSE_UNITS.PERCENT_LIQUID,
-        administrationDevice: "heated_agent_specific_vaporizer (Tec 6 / Blue)"
+        label: "100% Volatile Liquid (سائل استنشاقي مخصص للمبخرة المدفأة الزرقاء Tec 6)",
+        administrationDevice: "heated_agent_specific_vaporizer (Tec 6 / Blue)",
+        isDefault: true
       }
     ],
     displayWarning: {
@@ -1087,3 +1122,5 @@ export const hypnosisData = [
     ]
   }
 ];
+
+export default hypnosisData;
