@@ -30,7 +30,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA",
       documentTitle: "Ephedrine Sulfate Injection Prescribing Information",
       evidenceLevel: "regulatory"
@@ -58,23 +57,25 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
-        concentration: 50,
-        unit: DOSE_UNITS.MG_PER_ML,
-        label: "50 mg/mL Concentrate (يتطلب التخفيف الإلزامي إلى 5 mg/mL)",
-        requiresDilution: true
-      },
-      {
+        value: 5,
         concentration: 5,
         unit: DOSE_UNITS.MG_PER_ML,
         label: "5 mg/mL (مخفف جاهز للحقن المباشر - 50 mg في 10 mL سالاين)",
         requiresDilution: false,
         isDefault: true
+      },
+      {
+        value: 50,
+        concentration: 50,
+        unit: DOSE_UNITS.MG_PER_ML,
+        label: "50 mg/mL Concentrate (أمبولة مركزة 1 مل - تتطلب التخفيف الإلزامي إلى 5 mg/mL)",
+        requiresDilution: true
       }
     ],
     pharmacodynamics: {
       onset: "فوري (وريدياً)",
       peak: "2 – 5 دقائق",
-      duration: "10 – 60 دقيقة",
+      clinicalDuration: "10 – 60 دقيقة",
       variabilityFactors: ["endogenous_catecholamine_stores", "repeat_dosing"]
     },
     clinicalContexts: [
@@ -90,7 +91,7 @@ export const supportingDrugsData = [
         basis: "titrated_to_hemodynamic_target",
         administration: {
           method: "slow_iv_push",
-          dilutionRequirement: "يُسحب 1 مل (50 ملغ) مع 9 مل سالاين ليصبح التركيز 5 ملغ/مل ويُحقن 1-2 مل لكل جرعة."
+          dilutionProtocol: "يُسحب 1 مل (50 ملغ) مع 9 مل سالاين ليصبح التركيز 5 ملغ/مل ويُحقن 1-2 مل لكل جرعة."
         },
         doseLimits: {
           maximumSingleDoseMg: 10.0,
@@ -117,12 +118,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Ephedrine Sulfate Injection Prescribing Information",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   },
@@ -144,7 +141,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA",
       documentTitle: "Phenylephrine Hydrochloride Injection Prescribing Information",
       evidenceLevel: "regulatory"
@@ -172,28 +168,31 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
-        concentration: 10,
-        unit: DOSE_UNITS.MG_PER_ML,
-        label: "10 mg/mL Concentrate (يتطلب التخفيف الإلزامي الدقيق قبل الحقن)",
-        requiresDilution: true
-      },
-      {
+        value: 100,
         concentration: 100,
         unit: DOSE_UNITS.MCG_PER_ML,
-        label: "100 mcg/mL (مخفف جاهز للحقن الدفعي - 10 mg في 100 mL)",
+        label: "100 mcg/mL (مخفف جاهز للحقن الدفعي - 10 mg في 100 mL سالاين)",
         requiresDilution: false,
         isDefault: true
       },
       {
+        value: 50,
         concentration: 50,
         unit: DOSE_UNITS.MCG_PER_ML,
         label: "50 mcg/mL (مخفف للحقن الدفعي الدقيق)"
+      },
+      {
+        value: 10,
+        concentration: 10,
+        unit: DOSE_UNITS.MG_PER_ML,
+        label: "10 mg/mL Concentrate (أمبولة مركزة 1 مل - تتطلب التخفيف الإلزامي قبل الحقن)",
+        requiresDilution: true
       }
     ],
     pharmacodynamics: {
       onset: "فوري تقريباً (وريدياً)",
       peak: "1 – 2 دقيقة",
-      duration: "5 – 15 دقيقة"
+      clinicalDuration: "5 – 15 دقيقة"
     },
     clinicalContexts: [
       {
@@ -208,7 +207,7 @@ export const supportingDrugsData = [
         basis: "titrated_to_hemodynamic_target",
         administration: {
           method: "rapid_iv_push",
-          dilutionRequirement: "يُسحب 1 مل (10 ملغ) ويُحل في كيس 100 مل سالاين ليصبح بتركيز 100 mcg/mL ويُحقن 0.5-1 مل لكل جرعة."
+          dilutionProtocol: "يُسحب 1 مل (10 ملغ) ويُحل في كيس 100 مل سالاين ليصبح بتركيز 100 mcg/mL ويُحقن 0.5-1 مل لكل جرعة."
         },
         validation: {
           requireMonitoringConfirmation: true
@@ -272,12 +271,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Neo-Synephrine (Phenylephrine HCl Injection) Prescribing Information",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   },
@@ -299,7 +294,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA",
       documentTitle: "Levophed (Norepinephrine Bitartrate Injection) Prescribing Information",
       evidenceLevel: "regulatory"
@@ -329,17 +323,31 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 16,
+        concentration: 16,
+        unit: DOSE_UNITS.MCG_PER_ML,
+        label: "16 mcg/mL (محلول تسريب قياسي: 4 ملغ في 250 مل D5W)",
+        requiresDilution: false,
+        isDefault: true
+      },
+      {
+        value: 32,
+        concentration: 32,
+        unit: DOSE_UNITS.MCG_PER_ML,
+        label: "32 mcg/mL (محلول تسريب مركز: 8 ملغ في 250 مل D5W)"
+      },
+      {
+        value: 1,
         concentration: 1,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "1 mg/mL (4 mg / 4 mL Ampoule - يتطلب التخفيف الإلزامي في D5W أو D5NS)",
-        requiresDilution: true,
-        isDefault: true
+        label: "1 mg/mL Concentrate (أمبولة مركزة 4 ملغ في 4 مل - تتطلب التخفيف الإلزامي)",
+        requiresDilution: true
       }
     ],
     pharmacodynamics: {
       onset: "1 – 2 دقيقة من بدء التسريب",
       peak: "سريع",
-      duration: "1 – 2 دقيقة بعد إيقاف التسريب (عمر نصف بلازمي فائق القصر)"
+      clinicalDuration: "1 – 2 دقيقة بعد إيقاف التسريب (عمر نصف بلازمي فائق القصر)"
     },
     clinicalContexts: [
       {
@@ -380,12 +388,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Levophed (Norepinephrine Bitartrate) Prescribing Information",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   },
@@ -407,7 +411,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "AHA / FDA",
       documentTitle: "AHA ACLS Guidelines & Adrenalin Injection Labeling",
       evidenceLevel: "regulatory_and_guideline"
@@ -444,21 +447,29 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 1,
         concentration: 1,
         unit: DOSE_UNITS.MG_PER_ML,
         label: "1 mg/mL (1:1,000 Ampoule - للحقن العضلي في التحسس أو التخفيف)",
         isDefault: true
       },
       {
+        value: 100,
         concentration: 100,
         unit: DOSE_UNITS.MCG_PER_ML,
         label: "100 mcg/mL (1:10,000 Syringe - 1 mg / 10 mL مخصص لتوقف القلب ACLS)"
+      },
+      {
+        value: 16,
+        concentration: 16,
+        unit: DOSE_UNITS.MCG_PER_ML,
+        label: "16 mcg/mL (محلول تسريب: 4 ملغ في 250 مل D5W)"
       }
     ],
     pharmacodynamics: {
       onset: "فوري (وريدياً) / 3 – 5 دقائق (عضلياً)",
       peak: "سريع",
-      duration: "5 – 10 دقائق (وريدياً)"
+      clinicalDuration: "5 – 10 دقائق (وريدياً)"
     },
     clinicalContexts: [
       {
@@ -536,7 +547,7 @@ export const supportingDrugsData = [
       {
         organization: "AHA",
         title: "ACLS Guidelines for Cardiopulmonary Resuscitation and Emergency Cardiovascular Care",
-        revisionDate: "2024-01",
+        year: "2024",
         evidenceLevel: "guideline"
       }
     ]
@@ -559,7 +570,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA / AHA",
       documentTitle: "Dopamine Hydrochloride Injection Prescribing Information",
       evidenceLevel: "regulatory_and_guideline"
@@ -588,17 +598,24 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 40,
         concentration: 40,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "40 mg/mL (200 mg / 5 mL or 400 mg / 10 mL Concentrate - يتطلب التخفيف الإلزامي)",
+        label: "40 mg/mL (أمبولة 200 ملغ في 5 مل - مركز يتطلب التخفيف الإلزامي)",
         requiresDilution: true,
         isDefault: true
+      },
+      {
+        value: 1.6,
+        concentration: 1.6,
+        unit: DOSE_UNITS.MG_PER_ML,
+        label: "1.6 mg/mL = 1600 mcg/mL (محلول تسريب: 400 ملغ في 250 مل D5W)"
       }
     ],
     pharmacodynamics: {
       onset: "2 – 5 دقائق",
       peak: "سريع",
-      duration: "أقل من 10 دقائق بعد إيقاف التسريب"
+      clinicalDuration: "أقل من 10 دقائق بعد إيقاف التسريب"
     },
     clinicalContexts: [
       {
@@ -664,12 +681,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Dopamine Hydrochloride Injection Prescribing Information",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   },
@@ -694,7 +707,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "AHA / FDA",
       documentTitle: "AHA ACLS Guidelines for Bradycardia & Atropine Labeling",
       evidenceLevel: "regulatory_and_guideline"
@@ -722,28 +734,30 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 1,
         concentration: 1,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "1 mg/mL (1 mg / 1 mL Ampoule)",
+        label: "1 mg/mL (أمبولة 1 ملغ في 1 مل)",
         isDefault: true
       },
       {
+        value: 0.5,
         concentration: 0.5,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "0.5 mg/mL (0.5 mg / 1 mL Ampoule)"
+        label: "0.5 mg/mL (أمبولة 0.5 ملغ في 1 مل)"
       }
     ],
     pharmacodynamics: {
       onset: "فوري (وريدياً)",
       peak: "2 – 4 دقائق",
-      duration: "2 – 4 ساعات"
+      clinicalDuration: "2 – 4 ساعات"
     },
     clinicalContexts: [
       {
         id: "acls_bradycardia_bolus_updated",
         population: "adult",
         route: "IV",
-        label: "علاج بطء القلب العرضي (ACLS Updated Symptomatic Bradycardia Bolus)",
+        label: "علاج بطء القلب العرضي (ACLS Symptomatic Bradycardia Bolus)",
         doseMin: 1.0,
         doseMax: 1.0,
         unit: DOSE_UNITS.MG_FIXED,
@@ -760,7 +774,7 @@ export const supportingDrugsData = [
           requireMonitoringConfirmation: true
         },
         isDefault: true,
-        note: "توصي إرشادات ACLS الحديثة بجرعة بدئية معيارية 1.0 mg وريدياً (لتفادي بطء القلب التناقضي)، وتُكرر كل 3-5 دقائق عند الحاجة (بحد أقصى 3 mg)."
+        note: "توصي إرشادات ACLS بجرعة بدئية معيارية 1.0 mg وريدياً (لتفادي بطء القلب التناقضي)، وتُكرر كل 3-5 دقائق عند الحاجة (بحد أقصى 3 mg)."
       }
     ],
     toxicitySignals: ["severe_tachycardia", "anticholinergic_syndrome_cns", "urinary_retention"],
@@ -777,7 +791,7 @@ export const supportingDrugsData = [
       {
         organization: "AHA",
         title: "ACLS Management of Bradycardia Guidelines",
-        revisionDate: "2024-01",
+        year: "2024",
         evidenceLevel: "guideline"
       }
     ]
@@ -787,7 +801,7 @@ export const supportingDrugsData = [
     id: "amiodarone",
     name: {
       generic: "Amiodarone HCl",
-      arabic: "أمiodarone (أميدارون)",
+      arabic: "أميودارون",
       brandNames: ["Cordarone", "Nexterone"]
     },
     classification: {
@@ -800,7 +814,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "AHA / FDA",
       documentTitle: "Amiodarone Hydrochloride Injection Prescribing Information",
       evidenceLevel: "regulatory_and_guideline"
@@ -833,16 +846,17 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 50,
         concentration: 50,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "50 mg/mL (150 mg / 3 mL Ampoule)",
+        label: "50 mg/mL (أمبولة 150 ملغ في 3 مل)",
         isDefault: true
       }
     ],
     pharmacodynamics: {
       onset: "فوري إلى دقائق",
       peak: "سريع",
-      duration: "عمر نصف إطراحي طويل جداً يمتد لأسابيع مع الجرعات المتكررة"
+      clinicalDuration: "عمر نصف إطراحي طويل جداً يمتد لأسابيع مع الجرعات المتكررة"
     },
     clinicalContexts: [
       {
@@ -917,7 +931,7 @@ export const supportingDrugsData = [
       {
         organization: "AHA",
         title: "ACLS Cardiac Arrest & Arrhythmia Guidelines",
-        revisionDate: "2024-01",
+        year: "2024",
         evidenceLevel: "guideline"
       }
     ]
@@ -940,7 +954,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA / ACLS",
       documentTitle: "Calcium Chloride 10% Injection USP Prescribing Information",
       evidenceLevel: "regulatory_and_guideline"
@@ -973,6 +986,7 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 100,
         concentration: 100,
         unit: DOSE_UNITS.MG_PER_ML,
         label: "10% Solution (100 mg/mL = 1 g / 10 mL = 270 mg Elemental Calcium = 13.6 mEq Ca2+)",
@@ -982,7 +996,7 @@ export const supportingDrugsData = [
     pharmacodynamics: {
       onset: "فوري (خلال 1 – 3 دقائق)",
       peak: "سريع",
-      duration: "20 – 60 دقيقة"
+      clinicalDuration: "20 – 60 دقيقة"
     },
     clinicalContexts: [
       {
@@ -1020,12 +1034,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA / AHA",
         title: "Calcium Chloride Injection USP Guidelines",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory_and_guideline",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory_and_guideline"
       }
     ]
   },
@@ -1047,7 +1057,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA / Guidelines",
       documentTitle: "Calcium Gluconate Injection USP Prescribing Information",
       evidenceLevel: "regulatory_and_guideline"
@@ -1078,6 +1087,7 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 100,
         concentration: 100,
         unit: DOSE_UNITS.MG_PER_ML,
         label: "10% Solution (100 mg/mL = 1 g / 10 mL = 90 mg Elemental Calcium = 4.6 mEq Ca2+)",
@@ -1087,7 +1097,7 @@ export const supportingDrugsData = [
     pharmacodynamics: {
       onset: "فوري (خلال 1 – 3 دقائق)",
       peak: "سريع",
-      duration: "30 – 60 دقيقة"
+      clinicalDuration: "30 – 60 دقيقة"
     },
     clinicalContexts: [
       {
@@ -1123,12 +1133,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Calcium Gluconate Injection USP Labeling",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   },
@@ -1150,7 +1156,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA / ACLS",
       documentTitle: "Sodium Bicarbonate 8.4% Injection Prescribing Information",
       evidenceLevel: "regulatory_and_guideline"
@@ -1182,6 +1187,7 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 1,
         concentration: 1,
         unit: DOSE_UNITS.MEQ_PER_ML,
         label: "8.4% Solution (1 mEq/mL = 84 mg/mL in 50 mL Vial = 50 mEq)",
@@ -1191,7 +1197,7 @@ export const supportingDrugsData = [
     pharmacodynamics: {
       onset: "فوري (وريدياً)",
       peak: "سريع",
-      duration: "1 – 2 ساعة"
+      clinicalDuration: "1 – 2 ساعة"
     },
     clinicalContexts: [
       {
@@ -1252,12 +1258,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA / ACLS",
         title: "Sodium Bicarbonate 8.4% Injection Prescribing Information",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory_and_guideline",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory_and_guideline"
       }
     ]
   },
@@ -1280,7 +1282,6 @@ export const supportingDrugsData = [
       note: "ترياق طوارئ نوعي وإلزامي التوفر في كل مركز يستخدم غازات التخدير الهالوجينية أو السكوسينيل كولين."
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "MHAUS / FDA",
       documentTitle: "MHAUS Malignant Hyperthermia Treatment Protocol & Dantrium Labeling",
       evidenceLevel: "regulatory_and_guideline"
@@ -1310,23 +1311,25 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 0.33,
         concentration: 0.33,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "Dantrium / Revonto: 20 mg/vial (يتطلب الحل في 60 mL ماء معقم بدون مواد حافظة)",
+        label: "Dantrium / Revonto: 20 mg/vial (يُحل في 60 mL ماء معقم = 0.33 mg/mL)",
         requiresReconstitution: true,
         isDefault: true
       },
       {
+        value: 50,
         concentration: 50,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "Ryanodex: 250 mg/vial (سريع الانحلال في 5 mL ماء معقم)",
+        label: "Ryanodex: 250 mg/vial (سريع الانحلال في 5 mL ماء معقم = 50 mg/mL)",
         requiresReconstitution: true
       }
     ],
     pharmacodynamics: {
       onset: "سريع (خلال دقائق من الحقن الوريدي المباشر)",
       peak: "سريع",
-      duration: "4 – 8 ساعات (تثبيط تحرر الكالسيوم من الشبكة الهيولية العضلية)"
+      clinicalDuration: "4 – 8 ساعات (تثبيط تحرر الكالسيوم من الشبكة الهيولية العضلية)"
     },
     clinicalContexts: [
       {
@@ -1367,7 +1370,7 @@ export const supportingDrugsData = [
       {
         organization: "MHAUS",
         title: "Malignant Hyperthermia Emergency Management Protocol",
-        revisionDate: "2024-01",
+        year: "2024",
         evidenceLevel: "guideline"
       }
     ]
@@ -1391,7 +1394,6 @@ export const supportingDrugsData = [
       note: "ترياق طوارئ نوعي وإلزامي التوفر في كل موقع يُجرى فيه تخدير نصفي أو موضعي بحجوم كبيرة."
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "ASRA",
       documentTitle: "ASRA Practice Advisory on Local Anesthetic Systemic Toxicity (LAST)",
       evidenceLevel: "guideline"
@@ -1420,16 +1422,17 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 20,
         concentration: 20,
         unit: DOSE_UNITS.PERCENT_LIQUID,
-        label: "20% Lipid Emulsion (500 mL Bag)",
+        label: "20% Lipid Emulsion (كيس 500 mL جاهز للتسريب)",
         isDefault: true
       }
     ],
     pharmacodynamics: {
       onset: "فوري (امتصاص السموم الجزيئية الدهنية Lipid Sink وتنشيط استقلاب القلب)",
       peak: "سريع",
-      duration: "مستمر أثناء التسريب"
+      clinicalDuration: "مستمر أثناء التسريب"
     },
     clinicalContexts: [
       {
@@ -1497,7 +1500,7 @@ export const supportingDrugsData = [
       {
         organization: "ASRA",
         title: "Checklist for Treatment of Local Anesthetic Systemic Toxicity",
-        revisionDate: "2024-01",
+        year: "2024",
         evidenceLevel: "guideline"
       }
     ]
@@ -1523,7 +1526,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA",
       documentTitle: "Zofran (Ondansetron HCl Injection) Prescribing Information",
       evidenceLevel: "regulatory"
@@ -1550,16 +1552,17 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 2,
         concentration: 2,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "2 mg/mL (4 mg / 2 mL Ampoule)",
+        label: "2 mg/mL (أمبولة 4 ملغ في 2 مل / 8 ملغ في 4 مل)",
         isDefault: true
       }
     ],
     pharmacodynamics: {
       onset: "15 – 30 دقيقة",
       peak: "سريع",
-      duration: "4 – 8 ساعات"
+      clinicalDuration: "4 – 8 ساعات"
     },
     clinicalContexts: [
       {
@@ -1615,12 +1618,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Zofran (Ondansetron Hydrochloride) Prescribing Information",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   },
@@ -1642,7 +1641,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA",
       documentTitle: "Dexamethasone Sodium Phosphate Injection Prescribing Information",
       evidenceLevel: "regulatory"
@@ -1671,28 +1669,30 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 4,
         concentration: 4,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "4 mg/mL (4 mg / 1 mL or 8 mg / 2 mL)",
+        label: "4 mg/mL (أمبولة 4 ملغ في 1 مل / 8 ملغ في 2 مل)",
         isDefault: true
       },
       {
+        value: 8,
         concentration: 8,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "8 mg/mL (High Concentration Vial)"
+        label: "8 mg/mL (فيال عالي التركيز)"
       }
     ],
     pharmacodynamics: {
       onset: "1 – 2 ساعة (يتطلب وقتاً للتأثير الجيني والخلوي)",
       peak: "4 – 8 ساعات",
-      duration: "24 – 72 ساعة (تأثير ممتد طويل الأمد)"
+      clinicalDuration: "24 – 72 ساعة (تأثير ممتد طويل الأمد)"
     },
     clinicalContexts: [
       {
         id: "ponv_prophylaxis_induction",
         population: "adult",
         route: "IV",
-        label: "الوقاية من القيء والغثيان عند التحريض (PONV Induction Bolus)",
+        label: "الوقاية من القيء والغثيان عند الاستحثاث (PONV Induction Bolus)",
         doseMin: 4.0,
         doseMax: 8.0,
         unit: DOSE_UNITS.MG_FIXED,
@@ -1700,7 +1700,7 @@ export const supportingDrugsData = [
         basis: "fixed_adult_dose",
         administration: {
           method: "slow_iv_push",
-          timing: "يُعطى بعد تحريض التخدير مباشرة في بداية العملية لضمان وصول وقت الذروة مع الإفاقة."
+          timing: "يُعطى بعد استحثاث التخدير مباشرة في بداية العملية لضمان وصول وقت الذروة مع الإفاقة."
         },
         validation: {
           requireAge: true
@@ -1722,12 +1722,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Dexamethasone Sodium Phosphate Injection Labeling",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   },
@@ -1749,7 +1745,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA",
       documentTitle: "Reglan (Metoclopramide Injection) Prescribing Information",
       evidenceLevel: "regulatory"
@@ -1778,16 +1773,17 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 5,
         concentration: 5,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "5 mg/mL (10 mg / 2 mL Ampoule)",
+        label: "5 mg/mL (أمبولة 10 ملغ في 2 مل)",
         isDefault: true
       }
     ],
     pharmacodynamics: {
       onset: "1 – 3 دقائق (وريدياً)",
       peak: "سريع",
-      duration: "1 – 2 ساعة"
+      clinicalDuration: "1 – 2 ساعة"
     },
     clinicalContexts: [
       {
@@ -1826,12 +1822,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Reglan (Metoclopramide Injection) Prescribing Information & Boxed Warning",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   },
@@ -1854,7 +1846,6 @@ export const supportingDrugsData = [
       note: "البديل الحديث والآمن لمثبطات H2 بعد السحب العالمي لعقار الرانيتيدين."
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA",
       documentTitle: "Pepcid (Famotidine Injection) Prescribing Information",
       evidenceLevel: "regulatory"
@@ -1879,16 +1870,17 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 10,
         concentration: 10,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "10 mg/mL (20 mg / 2 mL Vial)",
+        label: "10 mg/mL (فيال 20 ملغ في 2 مل)",
         isDefault: true
       }
     ],
     pharmacodynamics: {
       onset: "30 – 60 دقيقة (وريدياً)",
       peak: "1 – 3 ساعات",
-      duration: "10 – 12 ساعة"
+      clinicalDuration: "10 – 12 ساعة"
     },
     clinicalContexts: [
       {
@@ -1924,12 +1916,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Pepcid (Famotidine) Injection Prescribing Information",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   },
@@ -1951,7 +1939,6 @@ export const supportingDrugsData = [
       regionDependent: true
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA / Anesthesia Guidelines",
       documentTitle: "Sodium Citrate Oral Solution USP Labeling",
       evidenceLevel: "regulatory"
@@ -1976,16 +1963,17 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 0.3,
         concentration: 0.3,
         unit: DOSE_UNITS.MOLAR,
-        label: "0.3 Molar Oral Solution (Ready to Drink 30 mL)",
+        label: "0.3 Molar Oral Solution (محلول فموي جاهز للشرب 30 mL)",
         isDefault: true
       }
     ],
     pharmacodynamics: {
       onset: "فوري (خلال 5 – 10 دقائق من الشرب الفموي)",
       peak: "فوري",
-      duration: "1 – 2 ساعة"
+      clinicalDuration: "1 – 2 ساعة"
     },
     clinicalContexts: [
       {
@@ -2000,7 +1988,7 @@ export const supportingDrugsData = [
         basis: "fixed_adult_dose",
         administration: {
           method: "oral_ingestion",
-          timing: "يُشرب فموياً قبل التحريض بـ 15 إلى 30 دقيقة."
+          timing: "يُشرب فموياً قبل الاستحثاث بـ 15 إلى 30 دقيقة."
         },
         validation: {
           requireAge: true
@@ -2022,12 +2010,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Sodium Citrate and Citric Acid Oral Solution USP",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   },
@@ -2052,7 +2036,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA",
       documentTitle: "Marcaine (Bupivacaine HCl) Injection Prescribing Information",
       evidenceLevel: "regulatory"
@@ -2085,6 +2068,7 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 5,
         concentration: 5,
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 0.5,
@@ -2092,12 +2076,14 @@ export const supportingDrugsData = [
         isDefault: true
       },
       {
+        value: 5,
         concentration: 5,
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 0.5,
         label: "0.5% Plain (5 mg/mL Isobaric - للتخدير فوق الجافية وحصر الأعصاب)"
       },
       {
+        value: 2.5,
         concentration: 2.5,
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 0.25,
@@ -2107,7 +2093,7 @@ export const supportingDrugsData = [
     pharmacodynamics: {
       onset: "5 – 15 دقيقة (حصر محيطي) / 2 – 5 دقائق (تخدير نصفي شوكي)",
       peak: "15 – 30 دقيقة",
-      duration: "3 – 6 ساعات (تخدير طويل الأمد)"
+      clinicalDuration: "3 – 6 ساعات (تخدير طويل الأمد)"
     },
     doseLimits: {
       maxSingleDosePlainMgKg: 2.0,
@@ -2173,12 +2159,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Marcaine (Bupivacaine HCl) Prescribing Information & Boxed Warnings",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   },
@@ -2200,7 +2182,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA / AHA",
       documentTitle: "Xylocaine (Lidocaine HCl Injection) Prescribing Information",
       evidenceLevel: "regulatory_and_guideline"
@@ -2237,6 +2218,7 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 10,
         concentration: 10,
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 1.0,
@@ -2244,18 +2226,21 @@ export const supportingDrugsData = [
         isDefault: true
       },
       {
+        value: 20,
         concentration: 20,
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 2.0,
         label: "2% Plain (20 mg/mL - 200 mg / 10 mL)"
       },
       {
+        value: 10,
         concentration: 10,
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 1.0,
         label: "1% with Epinephrine 1:100,000 (10 mg/mL + 10 mcg/mL Epi)"
       },
       {
+        value: 20,
         concentration: 20,
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 2.0,
@@ -2265,7 +2250,7 @@ export const supportingDrugsData = [
     pharmacodynamics: {
       onset: "سريع جداً (1 – 2 دقيقة رشحاً / فوري وريدياً)",
       peak: "3 – 5 دقائق",
-      duration: "30 – 120 دقيقة (يمتد إلى 2-4 ساعات مع الأدرينالين)"
+      clinicalDuration: "30 – 120 دقيقة (يمتد إلى 2-4 ساعات مع الأدرينالين)"
     },
     doseLimits: {
       maxSingleDosePlainMgKg: 4.5,
@@ -2361,12 +2346,8 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Xylocaine (Lidocaine HCl) Prescribing Information",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   },
@@ -2388,7 +2369,6 @@ export const supportingDrugsData = [
       regionDependent: false
     },
     evidence: {
-      status: "pending_formal_clinician_review",
       sourceOrganization: "FDA",
       documentTitle: "Naropin (Ropivacaine HCl Injection) Prescribing Information",
       evidenceLevel: "regulatory"
@@ -2421,6 +2401,7 @@ export const supportingDrugsData = [
     ],
     presentations: [
       {
+        value: 2,
         concentration: 2,
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 0.2,
@@ -2428,18 +2409,21 @@ export const supportingDrugsData = [
         isDefault: true
       },
       {
+        value: 5,
         concentration: 5,
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 0.5,
         label: "0.5% (5 mg/mL - لحصر الأعصاب المحيطية والتخدير الإبيديورال)"
       },
       {
+        value: 7.5,
         concentration: 7.5,
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 0.75,
         label: "0.75% (7.5 mg/mL - للتخدير الجراحي فوق الجافية للجراحة والقيصرية)"
       },
       {
+        value: 10,
         concentration: 10,
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 1.0,
@@ -2449,7 +2433,7 @@ export const supportingDrugsData = [
     pharmacodynamics: {
       onset: "10 – 20 دقيقة (فوق الجافية / حصر محيطي)",
       peak: "15 – 30 دقيقة",
-      duration: "3 – 8 ساعات (تخدير وتسكين ممتد)"
+      clinicalDuration: "3 – 8 ساعات (تخدير وتسكين ممتد)"
     },
     doseLimits: {
       maxSingleDosePlainMgKg: 3.0,
@@ -2512,13 +2496,11 @@ export const supportingDrugsData = [
       {
         organization: "FDA",
         title: "Naropin (Ropivacaine HCl) Prescribing Information",
-        documentId: null,
-        revisionDate: null,
-        url: null,
-        evidenceLevel: "regulatory",
-        verificationStatus: "pending",
-        accessedAt: null
+        year: "2024",
+        evidenceLevel: "regulatory"
       }
     ]
   }
 ];
+
+export default supportingDrugsData;
