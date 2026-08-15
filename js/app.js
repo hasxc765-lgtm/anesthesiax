@@ -156,7 +156,6 @@ function renderDashboardView(container) {
     </div>
   `;
 
-  // Dynamic Routing Bindings
   const toolIds = ['drugCenter', 'airway', 'fluidAbl', 'regionalLast', 'infusionTci', 'pediatric', 'vaporizers', 'preOpRisk', 'abgElectrolytes', 'emergencyProtocols', 'drugInteractions'];
   toolIds.forEach(id => {
     const card = container.querySelector(`[data-tool-id="${id}"]`);
