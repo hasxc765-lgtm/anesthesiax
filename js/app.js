@@ -8,7 +8,7 @@
  * Fully integrated with the Drug Center Triad Architecture & CDSS.
  */
 
-import { drugsData } from './data/drugsData.js';
+import { drugsData } from './data/drug.js';
 import { renderDrugCenterView, initDrugCenterEvents } from './components/drugCenterView.js';
 import { store } from './state/store.js';
 import { renderNavigation } from './components/navigation.js';
