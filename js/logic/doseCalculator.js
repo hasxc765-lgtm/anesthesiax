@@ -6,6 +6,7 @@
  * - Enforces Hard Safety Validation Gates (stops execution on missing mandatory inputs).
  * - Transparent weight scalar fallbacks (never obfuscates the actual weight used).
  * - Strict context verification (rejects invalid contexts without silent fallbacks).
+ * - Dynamic Age-Based Context Resolution (Pediatric vs Adult vs Elderly dosing).
  * - Enforces compound ceilings: min(labeled_mg_per_kg * weight, absolute_max_mg).
  * - Complete calculation trace and full floating-point precision throughout execution.
  */
@@ -141,7 +142,7 @@ export function validateCalculationInputs(drug, context, patient = {}) {
   // 2) فحص العمر الإلزامي
   if (validation.requireAge) {
     const age = sanitizePositiveNumber(patient.age);
-    if (!age) {
+    if (!age && age !== 0) {
       blockingErrors.push("عمر المريض (Patient Age) إلزامي لإجراء هذا الحساب السريري.");
     } else if (age < 0 || age > 125) {
       blockingErrors.push(`عمر المريض المدخل (${age}) غير صالح سريرياً.`);
@@ -242,9 +243,10 @@ export function calculateDose(drug, contextId, patient = {}, selectedPresentatio
     };
   }
 
-  // 1) التحقق الصارم من السياق السريري (Rejection of Invalid Contexts)
+  // 1) التحقق الصارم من السياق السريري والربط العمري الذكي (Dynamic Age-Based Resolution)
   const contexts = drug.clinicalContexts || [];
   let context = null;
+  const patientAge = sanitizePositiveNumber(patient.age);
 
   if (contextId) {
     context = contexts.find(c => c.id === contextId);
@@ -256,8 +258,21 @@ export function calculateDose(drug, contextId, patient = {}, selectedPresentatio
       };
     }
   } else {
-    // إذا لم يُمرر contextId، نبحث عن السياق الافتراضي الصريح فقط
-    context = contexts.find(c => c.isDefault);
+    // التوجيه التلقائي الذكي بحسب الفئة العمرية إذا لم يُمرر سياق محدد صراحة
+    if (drug.id === "propofol" && patientAge) {
+      if (patientAge < 16) {
+        context = contexts.find(c => c.id === "pediatric_induction") || contexts.find(c => c.isDefault);
+        calculationTrace.push(`توجيه عمري تلقائي: اختيار سياق الأطفال (عمر ${patientAge} سنة).`);
+      } else if (patientAge >= 65) {
+        context = contexts.find(c => c.id === "elderly_debilitated_induction") || contexts.find(c => c.isDefault);
+        calculationTrace.push(`توجيه عمري تلقائي: اختيار سياق كبار السن (عمر ${patientAge} سنة).`);
+      } else {
+        context = contexts.find(c => c.id === "healthy_adult_induction") || contexts.find(c => c.isDefault);
+      }
+    } else {
+      context = contexts.find(c => c.isDefault);
+    }
+
     if (!context && !drug.macModel) {
       return {
         status: "ERROR",
@@ -312,7 +327,7 @@ export function calculateDose(drug, contextId, patient = {}, selectedPresentatio
     population: context?.population || "adult",
     route: context?.route || (drug.routes && drug.routes[0]) || "IV",
     doseType: context?.doseType || "reference",
-    isPrescriptionOrder: false, // حماية قانونية: تأكيد أن الناتج مرجعي استرشادي
+    isPrescriptionOrder: false,
     calculationPolicy: drug.calculationPolicy || { mode: "reference_only", automaticDoseCalculation: false },
     validation: {
       warnings: validationResult.warnings
