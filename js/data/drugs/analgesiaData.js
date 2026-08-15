@@ -12,6 +12,8 @@
  * - Miller's Anesthesia 9th Ed & Morgan & Mikhail's Clinical Anesthesiology 7th Ed.
  */
 
+import { DOSE_UNITS } from "../common/doseUnits.js";
+
 export const analgesiaData = [
   // =========================================================================
   // A) OPIOID ANALGESICS (المسكنات الأفيونية)
@@ -33,16 +35,20 @@ export const analgesiaData = [
       requiresAirwayReady: true,
       requiresRespiratoryMonitoring: true
     },
+    clinicalFlags: ["resp_depression", "chest_wall_rigidity_risk", "bradycardia_risk"],
     indications: [
-      "تثبيط الاستجابة الكاتيكولامينية والودية (Sympathetic response) لتنظير الحنجرة والتنبيب الرغامي.",
-      "التسكين أثناء التخدير العام المتوازن (Balanced Anesthesia Maintenance).",
-      "تسكين الألم الحاد والمعايرة التدريجية في وحدة الإفاقة (PACU Titration)."
+      { id: "intubation_blunting", label: { ar: "تثبيط الاستجابة الودية لتنظير الحنجرة والتنبيب", en: "Blunting sympathetic response to laryngoscopy and tracheal intubation" } },
+      { id: "balanced_maintenance", label: { ar: "التسكين أثناء التخدير العام المتوازن", en: "Intraoperative analgesia during balanced general anesthesia" } },
+      { id: "pacu_rescue", label: { ar: "تسكين الألم الحاد والمعايرة في وحدة الإفاقة", en: "Postoperative acute pain titration in PACU" } }
     ],
     routes: ["IV", "IM"],
-    weightScalar: "Individualized / Titrate to clinical effect",
-    obesityDosingNotes: "شديد الذوبان في الدهون؛ لا توجد قاعدة وزنية واحدة ثابتة لجميع الحالات. يُوصى بالبدء بجرعات حذرة ومعايرتها بحسب الاستجابة السريرية والعمر والحالة العامة، مع خفض الجرعة البدئية في كبار السن والسمنة المفرطة.",
-    concentrations: [
-      { value: 50, unit: "mcg/mL", label: "50 mcg/mL (أمبولة جاهزة 2 مل / 10 مل)", isDefault: true }
+    weightPolicy: {
+      preferred: "TBW",
+      note: "شديد الذوبان في الدهون؛ يُعاير بحسب الاستجابة السريرية والعمر مع خفض الجرعة البدئية في كبار السن والسمنة المفرطة."
+    },
+    presentations: [
+      { value: 50, concentration: 50, unit: DOSE_UNITS.MCG_PER_ML, label: "50 mcg/mL (أمبولة جاهزة 2 مل / 10 مل)", isDefault: true },
+      { value: 10, concentration: 10, unit: DOSE_UNITS.MCG_PER_ML, label: "10 mcg/mL (مخفف: 100 مايكرو في 10 مل سالاين)" }
     ],
     pharmacodynamics: {
       onset: "1 – 2 دقيقة (وريدياً)",
@@ -53,45 +59,45 @@ export const analgesiaData = [
       route: "IV",
       method: "slow_push",
       pushSpeed: "حقن وريدي بطيء على مدى 1 – 2 دقيقة.",
-      dilution: "يمكن إعطاؤه بتركيزه الأصلي (50 mcg/mL) أو تخفيفه في محلول سالاين 0.9% لتسهيل المعايرة الدقيقة."
+      dilutionProtocol: "يمكن إعطاؤه بتركيزه الأصلي (50 mcg/mL) أو تخفيفه إلى 10 mcg/mL في سالاين 0.9% لتسهيل المعايرة الدقيقة للأطفال."
     },
     clinicalContexts: [
       {
         id: "intubation_blunting",
-        label: "تثبيط استجابة التنبيب (Induction Bolus)",
+        label: "جرعة الاستحثاث وتثبيط استجابة التنبيب (Induction Bolus)",
         doseMin: 1.0,
         doseMax: 2.0,
-        unit: "mcg/kg",
+        unit: DOSE_UNITS.MCG_PER_KG,
         doseType: "weight_bolus",
         isDefault: true,
-        note: "تُعطى عادة قبل التحفيز الجراحي أو تنظير الحنجرة بعد تقدير زمن بدء المفعول والاستجابة السريرية."
+        note: "تُعطى قبل تنظير الحنجرة بـ 2-3 دقائق لتتزامن ذروة التسكين مع التحفيز الودي."
       },
       {
         id: "balanced_maintenance",
-        label: "التسكين أثناء التخدير المتوازن (Maintenance Bolus)",
+        label: "جرعة المداومة أثناء التخدير المتوازن (Maintenance Bolus)",
         doseMin: 0.5,
         doseMax: 1.5,
-        unit: "mcg/kg",
+        unit: DOSE_UNITS.MCG_PER_KG,
         doseType: "weight_bolus",
-        note: "جرعات دفعية متكررة ومعايرة سريرياً كل 30-45 دقيقة بحسب استجابة الجهاز العصبي الذاتي والمؤشرات الحيوية."
+        note: "جرعات دفعية متكررة كل 30-45 دقيقة بحسب المؤشرات الحيوية واستجابة الجهاز العصبي الذاتي."
       },
       {
         id: "higher_dose_technique",
-        label: "تقنية التسكين بجرعات عالية (Higher-dose intraoperative technique)",
+        label: "تقنية التسكين بجرعات عالية لجراحات القلب (Higher-Dose Technique)",
         doseMin: 2.0,
         doseMax: 5.0,
-        unit: "mcg/kg",
+        unit: DOSE_UNITS.MCG_PER_KG,
         doseType: "weight_bolus",
-        note: "جرعات عالية مخصصة لتقنيات جراحية معينة كجراحات القلب؛ ليست جرعة روتينية وتتطلب تهوية آلية ومراقبة مستمرة."
+        note: "مخصصة لجراحات القلب الكبرى؛ تتطلب تهوية آلية إلزامية ومراقبة لصيقة في العناية المركزة."
       },
       {
         id: "pacu_rescue",
         label: "تسكين الألم في وحدة الإفاقة (PACU Incremental Bolus)",
         doseMin: 25.0,
         doseMax: 50.0,
-        unit: "mcg (fixed)",
+        unit: DOSE_UNITS.MCG_FIXED,
         doseType: "fixed_bolus",
-        note: "جرعات تدريجية مجزأة (25-50 mcg) كل 5 دقائق مع المعايرة والمراقبة اللصيقة لمعدل التنفس ومستوى الوعي وSpO2."
+        note: "جرعات تدريجية مجزأة (25-50 mcg) كل 5 دقائق مع المراقبة اللصيقة لمعدل التنفس ومستوى الوعي."
       }
     ],
     warnings: [
@@ -101,21 +107,11 @@ export const analgesiaData = [
     ],
     contraindications: [
       "فرط الحساسية المعروفة للفنتانيل أو مشتقات الفينيل بيبيريدين.",
-      "لا يُعطى دون توفر مراقبة مناسبة وتجهيزات دعم المجرى الهوائي والتهوية بالضغط الموجب."
+      "عدم توفر مراقبة مناسبة وتجهيزات دعم المجرى الهوائي والتهوية بالضغط الموجب."
     ],
     references: [
-      {
-        type: "regulatory",
-        organization: "FDA",
-        title: "Fentanyl Citrate Injection Prescribing Information",
-        year: "2024"
-      },
-      {
-        type: "textbook",
-        organization: "Miller",
-        title: "Miller's Anesthesia, 9th Ed. — Opioid Pharmacology & Dosing",
-        year: "2020"
-      }
+      { type: "regulatory", organization: "FDA", title: "Fentanyl Citrate Injection Prescribing Information", year: "2024" },
+      { type: "textbook", organization: "Miller", title: "Miller's Anesthesia, 9th Ed. — Opioid Pharmacology & Dosing", year: "2020" }
     ]
   },
 
@@ -136,46 +132,49 @@ export const analgesiaData = [
       requiresAirwayReady: true,
       requiresRespiratoryMonitoring: true
     },
+    clinicalFlags: ["resp_depression", "rapid_offset", "ultra_short_acting"],
     indications: [
-      "التسكين والتحكم الاستجابتي الفائق أثناء التحريض والتنبيب الرغامي تحت التخدير العام.",
-      "التسكين المستمر كجزء من التخدير الوريدي الكلي (TIVA) أو التخدير المتوازن مع التهوية الآلية.",
-      "توفير تسكين عميق قصير الأمد أثناء الإجراءات الجراحية مع إفاقة سريعة ومستقلة عن مدة التسريب."
+      { id: "induction_bolus", label: { ar: "التسكين والتحكم الاستجابتي أثناء الاستحثاث والتنبيب", en: "Analgesia and blunting response during induction and intubation" } },
+      { id: "maintenance_infusion", label: { ar: "التسكين المستمر كجزء من TIVA أو التخدير المتوازن", en: "Continuous infusion maintenance as part of TIVA or balanced anesthesia" } },
+      { id: "mac_spontaneous_breathing", label: { ar: "رعاية التخدير المراقبة مع التنفس التلقائي", en: "Monitored anesthesia care (MAC) with spontaneous ventilation" } }
     ],
     routes: ["IV Infusion", "IV Bolus (Airway Secured)"],
-    weightScalar: "IBW (in severe obesity) / Titrate to clinical response",
-    obesityDosingNotes: "في حالات السمنة الشديدة، ترتبط خصائص التوزيع والتصفية بالوزن المثالي (IBW) بشكل أدق. يجب دائماً معايرة معدل التسريب بحسب الاستجابة السريرية وتجنب الحساب على الوزن الكلي لتفادي بطء القلب وهبوط الضغط الحاد.",
-    concentrations: [
-      { value: 20, unit: "mcg/mL", label: "20 mcg/mL (تخفيف 1 ملغ في 50 مل سالاين)", isDefault: true },
-      { value: 50, unit: "mcg/mL", label: "50 mcg/mL (تخفيف 2 ملغ في 40 مل سالاين)" }
+    weightPolicy: {
+      preferred: "IBW",
+      note: "في السمنة الشديدة، ترتبط التصفية بالوزن المثالي (IBW) بدقة؛ يجب المعايرة السريرية لتفادي بطء القلب وهبوط الضغط الحاد."
+    },
+    presentations: [
+      { value: 20, concentration: 20, unit: DOSE_UNITS.MCG_PER_ML, label: "20 mcg/mL (تخفيف 1 ملغ في 50 مل سالاين)", isDefault: true },
+      { value: 50, concentration: 50, unit: DOSE_UNITS.MCG_PER_ML, label: "50 mcg/mL (تخفيف 2 ملغ في 40 مل سالاين)" }
     ],
     pharmacodynamics: {
       onset: "1 – 1.5 دقيقة",
       peak: "1.5 – 2 دقيقة",
-      clinicalDuration: "3 – 8 دقائق (استقلاب سريع للغاية بإسترازات الدم والأنسجة غير النوعية)"
+      clinicalDuration: "3 – 8 دقائق (استقلاب فائق السرعة بإسترازات الدم والأنسجة غير النوعية)"
     },
     administration: {
       route: "IV",
       method: "infusion_preferred",
-      pushSpeed: "الحقن الدفعي (Bolus) يتم ببطء شديد على مدى لا يقل عن 30-60 ثانية وفقط في وجود مجرى هوائي مؤمن. يُفضل دائماً الإعطاء عبر التسريب المستمر بمضخة المحاقن.",
-      dilution: "يأتي كمسحوق جاف (1 ملغ أو 2 ملغ) ويُحل في سالاين 0.9% أو ديكستروز 5% ليصبح بتركيز 20-50 mcg/mL."
+      pushSpeed: "الحقن الدفعي (Bolus) يتم ببطء شديد على مدى 30-60 ثانية وفقط في وجود مجرى هوائي مؤمن. يُفضل دائماً الإعطاء عبر التسريب بمضخة المحاقن.",
+      dilutionProtocol: "يأتي كمسحوق جاف (1 ملغ أو 2 ملغ) ويُحل في سالاين 0.9% أو ديكستروز 5% ليصبح بتركيز 20-50 mcg/mL."
     },
     clinicalContexts: [
       {
         id: "induction_bolus",
-        label: "جرعة التحريض والتنبيب (Induction Bolus - Airway Control)",
+        label: "جرعة الاستحثاث والتحكم بالمجرى الهوائي (Induction Bolus)",
         doseMin: 0.5,
         doseMax: 1.0,
-        unit: "mcg/kg",
+        unit: DOSE_UNITS.MCG_PER_KG,
         doseType: "weight_bolus",
         isDefault: true,
-        note: "تُعطى ببطء على مدى 30-60 ثانية قبل التنبيب وفقط مع الجاهزية التامة لإدارة المجرى الهوائي والتهوية الآلية."
+        note: "تُعطى ببطء على مدى 30-60 ثانية قبل التنبيب وفقط مع الجاهزية التامة لإدارة المجرى الهوائي."
       },
       {
         id: "maintenance_infusion",
-        label: "التسريب المستمر مع التهوية الآلية (Maintenance Infusion)",
+        label: "جرعة المداومة بالتسريب المستمر (Maintenance Infusion)",
         doseMin: 0.1,
         doseMax: 0.5,
-        unit: "mcg/kg/min",
+        unit: DOSE_UNITS.MCG_PER_KG_MIN,
         doseType: "weight_infusion_min",
         note: "تتم المعايرة بزيادة أو خفض 0.05 mcg/kg/min حسب المؤشرات الحيوية وعمق التسكين المطلوب."
       },
@@ -184,33 +183,23 @@ export const analgesiaData = [
         label: "رعاية التخدير المراقبة والتنفس التلقائي (MAC – Spontaneous Breathing)",
         doseMin: 0.025,
         doseMax: 0.2,
-        unit: "mcg/kg/min",
+        unit: DOSE_UNITS.MCG_PER_KG_MIN,
         doseType: "weight_infusion_min",
-        note: "جرعة البدء الشائعة 0.05 - 0.1 mcg/kg/min وتُعاير تدريجياً؛ لا يُنصح بإعطاء جرعات دفعية (Bolus) متزامنة لدى المرضى ذوي التنفس التلقائي. يتطلب مراقبة مستمرة للمجرى الهوائي والأكسجة."
+        note: "جرعة البدء الشائعة 0.05 - 0.1 mcg/kg/min؛ تجنب الجرعات الدفعية لمنع انقطاع النفس."
       }
     ],
     warnings: [
-      "مفعوله التسكيني ينتهي خلال 5-10 دقائق من إيقاف التسريب؛ يجب تأمين خطة تسكين انتقالية (مثل المورفين أو الباراسيتامول) قبل نهاية العملية.",
-      "قد يسبب انقطاع نفس فوري (Apnea)، بطء قلب شديد، هبوطاً حاداً في ضغط الدم، وتصلب جدار الصدر عند الحقن السريع.",
-      "قد يحرض فرط التحسس للألم الارتدادي (Opioid-Induced Hyperalgesia) عند التوقف المفاجئ بعد الجرعات العالية."
+      "ينتهي مفعوله التسكيني خلال 5-10 دقائق من إيقاف التسريب؛ يجب إعطاء مسكن انتقالي (مثل المورفين أو الباراسيتامول) قبل نهاية الجراحة.",
+      "قد يسبب انقطاع نفس فوري (Apnea)، بطء قلب شديد، وهبوطاً حاداً في ضغط الدم عند الحقن السريع.",
+      "قد يحرض فرط التحسس للألم الارتدادي (Opioid-Induced Hyperalgesia) بعد التسريب بجرعات عالية."
     ],
     contraindications: [
-      "الحقن فوق الجافية أو داخل النخاع (Epidural/Intrathecal) لاحتواء المستحضر على مادة الغلايسين.",
+      "الحقن فوق الجافية أو داخل النخاع (Epidural/Intrathecal) لاحتوائه على مادة الغلايسين.",
       "فرط الحساسية لمركبات الفنتانيل ومشتقاتها."
     ],
     references: [
-      {
-        type: "regulatory",
-        organization: "FDA",
-        title: "Ultiva (Remifentanil HCl) for Injection Prescribing Information",
-        year: "2024"
-      },
-      {
-        type: "textbook",
-        organization: "Miller",
-        title: "Miller's Anesthesia, 9th Ed. — Context-Sensitive Half-Time & Metabolism",
-        year: "2020"
-      }
+      { type: "regulatory", organization: "FDA", title: "Ultiva (Remifentanil HCl) for Injection Prescribing Information", year: "2024" },
+      { type: "textbook", organization: "Miller", title: "Miller's Anesthesia, 9th Ed. — Context-Sensitive Half-Time & Metabolism", year: "2020" }
     ]
   },
 
@@ -231,17 +220,31 @@ export const analgesiaData = [
       requiresAirwayReady: true,
       requiresRespiratoryMonitoring: true
     },
+    clinicalFlags: ["resp_depression", "histamine_release", "delayed_peak_risk"],
     indications: [
-      "تسكين الألم الجراحي المتوسط إلى الشديد ممتد المفعول.",
-      "التسكين الوقائي والاستباقي قبل نهاية الجراحة لضمان إفاقة مريحة في الـ PACU.",
-      "تسكين الألم في احتشاء عضلة القلب والوذمة الرئوية الحادة."
+      { id: "intraop_loading", label: { ar: "تسكين الألم الجراحي المتوسط إلى الشديد ممتد المفعول", en: "Moderate to severe intraoperative and postoperative surgical analgesia" } },
+      { id: "pacu_titration", label: { ar: "معايرة تسكين الألم الحاد في وحدة الإفاقة", en: "Acute postoperative pain titration in PACU" } }
     ],
     routes: ["IV", "IM", "SC"],
-    weightScalar: "Individualized / Reduced initial dose in elderly, renal impairment, and opioid-naïve",
-    obesityDosingNotes: "يجب تفصيل الجرعة ومعايرتها بحذر؛ يُفضل خفض الجرعة البدئية في حالات السمنة وكبار السن مع المراقبة لتفادي التراكم والتثبيط التنفسي المتأخر.",
-    concentrations: [
-      { value: 10, unit: "mg/mL", label: "10 mg/mL (أمبولة أصلية مركزة 1 مل)" },
-      { value: 1, unit: "mg/mL", label: "1 mg/mL (تخفيف 10 ملغ في 10 مل سالاين 0.9%)", isDefault: true }
+    weightPolicy: {
+      preferred: "TBW",
+      note: "يُعاير بحذر شديد مع خفض الجرعة البدئية في كبار السن وقصور الكلى لتفادي التراكم والتثبيط التنفسي المتأخر."
+    },
+    presentations: [
+      { 
+        value: 1, 
+        concentration: 1, 
+        unit: DOSE_UNITS.MG_PER_ML, 
+        label: "1 mg/mL (مخفف آمن: 10 ملغ في 10 مل سالاين 0.9%)", 
+        isDefault: true 
+      },
+      { 
+        value: 10, 
+        concentration: 10, 
+        unit: DOSE_UNITS.MG_PER_ML, 
+        label: "10 mg/mL (أمبولة أصلية مركزة 1 مل - تتطلب الحذر في السحب)", 
+        isDefault: false 
+      }
     ],
     pharmacodynamics: {
       onset: "5 – 10 دقائق (وريدياً)",
@@ -252,15 +255,15 @@ export const analgesiaData = [
       route: "IV",
       method: "slow_push",
       pushSpeed: "حقن وريدي بطيء (1-2 ملغ على مدى دقيقة إلى دقيقتين) لتقليل تحرر الهيستامين وهبوط الضغط.",
-      dilution: "يُوصى بسحب أمبولة 10 ملغ وتخفيفها إلى 10 مل بسالاين 0.9% لتصبح بتركيز 1 mg/mL لضمان المعايرة الآمنة."
+      dilutionProtocol: "توصية أمان سريرية: تُسحب أمبولة 10 ملغ وتُخفف إلى 10 مل بسالاين 0.9% لتصبح بتركيز 1 mg/mL لضمان دقة السحب وتجنب أخطاء الحيز الميت (Dead Space) خاصة للأوزان الصغيرة."
     },
     clinicalContexts: [
       {
         id: "intraop_loading",
-        label: "جرعة التسكين أثناء العمليات (Intraop Pre-emergence Bolus)",
+        label: "جرعة التسكين أثناء العملية (Intraop Pre-emergence Bolus)",
         doseMin: 0.05,
         doseMax: 0.15,
-        unit: "mg/kg",
+        unit: DOSE_UNITS.MG_PER_KG,
         doseType: "weight_bolus",
         isDefault: true,
         note: "تُعطى قبل نهاية العملية بـ 20-30 دقيقة ليتزامن وقت الذروة مع الإفاقة؛ تخضع لمعايرة دقيقة بحسب استجابة المريض."
@@ -270,34 +273,24 @@ export const analgesiaData = [
         label: "معايرة الألم في وحدة الإفاقة (PACU Incremental Titration)",
         doseMin: 1.0,
         doseMax: 2.0,
-        unit: "mg (fixed)",
+        unit: DOSE_UNITS.MG_FIXED,
         doseType: "fixed_bolus",
-        note: "تُعطى 1-2 ملغ كل 5-10 دقائق مع المعايرة الحذرة وفق شدة الألم، العمر، وظائف الكلى، ودرجة اليقظة. لا تتعجل تكرار الجرعات الكبيرة لتجنب التراكم (Dose Stacking)."
+        note: "تُعطى 1-2 ملغ كل 5-10 دقائق مع المعايرة الحذرة. تجنب تكرار الجرعات السريعة لمنع التراكم الدوائي (Dose Stacking)."
       }
     ],
     warnings: [
       "تأخر ذروة التأثير التسكيني والتنفسي حتى 20-30 دقيقة وريدياً؛ تكرار الجرعات السريع يؤدي إلى تراكم الجرعة وحدوث تثبيط تنفسي متأخر.",
-      "يحرر مادة الهيستامين، مما قد يسبب هبوط ضغط شرياني، احمرار الجلد، وتشنج القصبات؛ يُستخدم بحذر شديد في مرضى الربو القصبي غير المستقر.",
-      "تتراكم مستقلباته النشطة (Morphine-6-Glucuronide) في مرضى قصور وظائف الكلى مسببة تثبيطاً تنفسياً ممتداً وتهدئة عميقة؛ يتطلب خفض الجرعات ومراقبة لصيقة."
+      "يحرر الهيستامين مسبباً هبوط ضغط شرياني واحمرار الجلد وتشنج القصبات؛ يُستخدم بحذر في مرضى الربو غير المستقر.",
+      "تتراكم مستقلباته النشطة (M6G) في قصور وظائف الكلى مسببة تثبيطاً تنفسياً ممتداً؛ يتطلب خفض الجرعات والمراقبة."
     ],
     contraindications: [
       "فرط الحساسية المعروفة للمورفين.",
-      "التثبيط التنفسي الشديد الحاد أو انسداد المجرى الهوائي العلوي في غياب التهوية الآلية.",
+      "التثبيط التنفسي الشديد أو انسداد المجرى الهوائي في غياب التهوية الآلية.",
       "انسداد الأمعاء الشللي (Paralytic Ileus)."
     ],
     references: [
-      {
-        type: "regulatory",
-        organization: "FDA",
-        title: "Morphine Sulfate Injection Prescribing Information",
-        year: "2024"
-      },
-      {
-        type: "guideline",
-        organization: "Oxford",
-        title: "Oxford Handbook of Anaesthesia, 5th Ed. — Opioids in Renal Disease",
-        year: "2022"
-      }
+      { type: "regulatory", organization: "FDA", title: "Morphine Sulfate Injection Prescribing Information", year: "2024" },
+      { type: "guideline", organization: "Oxford", title: "Oxford Handbook of Anaesthesia, 5th Ed. — Opioids in Renal Disease", year: "2022" }
     ]
   },
 
@@ -318,16 +311,19 @@ export const analgesiaData = [
       requiresAirwayReady: true,
       requiresRespiratoryMonitoring: true
     },
+    clinicalFlags: ["resp_depression", "rapid_onset", "chest_wall_rigidity_risk"],
     indications: [
-      "تسكين الإجراءات الجراحية القصيرة والمؤلمة (مثل تنظير الحنجرة، تنظير القصبات).",
-      "تثبيط الاستجابة الوعائية والحنجرية للتنبيب كجزء من تقنيات التخدير الموجهة.",
-      "التسكين المستمر لجراحات اليوم الواحد مع إفاقة سريعة."
+      { id: "rapid_onset_technique", label: { ar: "تسكين الإجراءات القصيرة وتثبيط استجابة التنبيب", en: "Analgesia for short painful procedures and intubation blunting" } },
+      { id: "maintenance_infusion", label: { ar: "التسريب المستمر لجراحات اليوم الواحد", en: "Continuous infusion for short outpatient surgical cases" } }
     ],
     routes: ["IV"],
-    weightScalar: "Individualized / Titrate to effect",
-    obesityDosingNotes: "يُعاير بحسب الحالة السريرية ونوع الإجراء؛ يجب توخي الحذر وخفض الجرعة في كبار السن والمرضى ذوي الحالة الحرجة.",
-    concentrations: [
-      { value: 500, unit: "mcg/mL", label: "500 mcg/mL (0.5 mg/mL أمبولة جاهزة)", isDefault: true }
+    weightPolicy: {
+      preferred: "TBW",
+      note: "يُعاير بحسب الحالة السريرية ونوع الإجراء؛ يجب توخي الحذر وخفض الجرعة في كبار السن والمرضى ذوي الحالة الحرجة."
+    },
+    presentations: [
+      { value: 500, concentration: 500, unit: DOSE_UNITS.MCG_PER_ML, label: "500 mcg/mL (0.5 mg/mL أمبولة جاهزة)", isDefault: true },
+      { value: 100, concentration: 100, unit: DOSE_UNITS.MCG_PER_ML, label: "100 mcg/mL (مخفف في سالاين 0.9%)" }
     ],
     pharmacodynamics: {
       onset: "30 – 60 ثانية (بدء مفعول فائق السرعة لانخفاض pKa وارتفاع الكسر غير المتأين)",
@@ -338,36 +334,36 @@ export const analgesiaData = [
       route: "IV",
       method: "slow_push",
       pushSpeed: "حقن وريدي بطيء على مدى 30-60 ثانية لتجنب هبوط الضغط وتصلب جدار الصدر.",
-      dilution: "يُعطى بتركيزه الأصلي (500 mcg/mL) أو مخففاً إلى 100 mcg/mL في سالاين 0.9%."
+      dilutionProtocol: "يُعطى بتركيزه الأصلي (500 mcg/mL) أو مخففاً إلى 100 mcg/mL في سالاين 0.9%."
     },
     clinicalContexts: [
       {
         id: "rapid_onset_technique",
-        label: "تقنية التسكين سريع البدء للإجراءات المحددة (Rapid-onset opioid technique)",
+        label: "جرعة الاستحثاث سريع البدء (Rapid-Onset Technique)",
         doseMin: 10.0,
         doseMax: 20.0,
-        unit: "mcg/kg",
+        unit: DOSE_UNITS.MCG_PER_KG,
         doseType: "weight_bolus",
         isDefault: true,
-        note: "الجرعة تعتمد بشدة على التقنية التخديرية ونوع الإجراء والأدوية المصاحبة؛ لا تُستخدم كجرعة روتينية عامة للتنبيب لجميع المرضى، وتتطلب جاهزية التهوية الفورية."
+        note: "تعتمد الجرعة على الإجراء والأدوية المصاحبة؛ تتطلب جاهزية التهوية الفورية."
       },
       {
         id: "short_procedure",
         label: "تسكين الإجراءات القصيرة المراقبة (Monitored Short Procedure)",
         doseMin: 5.0,
         doseMax: 10.0,
-        unit: "mcg/kg",
+        unit: DOSE_UNITS.MCG_PER_KG,
         doseType: "weight_bolus",
         note: "تُعطى بحذر مع الجاهزية لدعم التنفس والأكسجة."
       },
       {
         id: "maintenance_infusion",
-        label: "التسريب المستمر أثناء الجراحة (Maintenance Infusion)",
+        label: "جرعة المداومة بالتسريب المستمر (Maintenance Infusion)",
         doseMin: 0.5,
         doseMax: 1.5,
-        unit: "mcg/kg/min",
+        unit: DOSE_UNITS.MCG_PER_KG_MIN,
         doseType: "weight_infusion_min",
-        note: "يُوقف قبل نهاية العملية بـ 10-15 دقيقة."
+        note: "يُوقف قبل نهاية العملية بـ 10-15 دقيقة لضمان إفاقة مريحة."
       }
     ],
     warnings: [
@@ -380,18 +376,8 @@ export const analgesiaData = [
       "عدم جاهزية وسائل تأمين المجرى الهوائي والإنعاش."
     ],
     references: [
-      {
-        type: "regulatory",
-        organization: "FDA",
-        title: "Alfentanil Injection Prescribing Information",
-        year: "2023"
-      },
-      {
-        type: "textbook",
-        organization: "Morgan & Mikhail",
-        title: "Clinical Anesthesiology, 7th Ed. — Rapid-acting Opioids",
-        year: "2022"
-      }
+      { type: "regulatory", organization: "FDA", title: "Alfentanil Injection Prescribing Information", year: "2023" },
+      { type: "textbook", organization: "Morgan & Mikhail", title: "Clinical Anesthesiology, 7th Ed. — Rapid-acting Opioids", year: "2022" }
     ]
   },
 
@@ -412,17 +398,20 @@ export const analgesiaData = [
       requiresAirwayReady: true,
       requiresRespiratoryMonitoring: true
     },
+    clinicalFlags: ["resp_depression", "ultra_potent", "chest_wall_rigidity_risk"],
     indications: [
-      "عامل تسكين مساعد في التخدير العام المتوازن للعمليات الجراحية الكبرى.",
-      "عامل تخدير أولي أساسي في جراحات القلب والأوعية الدموية والجراحة العصبية الكبرى.",
-      "تسكين المخاض والولادة عبر القثطرة فوق الجافية (Epidural Analgesia with local anesthetics)."
+      { id: "analgesic_adjunct", label: { ar: "عامل تسكين مساعد في التخدير العام المتوازن للعمليات الكبرى", en: "Analgesic adjunct in balanced general anesthesia" } },
+      { id: "primary_anesthetic_cardiac", label: { ar: "عامل تخدير أساسي في جراحات القلب والأوعية الدموية", en: "Primary anesthetic agent in major cardiovascular surgeries" } },
+      { id: "epidural_labor", label: { ar: "تسكين المخاض والولادة عبر القثطرة فوق الجافية", en: "Epidural labor and delivery analgesia" } }
     ],
     routes: ["IV", "Epidural (Labor & Delivery)"],
-    weightScalar: "Individualized / Titrate to effect",
-    obesityDosingNotes: "أقوى من الفنتانيل بنحو 5 إلى 10 أضعاف؛ يتطلب المعايرة الحذرة وتفصيل الجرعة وفق الحالة السريرية ونوع التخدير.",
-    concentrations: [
-      { value: 5, unit: "mcg/mL", label: "5 mcg/mL (أمبولة مخففة)", isDefault: true },
-      { value: 50, unit: "mcg/mL", label: "50 mcg/mL (أمبولة مركزة)" }
+    weightPolicy: {
+      preferred: "TBW",
+      note: "أقوى من الفنتانيل بنحو 5 إلى 10 أضعاف؛ يتطلب المعايرة الحذرة وتفصيل الجرعة وفق الحالة ونوع الجراحة."
+    },
+    presentations: [
+      { value: 5, concentration: 5, unit: DOSE_UNITS.MCG_PER_ML, label: "5 mcg/mL (أمبولة مخففة جاهزة)", isDefault: true },
+      { value: 50, concentration: 50, unit: DOSE_UNITS.MCG_PER_ML, label: "50 mcg/mL (أمبولة مركزة)" }
     ],
     pharmacodynamics: {
       onset: "1 – 3 دقائق (وريدياً)",
@@ -433,7 +422,7 @@ export const analgesiaData = [
       route: "IV / Epidural",
       method: "slow_push",
       pushSpeed: "حقن وريدي بطيء ومعاير بدقة بالغة. في الاستخدام فوق الجافية: يجب شفط القثطرة للتأكد من عدم وجود دم أو سائل دماغي شوكي.",
-      dilution: "يُفضل التخفيف إلى تركيز 5 mcg/mL لتفادي أخطاء الجرعات المفرطة."
+      dilutionProtocol: "يُفضل التخفيف إلى تركيز 5 mcg/mL لتفادي أخطاء الجرعات المفرطة."
     },
     clinicalContexts: [
       {
@@ -441,7 +430,7 @@ export const analgesiaData = [
         label: "عامل تسكين مساعد في التخدير المتوازن (Analgesic Adjunct)",
         doseMin: 0.2,
         doseMax: 0.6,
-        unit: "mcg/kg",
+        unit: DOSE_UNITS.MCG_PER_KG,
         doseType: "weight_bolus",
         isDefault: true,
         note: "يُعطى كعامل مساعد للتسكين مع أدوية التخدير الأخرى أثناء الجراحات العامة."
@@ -451,22 +440,22 @@ export const analgesiaData = [
         label: "عامل تخدير أساسي لجراحات القلب الكبرى (Primary Anesthetic - Cardiac)",
         doseMin: 1.0,
         doseMax: 3.0,
-        unit: "mcg/kg",
+        unit: DOSE_UNITS.MCG_PER_KG,
         doseType: "weight_bolus",
-        note: "تُعطى الجرعات العالية مع الأكسجين بنسبة 100% والمرخيات العضلية، وتتطلب تهوية آلية ممتدة ومراقبة مكثفة."
+        note: "تُعطى الجرعات العالية مع الأكسجين 100% والمرخيات العضلية، وتتطلب تهوية آلية ممتدة ومراقبة مكثفة."
       },
       {
         id: "epidural_labor",
         label: "تسكين المخاض فوق الجافية (Epidural Labor Analgesia)",
         doseMin: 10.0,
         doseMax: 15.0,
-        unit: "mcg (fixed)",
+        unit: DOSE_UNITS.MCG_FIXED,
         doseType: "fixed",
         note: "تُعطى جرعة 10-15 mcg بالمشاركة مع بوبيفاكايين 0.125%؛ يجب التحقق الصارم من موضع القثطرة لمنع الحقن داخل القراب أو الأوعية."
       }
     ],
     warnings: [
-      "⚠️ تحذير رسمي من FDA: هذا المستحضر مخصص للحقن الوريدي أو فوق الجافية (Epidural) فقط. الحقن غير المقصود داخل القراب (Intrathecal) أو داخل الأوعية قد يكون قاتلاً؛ يجب التأكد الصارم من موضع القثطرة قبل الحقن.",
+      "⚠️ تحذير رسمي: مخصص للحقن الوريدي أو فوق الجافية (Epidural) فقط. الحقن غير المقصود داخل القراب (Intrathecal) أو الأوعية قد يكون قاتلاً.",
       "فائق القوة (5-10 أضعاف الفنتانيل)، وأي خطأ حسابي يؤدي لتثبيط تنفسي فوري وعميق وبطء قلب شديد.",
       "خطر تصلب عضلات جدار الصدر وهبوط الضغط الحاد عند الحقن السريع."
     ],
@@ -476,18 +465,8 @@ export const analgesiaData = [
       "الاستخدام دون توفر أجهزة التهوية والمراقبة المتقدمة."
     ],
     references: [
-      {
-        type: "regulatory",
-        organization: "FDA",
-        title: "Sufenta (Sufentanil Citrate Injection) Prescribing Information",
-        year: "2024"
-      },
-      {
-        type: "textbook",
-        organization: "Miller",
-        title: "Miller's Anesthesia, 9th Ed. — Potent Opioid Pharmacology",
-        year: "2020"
-      }
+      { type: "regulatory", organization: "FDA", title: "Sufenta (Sufentanil Citrate Injection) Prescribing Information", year: "2024" },
+      { type: "textbook", organization: "Miller", title: "Miller's Anesthesia, 9th Ed. — Potent Opioid Pharmacology", year: "2020" }
     ]
   },
 
@@ -508,16 +487,19 @@ export const analgesiaData = [
       requiresAirwayReady: false,
       requiresRespiratoryMonitoring: true
     },
+    clinicalFlags: ["neurotoxicity_risk", "serotonin_syndrome_risk", "tachycardia_risk"],
     indications: [
-      "علاج ومنع الرعشة والارتجاف بعد التخدير النصفي أو العام (Post-Anesthetic Shivering).",
-      "تسكين الألم الحاد متوسط الشدة وتسكين آلام المخاض قصيرة الأمد عند عدم توفر البدائل الأنسب."
+      { id: "anti_shivering", label: { ar: "علاج ومنع الرعشة والارتجاف بعد التخدير النصفي أو العام", en: "Treatment and prevention of post-anesthetic shivering" } },
+      { id: "acute_analgesia", label: { ar: "تسكين الألم الحاد متوسط الشدة قصير الأمد", en: "Short-term relief of moderate to severe acute pain" } }
     ],
     routes: ["IV", "IM"],
-    weightScalar: "Fixed small dose for shivering / Individualized for acute pain",
-    obesityDosingNotes: "يُفضل الاعتماد على الجرعات الثابتة المنخفضة لعلاج الرعشة وتجنب الحساب على الوزن الكلي المفرط لتفادي تراكم المستقلبات السامة.",
-    concentrations: [
-      { value: 50, unit: "mg/mL", label: "50 mg/mL (أمبولة 100 ملغ في 2 مل)", isDefault: true },
-      { value: 10, unit: "mg/mL", label: "10 mg/mL (تخفيف 100 ملغ في 10 مل سالاين)" }
+    weightPolicy: {
+      preferred: "TBW",
+      note: "يُفضل الاعتماد على الجرعات الثابتة المنخفضة لعلاج الرعشة وتجنب الحساب على الوزن المفرط لتفادي تراكم المستقلبات السامة."
+    },
+    presentations: [
+      { value: 50, concentration: 50, unit: DOSE_UNITS.MG_PER_ML, label: "50 mg/mL (أمبولة 100 ملغ في 2 مل)", isDefault: true },
+      { value: 10, concentration: 10, unit: DOSE_UNITS.MG_PER_ML, label: "10 mg/mL (تخفيف 100 ملغ في 10 مل سالاين 0.9%)" }
     ],
     pharmacodynamics: {
       onset: "2 – 5 دقائق (وريدياً)",
@@ -527,8 +509,8 @@ export const analgesiaData = [
     administration: {
       route: "IV / IM",
       method: "slow_push",
-      pushSpeed: "حقن وريدي بطيء على مدى 2 – 3 دقائق؛ يسبب تهيجاً وعائياً وهبوط ضغط إذا حُقن سريعاً.",
-      dilution: "يُوصى بتخفيفه في 10 مل سالاين 0.9% لتسهيل إعطاء جرعات دقيقة وصغيرة لعلاج الرعشة."
+      pushSpeed: "حقن وريدي بطيء على مدى 2 – 3 دقائق لتجنب التهيج الوعائي وهبوط الضغط.",
+      dilutionProtocol: "يُوصى بتخفيفه في 10 مل سالاين 0.9% لتسهيل إعطاء جرعات دقيقة وصغيرة لعلاج الرعشة."
     },
     clinicalContexts: [
       {
@@ -536,45 +518,35 @@ export const analgesiaData = [
         label: "علاج الرعشة بعد التخدير (Anti-Shivering)",
         doseMin: 12.5,
         doseMax: 25.0,
-        unit: "mg (fixed)",
+        unit: DOSE_UNITS.MG_FIXED,
         doseType: "fixed_bolus",
         isDefault: true,
-        note: "جرعة ثابتة صغيرة (12.5 إلى 25 ملغ وريدياً ببطء) كافية عادة لإنهاء الرعشة وتثبيط مركز تنظيم الحرارة."
+        note: "جرعة ثابتة صغيرة (12.5 إلى 25 ملغ وريدياً ببطء) كافية لإنهاء الرعشة وتثبيط مركز تنظيم الحرارة."
       },
       {
         id: "acute_analgesia",
         label: "تسكين الألم الحاد البديل (Acute Pain Bolus)",
         doseMin: 25.0,
         doseMax: 50.0,
-        unit: "mg (fixed)",
+        unit: DOSE_UNITS.MG_FIXED,
         doseType: "fixed_bolus",
-        note: "استخدام محدود وقصير الأمد فقط؛ تجنب الجرعات المتكررة بسبب خطر تراكم مادة normeperidine، خصوصاً في قصور وظائف الكلى."
+        note: "استخدام قصير الأمد؛ تجنب الجرعات المتكررة بسبب خطر تراكم مادة Normeperidine المحدثة للاختلاجات."
       }
     ],
     warnings: [
-      "⚠️ تحذير حرج: تراكم المستقلب النشط (نوربيثيدين - Normeperidine) يسبب سمية عصبية واضحة (Neurotoxicity) تشمل الرعاش، الرمع العضلي (Myoclonus)، والاختلاجات والصرع، خصوصاً مع الجرعات المتكررة، الاستخدام لأكثر من 48 ساعة، أو في قصور وظائف الكلى.",
-      "⚠️ خطر مميت: يُمنع الاستخدام المتزامن مع مثبطات المونوامين أوكسيديز (MAOIs) لخطورة حدوث متلازمة السيروتونين القاتلة (Serotonin Syndrome) وفرط الحرارة الشديد وهبوط/ارتفاع الضغط الحاد.",
-      "يمتلك تأثيراً شبيهاً بالأتروبين (Atropine-like effect) فيسبب تسارع نبضات القلب وجفاف الفم، بخلاف باقي الأفيونات."
+      "⚠️ تحذير حرج: تراكم المستقلب النشط (Normeperidine) يسبب سمية عصبية واضحة تشمل الرعاش والرمع العضلي والاختلاجات، خصوصاً في قصور الكلى أو الاستخدام لأكثر من 48 ساعة.",
+      "⚠️ خطر مميت: يُمنع الاستخدام المتزامن مع مثبطات MAOIs لخطورة حدوث متلازمة السيروتونين القاتلة (Serotonin Syndrome) وفرط الحرارة الشديد.",
+      "يمتلك تأثيراً شبيهاً بالأتروبين (Atropine-like) مسبباً تسارع نبضات القلب وجفاف الفم، بخلاف باقي الأفيونات."
     ],
     contraindications: [
-      "الاستخدام المتزامن أو خلال 14 يوماً من تناول أدوية MAOIs (خطر متلازمة السيروتونين).",
+      "الاستخدام المتزامن أو خلال 14 يوماً من تناول أدوية MAOIs.",
       "فرط الحساسية المعروفة للبيثيدين / الميبيريدين.",
       "قصور وظائف الكلى الشديد لخطورة تراكم النوربيثيدين المحدث للاختلاجات.",
       "المرضى الذين لديهم سوابق اختلاجات أو صرع."
     ],
     references: [
-      {
-        type: "regulatory",
-        organization: "FDA",
-        title: "Demerol (Meperidine HCl) Prescribing Information",
-        year: "2023"
-      },
-      {
-        type: "textbook",
-        organization: "Miller",
-        title: "Miller's Anesthesia, 9th Ed. — Postoperative Shivering Management",
-        year: "2020"
-      }
+      { type: "regulatory", organization: "FDA", title: "Demerol (Meperidine HCl) Prescribing Information", year: "2023" },
+      { type: "textbook", organization: "Miller", title: "Miller's Anesthesia, 9th Ed. — Postoperative Shivering Management", year: "2020" }
     ]
   },
 
@@ -595,16 +567,18 @@ export const analgesiaData = [
       requiresAirwayReady: false,
       requiresRespiratoryMonitoring: true
     },
+    clinicalFlags: ["ponv_risk_high", "seizure_threshold_lowering", "serotonin_syndrome_risk"],
     indications: [
-      "تسكين الألم الجراحي المتوسط إلى الشديد كجزء من التسكين متعدد الوسائط (Multimodal Analgesia).",
-      "تسكين ألم ما بعد العمليات الجراحية اليومية والمتوسطة.",
-      "خيار بديل لعلاج الرعشة والارتجاف بعد التخدير."
+      { id: "postop_analgesia", label: { ar: "تسكين الألم الجراحي المتوسط إلى الشديد ضمن التسكين متعدد الوسائط", en: "Moderate to severe postoperative pain in multimodal analgesia" } },
+      { id: "anti_shivering", label: { ar: "خيار بديل لعلاج الرعشة والارتجاف بعد التخدير", en: "Alternative option for post-anesthetic shivering" } }
     ],
     routes: ["IV", "IM"],
-    weightScalar: "Fixed dose (Adults) / Individualized titration",
-    obesityDosingNotes: "للبالغين: يُفضل الاعتماد على الجرعات الثابتة (50-100 ملغ) مع الالتزام بالحد الأقصى للجرعة المفردة (100 ملغ) والجرعة اليومية (400 ملغ/يوم) بغض النظر عن وزن الجسم.",
-    concentrations: [
-      { value: 50, unit: "mg/mL", label: "50 mg/mL (أمبولة 100 ملغ في 2 مل)", isDefault: true }
+    weightPolicy: {
+      preferred: "TBW",
+      note: "للبالغين: يُفضل الاعتماد على الجرعات الثابتة (50-100 ملغ) مع الالتزام بالحد الأقصى للجرعة المفردة (100 ملغ) واليومية (400 ملغ/يوم)."
+    },
+    presentations: [
+      { value: 50, concentration: 50, unit: DOSE_UNITS.MG_PER_ML, label: "50 mg/mL (أمبولة 100 ملغ في 2 مل)", isDefault: true }
     ],
     pharmacodynamics: {
       onset: "5 – 10 دقائق (وريدياً)",
@@ -615,7 +589,7 @@ export const analgesiaData = [
       route: "IV / IM",
       method: "slow_push_or_short_infusion",
       pushSpeed: "حقن وريدي بطيء جداً على مدى 2 – 3 دقائق، أو يوضع في محلول 100 مل سالاين ويُسرّب على مدى 15 دقيقة لتقليل الغثيان والقيء.",
-      dilution: "يُفضل تخفيفه في 10-20 مل سالاين 0.9% لتفادي الدوار والغثيان الحاد."
+      dilutionProtocol: "يُفضل تخفيفه في 10-20 مل سالاين 0.9% لتفادي الدوار والغثيان الحاد."
     },
     clinicalContexts: [
       {
@@ -623,17 +597,17 @@ export const analgesiaData = [
         label: "تسكين الألم بعد العمليات (Adult Postop Analgesia)",
         doseMin: 50.0,
         doseMax: 100.0,
-        unit: "mg (fixed)",
+        unit: DOSE_UNITS.MG_FIXED,
         doseType: "fixed",
         isDefault: true,
-        note: "50 إلى 100 ملغ وريدياً ببطء كل 6 ساعات حسب الحاجة (الحد الأقصى للجرعة المفردة 100 ملغ، والحد الأقصى اليومي 400 ملغ/يوم)."
+        note: "50 إلى 100 ملغ وريدياً ببطء كل 6 ساعات حسب الحاجة (الحد الأقصى للمفردة 100 ملغ، واليومي 400 ملغ/يوم)."
       },
       {
         id: "anti_shivering",
         label: "علاج الرعشة بعد التخدير (Anti-Shivering)",
         doseMin: 50.0,
         doseMax: 50.0,
-        unit: "mg (fixed)",
+        unit: DOSE_UNITS.MG_FIXED,
         doseType: "fixed",
         note: "50 ملغ وريدياً ببطء لعلاج رعشة ما بعد التخدير النصفي أو العام."
       }
@@ -650,18 +624,8 @@ export const analgesiaData = [
       "مرضى الصرع غير المسيطر عليه علاجياً."
     ],
     references: [
-      {
-        type: "regulatory",
-        organization: "FDA",
-        title: "Ultram (Tramadol HCl) Prescribing Information",
-        year: "2023"
-      },
-      {
-        type: "regulatory",
-        organization: "eMC",
-        title: "Tramadol 50mg/ml Solution for Injection SmPC",
-        year: "2024"
-      }
+      { type: "regulatory", organization: "FDA", title: "Ultram (Tramadol HCl) Prescribing Information", year: "2023" },
+      { type: "regulatory", organization: "eMC", title: "Tramadol 50mg/ml Solution for Injection SmPC", year: "2024" }
     ]
   },
 
@@ -685,16 +649,18 @@ export const analgesiaData = [
       requiresAirwayReady: false,
       requiresRespiratoryMonitoring: false
     },
+    clinicalFlags: ["opioid_sparing", "hepatic_monitoring_required"],
     indications: [
-      "الركيزة الأساسية الأولى للتسكين متعدد الوسائط (Multimodal Analgesia) لجميع الفئات الجراحية.",
-      "تسكين الألم الخفيف إلى المتوسط، والمساهمة في خفض الاحتياج الكلي للأفيونات (Opioid-sparing effect).",
-      "علاج وخفض الحمى والحرارة المرتفعة أثناء وبعد الجراحة."
+      { id: "adult_standard", label: { ar: "الركيزة الأساسية الأولى للتسكين متعدد الوسائط (Multimodal Analgesia)", en: "Foundation of multimodal perioperative analgesia" } },
+      { id: "weight_based", label: { ar: "تسكين الألم وخفض الحرارة للأطفال والبالغين ذوي الوزن المنخفض", en: "Analgesia and antipyresis for pediatrics and adults <50 kg" } }
     ],
     routes: ["IV Infusion"],
-    weightScalar: "Fixed (for ≥50 kg) / Weight-based (for <50 kg)",
-    obesityDosingNotes: "للبالغين ذوي الوزن 50 كجم فأكثر: يُعطى بالجرعة الثابتة القياسية 1000 ملغ. في البالغين ذوي الوزن أقل من 50 كجم والأطفال: يجب الحساب الدقيق بالوزن (15 mg/kg) لتجنب الجرعات الزائدة.",
-    concentrations: [
-      { value: 10, unit: "mg/mL", label: "10 mg/mL (قارورة جاهزة 1000 ملغ في 100 مل)", isDefault: true }
+    weightPolicy: {
+      preferred: "TBW",
+      note: "للبالغين ≥50 كجم: جرعة ثابتة 1000 ملغ. في البالغين <50 كجم والأطفال: حساب دقيق بالوزن (15 mg/kg)."
+    },
+    presentations: [
+      { value: 10, concentration: 10, unit: DOSE_UNITS.MG_PER_ML, label: "10 mg/mL (قارورة جاهزة 1000 ملغ في 100 مل)", isDefault: true }
     ],
     pharmacodynamics: {
       onset: "5 – 10 دقائق من بدء التسريب",
@@ -706,7 +672,7 @@ export const analgesiaData = [
       method: "infusion",
       durationMinutes: 15,
       pushSpeed: "تسريب وريدي بطيء على مدى 15 دقيقة. لا يُحقن كدفعة سريعة (Bolus).",
-      dilution: "يأتي في قارورة جاهزة للتقطير الوريدي المباشر بتركيز 10 mg/mL."
+      dilutionProtocol: "يأتي في قارورة جاهزة للتقطير الوريدي المباشر بتركيز 10 mg/mL."
     },
     clinicalContexts: [
       {
@@ -714,24 +680,24 @@ export const analgesiaData = [
         label: "البالغين والمراهقين ذوي الوزن ≥50 كجم (Standard Adult Dose)",
         doseMin: 1000,
         doseMax: 1000,
-        unit: "mg (fixed)",
-        doseType: "fixed_infusion",
+        unit: DOSE_UNITS.MG_FIXED,
+        doseType: "fixed_bolus",
         isDefault: true,
-        note: "1000 ملغ (100 مل) بالتسريب الوريدي على مدى 15 دقيقة كل 6 ساعات، أو 650 ملغ كل 4 ساعات (الحد الأقصى اليومي 4000 ملغ/يوم من جميع المصادر)."
+        note: "1000 ملغ (100 مل) بالتسريب الوريدي على مدى 15 دقيقة كل 6 ساعات (الحد الأقصى اليومي 4000 ملغ/يوم من جميع المصادر)."
       },
       {
         id: "weight_based",
-        label: "البالغين والمراهقين ذوي الوزن <50 كجم والأطفال (Weight-based Dosing)",
+        label: "البالغين ذوي الوزن <50 كجم والأطفال (Weight-Based Dosing)",
         doseMin: 15.0,
         doseMax: 15.0,
-        unit: "mg/kg",
+        unit: DOSE_UNITS.MG_PER_KG,
         doseType: "weight_bolus",
-        note: "15 mg/kg بالتسريب الوريدي كل 6 ساعات، أو 12.5 mg/kg كل 4 ساعات وفق النظام المتبع. يجب ألا يتجاوز إجمالي الأسيتامينوفين من جميع الطرق 75 mg/kg/day، وبحد أقصى 3750 mg/day لهذه الفئة وفق ملصق FDA."
+        note: "15 mg/kg بالتسريب الوريدي كل 6 ساعات. الحد الأقصى اليومي 75 mg/kg/day (بحد أقصى مطلق 3750 mg/day لهذه الفئة)."
       }
     ],
     warnings: [
-      "خطر السمية والقصور الكبدي الحاد عند تجاوز الجرعة اليومية القصوى (4 غرام/يوم للبالغين السليمين، وتُخفض إلى 2-3 غرام/يوم في قصور الكبد وسوء التغذية وإدمان الكحول).",
-      "يجب التحقق من أي جرعات باراسيتامول تم إعطاؤها فموياً أو ضمن مركبات أخرى قبل الجراحة لتفادي تجاوز الحد الأقصى.",
+      "خطر السمية الكبدية عند تجاوز الجرعة اليومية القصوى (4 غرام/يوم للبالغين السليمين، وتُخفض إلى 2-3 غرام/يوم في قصور الكبد وسوء التغذية).",
+      "يجب التحقق من أي جرعات باراسيتامول تم إعطاؤها فموياً أو ضمن مركبات أخرى لتفادي تجاوز الحد الأقصى.",
       "قد يسبب هبوطاً عابراً في ضغط الدم أثناء التسريب لدى المرضى ذوي الحالات الحرجة في العناية المركزة."
     ],
     contraindications: [
@@ -739,18 +705,8 @@ export const analgesiaData = [
       "فرط الحساسية المعروفة للباراسيتامول أو الأسيتامينوفين أو البروباسيتامول."
     ],
     references: [
-      {
-        type: "regulatory",
-        organization: "FDA",
-        title: "Ofirmev (Acetaminophen Injection) Prescribing Information",
-        year: "2024"
-      },
-      {
-        type: "textbook",
-        organization: "Miller",
-        title: "Miller's Anesthesia, 9th Ed. — Multimodal Analgesia Strategies",
-        year: "2020"
-      }
+      { type: "regulatory", organization: "FDA", title: "Ofirmev (Acetaminophen Injection) Prescribing Information", year: "2024" },
+      { type: "textbook", organization: "Miller", title: "Miller's Anesthesia, 9th Ed. — Multimodal Analgesia Strategies", year: "2020" }
     ]
   },
 
@@ -771,16 +727,19 @@ export const analgesiaData = [
       requiresAirwayReady: false,
       requiresRespiratoryMonitoring: false
     },
+    clinicalFlags: ["bleeding_risk", "renal_toxicity_risk", "max_5_days_limit"],
     indications: [
-      "التدبير قصير الأمد للألم الحاد المتوسط إلى الشديد بعد العمليات الجراحية (NSAID قوي).",
-      "المساهمة في تقليل استهلاك الأفيونات والحد من آثارها الجانبية كالغثيان والتهدئة الزائدة.",
-      "تسكين آلام المغص الكلوي الحاد."
+      { id: "adult_standard", label: { ar: "التدبير قصير الأمد للألم الحاد المتوسط إلى الشديد بعد العمليات", en: "Short-term management of moderate to severe acute postoperative pain" } },
+      { id: "high_risk_population", label: { ar: "تسكين الألم للفئات عالية الخطورة وكبار السن", en: "Analgesia for high-risk patients (elderly / reduced weight / renal risk)" } }
     ],
     routes: ["IV", "IM"],
-    weightScalar: "Fixed dose based on age, weight, and renal status",
-    obesityDosingNotes: "تُستخدم الجرعات الثابتة المحددة للفئة السريرية؛ لا تُرفع الجرعة بحسب زيادة وزن المريض في السمنة لتفادي السمية الكلوية والنزف.",
-    concentrations: [
-      { value: 30, unit: "mg/mL", label: "30 mg/mL (أمبولة 1 مل)", isDefault: true }
+    weightPolicy: {
+      preferred: "TBW",
+      note: "تُستخدم الجرعات الثابتة المحددة للفئة السريرية؛ لا تُرفع الجرعة بزيادة الوزن في السمنة لتفادي السمية الكلوية والنزف."
+    },
+    presentations: [
+      { value: 30, concentration: 30, unit: DOSE_UNITS.MG_PER_ML, label: "30 mg/mL (أمبولة 1 مل)", isDefault: true },
+      { value: 15, concentration: 15, unit: DOSE_UNITS.MG_PER_ML, label: "15 mg/mL (أمبولة مخففة)" }
     ],
     pharmacodynamics: {
       onset: "10 دقائق (وريدياً)",
@@ -791,7 +750,7 @@ export const analgesiaData = [
       route: "IV / IM",
       method: "slow_push",
       pushSpeed: "حقن وريدي بطيء على مدى لا يقل عن 15 ثانية أو حقن عضلي عميق.",
-      dilution: "يمكن إعطاؤه غير مخفف أو مخففاً في سالاين 0.9%."
+      dilutionProtocol: "يمكن إعطاؤه غير مخفف أو مخففاً في سالاين 0.9%."
     },
     clinicalContexts: [
       {
@@ -799,23 +758,23 @@ export const analgesiaData = [
         label: "البالغين (<65 سنة ووزن ≥50 كجم بدون قصور كلوي)",
         doseMin: 30.0,
         doseMax: 30.0,
-        unit: "mg (fixed)",
+        unit: DOSE_UNITS.MG_FIXED,
         doseType: "fixed",
         isDefault: true,
-        note: "30 ملغ وريدياً أو عضلياً كل 6 ساعات حسب الحاجة (الحد الأقصى اليومي 120 ملغ/يوم، ولمدة أقصاها 5 أيام متتالية فقط من جميع الطرق)."
+        note: "30 ملغ وريدياً أو عضلياً كل 6 ساعات حسب الحاجة (الحد الأقصى اليومي 120 ملغ/يوم، ولمدة أقصاها 5 أيام متتالية فقط)."
       },
       {
         id: "high_risk_population",
         label: "الفئات عالية الخطورة (≥65 سنة، وزن <50 كجم، أو قصور كلوي)",
         doseMin: 15.0,
         doseMax: 15.0,
-        unit: "mg (fixed)",
+        unit: DOSE_UNITS.MG_FIXED,
         doseType: "fixed",
-        note: "15 ملغ وريدياً أو عضلياً كل 6 ساعات (الحد الأقصى اليومي 60 ملغ/يوم، ولمدة أقصاها 5 أيام)."
+        note: "15 ملغ وريدياً أو عضلياً كل 6 ساعات (الحد الأقصى اليومي 60 ملغ/يوم، ولمدة أقصاها 5 أيام متتالية)."
       }
     ],
     warnings: [
-      "يثبط تراكم الصفائح الدموية ويزيد وقت النزف؛ يجب تجنبه أو استخدامه بحذر شديد عندما تكون مخاطر النزف الجراحي غير مقبولة أو يتطلب الإجراء إرقاءً دقيقاً وصارماً.",
+      "يثبط تراكم الصفائح الدموية ويزيد وقت النزف؛ يجب تجنبه عندما تكون مخاطر النزف الجراحي غير مقبولة.",
       "خطر حدوث قصور كلوي حاد ناتج عن تثبيط البروستاغلاندينات الكلوية، خصوصاً في حالات نقص السوائل والتجفاف (Hypovolemia).",
       "الاستخدام محدد بمدة أقصاها 5 أيام متتالية فقط لتجنب القرحات والنزف الهضمي والسمية الكلوية."
     ],
@@ -826,18 +785,8 @@ export const analgesiaData = [
       "الحساسية المفرطة المعروفة للأسبرين أو مضادات NSAIDs الأخرى."
     ],
     references: [
-      {
-        type: "regulatory",
-        organization: "FDA",
-        title: "Toradol (Ketorolac Tromethamine) Injection Boxed Warning & Label",
-        year: "2023"
-      },
-      {
-        type: "textbook",
-        organization: "Morgan & Mikhail",
-        title: "Clinical Anesthesiology, 7th Ed. — NSAIDs & Perioperative Bleeding",
-        year: "2022"
-      }
+      { type: "regulatory", organization: "FDA", title: "Toradol (Ketorolac Tromethamine) Injection Boxed Warning & Label", year: "2023" },
+      { type: "textbook", organization: "Morgan & Mikhail", title: "Clinical Anesthesiology, 7th Ed. — NSAIDs & Perioperative Bleeding", year: "2022" }
     ]
   },
 
@@ -858,16 +807,17 @@ export const analgesiaData = [
       requiresAirwayReady: false,
       requiresRespiratoryMonitoring: false
     },
+    clinicalFlags: ["cv_thrombotic_risk", "gi_ulcer_risk", "deep_im_only"],
     indications: [
-      "تسكين الألم الحاد بعد العمليات الجراحية كجزء من التسكين متعدد الوسائط.",
-      "علاج المغص الكلوي والمراري الحاد.",
-      "علاج الالتهاب والتورم الحاد المرافق للإجراءات الجراحية والعظمية."
+      { id: "standard_parenteral", label: { ar: "تسكين الألم الحاد بعد العمليات الجراحية وعلاج المغص الكلوي", en: "Acute postoperative pain and acute renal/biliary colic" } }
     ],
     routes: ["IM (Deep)", "IV Infusion"],
-    weightScalar: "Fixed dose (Adults)",
-    obesityDosingNotes: "جرعة محددة ثابتة للبالغين؛ لا تُحسب بضرب الوزن لتفادي السمية الكلوية والوعائية.",
-    concentrations: [
-      { value: 25, unit: "mg/mL", label: "25 mg/mL (أمبولة 75 ملغ في 3 مل)", isDefault: true }
+    weightPolicy: {
+      preferred: "TBW",
+      note: "جرعة محددة ثابتة للبالغين؛ لا تُحسب بضرب الوزن لتفادي السمية الكلوية والوعائية."
+    },
+    presentations: [
+      { value: 25, concentration: 25, unit: DOSE_UNITS.MG_PER_ML, label: "25 mg/mL (أمبولة 75 ملغ في 3 مل)", isDefault: true }
     ],
     pharmacodynamics: {
       onset: "15 – 30 دقيقة",
@@ -877,8 +827,8 @@ export const analgesiaData = [
     administration: {
       route: "IM / IV Infusion",
       method: "infusion_or_deep_im",
-      pushSpeed: "حقن عضلي عميق في الربع العلوي الخارجي للإلية. للإعطاء الوريدي: يجب تخفيف 75 ملغ في 100-500 مل سالاين والتسريب على مدى 30 إلى 120 دقيقة.",
-      dilution: "لا يُحقن وريدياً كدفعة سريعة (IV Bolus) غير مخففة لتفادي الألم الشديد والتهيج الوعائي."
+      pushSpeed: "حقن عضلي عميق في الإلية. للإعطاء الوريدي: يجب تخفيف 75 ملغ في 100-500 مل سالاين والتسريب على مدى 30 إلى 120 دقيقة.",
+      dilutionProtocol: "لا يُحقن وريدياً كدفعة سريعة (IV Bolus) غير مخففة لتفادي الألم الشديد والتهيج الوعائي."
     },
     clinicalContexts: [
       {
@@ -886,14 +836,14 @@ export const analgesiaData = [
         label: "الجرعة الوريدية بالتسريب أو العضلية (Standard Parenteral Dose)",
         doseMin: 75.0,
         doseMax: 75.0,
-        unit: "mg (fixed)",
-        doseType: "fixed_infusion",
+        unit: DOSE_UNITS.MG_FIXED,
+        doseType: "fixed",
         isDefault: true,
-        note: "75 ملغ بالتسريب الوريدي البطيء على مدى 30-120 دقيقة أو عضلياً عميقاً (الحد الأقصى 150 ملغ في 24 ساعة، ولمدة علاج حقني لا تتجاوز يومين)."
+        note: "75 ملغ بالتسريب الوريدي البطيء على مدى 30-120 دقيقة أو عضلياً عميقاً (الحد الأقصى 150 ملغ في 24 ساعة، ولمدة لا تتجاوز يومين)."
       }
     ],
     warnings: [
-      "يرفع احتمالية المخاطر الخثارية القلبية الوعائية (Cardiovascular Thrombotic Events)؛ يُستخدم بأقل جرعة فعالة ولأقصر مدة ممكنة.",
+      "يرفع احتمالية المخاطر الخثارية القلبية الوعائية؛ يُستخدم بأقل جرعة فعالة ولأقصر مدة ممكنة.",
       "خطر النزف والتقرح الهضمي وتثبيط التروية الكلوية لدى المرضى الذين يعانون من نقص السوائل.",
       "الحقن العضلي يجب أن يكون عميقاً جداً لتجنب تلف الأنسجة والأعصاب المحيطية."
     ],
@@ -903,18 +853,8 @@ export const analgesiaData = [
       "مرضى الربو المحرض بمضادات الالتهاب غير الستيرويدية."
     ],
     references: [
-      {
-        type: "regulatory",
-        organization: "eMC",
-        title: "Voltarol (Diclofenac Sodium) 75mg/3ml Injection SmPC",
-        year: "2024"
-      },
-      {
-        type: "textbook",
-        organization: "Oxford",
-        title: "Oxford Handbook of Anaesthesia, 5th Ed. — Non-Opioid Analgesics",
-        year: "2022"
-      }
+      { type: "regulatory", organization: "eMC", title: "Voltarol (Diclofenac Sodium) 75mg/3ml Injection SmPC", year: "2024" },
+      { type: "textbook", organization: "Oxford", title: "Oxford Handbook of Anaesthesia, 5th Ed. — Non-Opioid Analgesics", year: "2022" }
     ]
   },
 
@@ -935,16 +875,17 @@ export const analgesiaData = [
       requiresAirwayReady: false,
       requiresRespiratoryMonitoring: false
     },
+    clinicalFlags: ["cox2_selective", "sulfa_allergy_risk", "cabg_contraindicated"],
     indications: [
-      "تسكين الألم الحاد بعد العمليات الجراحية عبر التثبيط الانتقائي لأنزيم (COX-2 Selective Inhibitor).",
-      "تسكين الألم الجراحي مع تأثير أقل على وظيفة الصفائح الدموية مقارنة بـ NSAIDs غير الانتقائية.",
-      "تقليل استهلاك الأفيونات في جراحات العظام والجراحة العامة الكبرى."
+      { id: "adult_standard", label: { ar: "تسكين الألم الحاد بعد العمليات الجراحية عبر التثبيط الانتقائي لـ COX-2", en: "Short-term management of acute postoperative pain (COX-2 selective)" } }
     ],
     routes: ["IV", "IM"],
-    weightScalar: "Fixed dose (Adults)",
-    obesityDosingNotes: "جرعة قياسية ثابتة للبالغين 40 ملغ وريدياً دون الحاجة لتعديل الجرعة في السمنة.",
-    concentrations: [
-      { value: 20, unit: "mg/mL", label: "20 mg/mL (فيال 40 ملغ يُحل في 2 مل سالاين)", isDefault: true }
+    weightPolicy: {
+      preferred: "TBW",
+      note: "جرعة قياسية ثابتة للبالغين 40 ملغ وريدياً دون الحاجة لتعديل الجرعة في السمنة."
+    },
+    presentations: [
+      { value: 20, concentration: 20, unit: DOSE_UNITS.MG_PER_ML, label: "20 mg/mL (فيال 40 ملغ يُحل في 2 مل سالاين)", isDefault: true }
     ],
     pharmacodynamics: {
       onset: "7 – 14 دقيقة",
@@ -955,7 +896,7 @@ export const analgesiaData = [
       route: "IV / IM",
       method: "push_or_im",
       pushSpeed: "حقن وريدي مباشر سريع أو بطيء، أو حقن عضلي عميق.",
-      dilution: "يأتي كمسحوق جاف (40 ملغ) ويُحل في 2 مل سالاين 0.9% ليصبح بتركيز 20 mg/mL."
+      dilutionProtocol: "يأتي كمسحوق جاف (40 ملغ) ويُحل في 2 مل سالاين 0.9% ليصبح بتركيز 20 mg/mL."
     },
     clinicalContexts: [
       {
@@ -963,7 +904,7 @@ export const analgesiaData = [
         label: "الجرعة القياسية للبالغين (Standard Adult Dose)",
         doseMin: 40.0,
         doseMax: 40.0,
-        unit: "mg (fixed)",
+        unit: DOSE_UNITS.MG_FIXED,
         doseType: "fixed",
         isDefault: true,
         note: "40 ملغ وريدياً أو عضلياً، تليها 20-40 ملغ كل 6-12 ساعة حسب الحاجة (الحد الأقصى 80 ملغ/يوم)."
@@ -973,7 +914,7 @@ export const analgesiaData = [
         label: "كبار السن (≥65 سنة) أو وزن <50 كجم",
         doseMin: 20.0,
         doseMax: 20.0,
-        unit: "mg (fixed)",
+        unit: DOSE_UNITS.MG_FIXED,
         doseType: "fixed",
         note: "20 ملغ وريدياً كل 12 ساعة (الحد الأقصى 40 ملغ/يوم)."
       }
@@ -990,18 +931,8 @@ export const analgesiaData = [
       "القرحة الهضمية النشطة أو القصور الكبدي الشديد."
     ],
     references: [
-      {
-        type: "regulatory",
-        organization: "EMA",
-        title: "Dynastat (Parecoxib Sodium) SmPC",
-        year: "2024"
-      },
-      {
-        type: "textbook",
-        organization: "Miller",
-        title: "Miller's Anesthesia, 9th Ed. — Selective COX-2 Inhibitors",
-        year: "2020"
-      }
+      { type: "regulatory", organization: "EMA", title: "Dynastat (Parecoxib Sodium) SmPC", year: "2024" },
+      { type: "textbook", organization: "Miller", title: "Miller's Anesthesia, 9th Ed. — Selective COX-2 Inhibitors", year: "2020" }
     ]
   },
 
@@ -1025,17 +956,19 @@ export const analgesiaData = [
       requiresAirwayReady: true,
       requiresRespiratoryMonitoring: true
     },
+    clinicalFlags: ["anti_hyperalgesia", "opioid_sparing", "bronchodilator"],
     indications: [
-      "تثبيط مستقبلات NMDA لمنع التحسس المركزي للألم وتخفيف فرط التحسس (Anti-Hyperalgesia).",
-      "تسكين الألم الحاد الشديد وتقليل استهلاك الأفيونات كجزء من التسكين متعدد الوسائط.",
-      "تسكين آلام المرضى المعتادين على الأفيونات (Opioid-Tolerant Patients) وآلام الجراحات الكبرى المؤلمة."
+      { id: "low_dose_bolus", label: { ar: "تثبيط مستقبلات NMDA ومنع فرط التحسس للألم وتقليل استهلاك الأفيونات", en: "NMDA antagonism, anti-hyperalgesia, and opioid-sparing multimodal analgesia" } },
+      { id: "low_dose_infusion", label: { ar: "تسريب مسكن مستمر منخفض الجرعة أثناء الجراحات الكبرى", en: "Low-dose intraoperative analgesic continuous infusion" } }
     ],
     routes: ["IV Bolus", "IV Infusion"],
-    weightScalar: "Weight-based; consider adjusted/ideal body weight in obesity according to institutional protocol",
-    obesityDosingNotes: "يُعاير بحسب بروتوكول المؤسسة والوزن المثالي أو المعدل في السمنة لتقليل الآثار النفسية غير المرغوبة ومنع تأخر الإفاقة.",
-    concentrations: [
-      { value: 10, unit: "mg/mL", label: "10 mg/mL (تخفيف 50 ملغ في 5 مل سالاين)", isDefault: true },
-      { value: 50, unit: "mg/mL", label: "50 mg/mL (أمبولة أصلية 500 ملغ في 10 مل)" }
+    weightPolicy: {
+      preferred: "IBW",
+      note: "يُعاير بحسب بروتوكول المؤسسة والوزن المثالي أو المعدل في السمنة لتقليل الآثار النفسية ومنع تأخر الإفاقة."
+    },
+    presentations: [
+      { value: 10, concentration: 10, unit: DOSE_UNITS.MG_PER_ML, label: "10 mg/mL (تخفيف 50 ملغ في 5 مل سالاين 0.9%)", isDefault: true },
+      { value: 50, concentration: 50, unit: DOSE_UNITS.MG_PER_ML, label: "50 mg/mL (أمبولة أصلية 500 ملغ في 10 مل)" }
     ],
     pharmacodynamics: {
       onset: "30 – 60 ثانية (وريدياً)",
@@ -1046,52 +979,44 @@ export const analgesiaData = [
       route: "IV",
       method: "slow_push_or_infusion",
       pushSpeed: "حقن وريدي بطيء على مدى دقيقة إلى دقيقتين.",
-      dilution: "يُسحب 1 مل (50 ملغ) ويُخفف في 4 مل سالاين ليصبح التركيز 10 mg/mL لتسهيل المعايرة الدقيقة للجرعات المسكنة المنخفضة."
+      dilutionProtocol: "يُسحب 1 مل (50 ملغ) ويُخفف في 4 مل سالاين ليصبح التركيز 10 mg/mL لتسهيل المعايرة الدقيقة للجرعات المسكنة المنخفضة."
     },
     clinicalContexts: [
       {
         id: "low_dose_bolus",
-        label: "جرعة مسكنة منخفضة محيطة بالجراحة (Low-dose perioperative analgesic bolus)",
+        label: "جرعة مسكنة منخفضة محيطة بالجراحة (Low-Dose Analgesic Bolus)",
         doseMin: 0.15,
         doseMax: 0.35,
-        unit: "mg/kg",
+        unit: DOSE_UNITS.MG_PER_KG,
         doseType: "weight_bolus",
         isDefault: true,
-        note: "تُعطى بعد التحريض وقبل الشق الجراحي أو أثناء الجراحة؛ الجرعات تحت التخديرية (<0.35 mg/kg) نادراً ما تسبب اضطرابات نفسية عند الإفاقة."
+        note: "تُعطى بعد التحريض وقبل الشق الجراحي؛ الجرعات تحت التخديرية (<0.35 mg/kg) نادراً ما تسبب اضطرابات نفسية عند الإفاقة."
       },
       {
         id: "low_dose_infusion",
-        label: "تسريب مسكن مستمر أثناء الجراحة (Low-Dose Infusion)",
+        label: "جرعة المداومة بالتسريب المسكن المستمر (Low-Dose Maintenance Infusion)",
         doseMin: 0.1,
         doseMax: 0.2,
-        unit: "mg/kg/h",
+        unit: DOSE_UNITS.MG_PER_KG_HOUR,
         doseType: "weight_infusion_hour",
         note: "تسريب وريدي منخفض الجرعة أثناء العمليات الكبرى؛ يُوقف قبل نهاية العملية بنحو 30 دقيقة لتجنب تأخر الإفاقة."
       }
     ],
     warnings: [
       "بالجرعات المسكنة المنخفضة تكون الآثار النفسية نادرة، لكنها قد تحدث وتتطلب التقييم والمراقبة السريرية.",
-      "يحافظ على التنفس التلقائي ومنعكسات المجرى الهوائي بشكل أفضل من معظم أدوية التخدير، لكن هذا ليس ضماناً مطلقاً؛ فقد يحدث انقطاع نفس أو انسداد مجرى الهواء أو تشنج الحنجرة خاصة مع الحقن السريع.",
+      "يحافظ على التنفس التلقائي ومنعكسات المجرى الهوائي بشكل أفضل من معظم أدوية التخدير، لكن هذا ليس ضماناً مطلقاً؛ قد يحدث انقطاع نفس عند الحقن السريع.",
       "تنبيه الجهاز العصبي الودي قد يرفع النبض وضغط الدم بشكل طفيف عبر تحرير الكاتيكولامينات."
     ],
     contraindications: [
       "ارتفاع ضغط الدم الشديد غير المنضبط أو داء الشريان التاجي غير المستقر.",
       "الذهان الحاد والاضطرابات النفسية الشديدة النشطة.",
-      "يُستخدم بحذر وتقييم سريري دقيق ومراقبة مستمرة في المرضى الذين يعانون من أمراض داخل القحف أو ارتفاع الضغط داخل الجمجمة."
+      "يُستخدم بحذر وتقييم سريري دقيق في المرضى الذين يعانون من ارتفاع الضغط داخل الجمجمة."
     ],
     references: [
-      {
-        type: "guideline",
-        organization: "ASRA-AAPM",
-        title: "Consensus Guidelines on the Use of Intravenous Ketamine for Acute Pain Management",
-        year: "2018"
-      },
-      {
-        type: "textbook",
-        organization: "Miller",
-        title: "Miller's Anesthesia, 9th Ed. — NMDA Antagonists & Adjuvant Analgesia",
-        year: "2020"
-      }
+      { type: "guideline", organization: "ASRA-AAPM", title: "Consensus Guidelines on the Use of Intravenous Ketamine for Acute Pain Management", year: "2018" },
+      { type: "textbook", organization: "Miller", title: "Miller's Anesthesia, 9th Ed. — NMDA Antagonists & Adjuvant Analgesia", year: "2020" }
     ]
   }
 ];
+
+export default analgesiaData;
