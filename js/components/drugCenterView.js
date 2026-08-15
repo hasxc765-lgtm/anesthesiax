@@ -1,6 +1,8 @@
 /**
  * AnesthesiaX — Drug Center & Clinical Dosing View Component
  * File: js/components/drugCenterView.js
+ * 
+ * Production-Grade View Layer (Zero-Crash Defensive UI)
  */
 
 import { drugsData } from "../data/drugs.js";
@@ -99,7 +101,6 @@ export function renderDrugCenterView() {
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-          <!-- Weight Input -->
           <div>
             <label class="block font-bold text-slate-700 mb-1">الوزن الفعلي <bdi dir="ltr">(kg)</bdi>:</label>
             <div class="flex gap-1">
@@ -108,13 +109,11 @@ export function renderDrugCenterView() {
             </div>
           </div>
 
-          <!-- Age Input -->
           <div>
             <label class="block font-bold text-slate-700 mb-1">العمر <bdi dir="ltr">(Years)</bdi>:</label>
             <input type="number" id="dcPatientAge" min="0" max="120" placeholder="مثال: 40" value="${state.patientAge}" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold font-mono text-center text-slate-900 focus:bg-white focus:border-blue-500 focus:outline-none">
           </div>
 
-          <!-- Safety Confirmations -->
           <div class="flex flex-col justify-end space-y-1.5 pt-1">
             <label class="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-700 font-semibold">
               <input type="checkbox" id="dcAllergyCheck" ${state.allergyReviewed ? 'checked' : ''} class="rounded text-blue-600">
@@ -170,23 +169,29 @@ export function renderDrugCenterView() {
   `;
 }
 
-// =============================================================
+// =============================================================================
 // 4. DRUG CARDS BUILDER
-// =============================================================
+// =============================================================================
 
 function getFilteredDrugs() {
-  const allDrugs = drugsData.all || [];
-  const cleanQuery = state.searchQuery.toLowerCase().trim();
+  const allDrugs = (drugsData && Array.isArray(drugsData.all)) ? drugsData.all : [];
+  const cleanQuery = (state.searchQuery || "").toLowerCase().trim();
 
   return allDrugs.filter(drug => {
+    if (!drug) return false;
+    
     const matchesTriad = state.activeTriadFilter === "ALL" || drug.classification?.triadComponent === state.activeTriadFilter;
     if (!matchesTriad) return false;
 
     if (!cleanQuery) return true;
 
-    const genericMatch = drug.name?.generic?.toLowerCase().includes(cleanQuery);
-    const arabicMatch = drug.name?.arabic?.toLowerCase().includes(cleanQuery);
-    const brandMatch = Array.isArray(drug.name?.brandNames) && drug.name.brandNames.some(b => b.toLowerCase().includes(cleanQuery));
+    const genericName = typeof drug.name === "object" ? (drug.name.generic || "") : (drug.name || "");
+    const arabicName = typeof drug.name === "object" ? (drug.name.arabic || "") : "";
+    const brandNames = (drug.name && Array.isArray(drug.name.brandNames)) ? drug.name.brandNames : [];
+
+    const genericMatch = genericName.toLowerCase().includes(cleanQuery);
+    const arabicMatch = arabicName.toLowerCase().includes(cleanQuery);
+    const brandMatch = brandNames.some(b => String(b).toLowerCase().includes(cleanQuery));
     const indicationMatch = Array.isArray(drug.indications) && drug.indications.some(ind => {
       const text = typeof ind === "string" ? ind : (ind.label?.en + " " + ind.label?.ar);
       return text?.toLowerCase().includes(cleanQuery);
@@ -213,6 +218,8 @@ function renderDrugCardsListHTML() {
 }
 
 function renderSingleDrugCardHTML(drug) {
+  if (!drug) return "";
+
   const patient = {
     weight: parseFloat(state.patientWeight) || 0,
     age: parseFloat(state.patientAge) || 40,
@@ -221,15 +228,27 @@ function renderSingleDrugCardHTML(drug) {
     monitoringConfirmed: state.monitoringConfirmed
   };
 
-  const contexts = drug.clinicalContexts || [];
+  const genericName = typeof drug.name === "object" ? (drug.name.generic || drug.id) : (drug.name || drug.id);
+  const arabicName = typeof drug.name === "object" ? (drug.name.arabic || "") : "";
+  const brandNames = (drug.name && Array.isArray(drug.name.brandNames)) ? drug.name.brandNames : [];
+
+  const contexts = Array.isArray(drug.clinicalContexts) ? drug.clinicalContexts : [];
   const selectedContextId = state.selectedContexts[drug.id] || (contexts.find(c => c.isDefault)?.id) || contexts[0]?.id;
-  const activeContext = contexts.find(c => c.id === selectedContextId) || contexts[0];
+  const activeContext = contexts.find(c => c.id === selectedContextId) || contexts[0] || null;
 
-  const presentations = drug.presentations || drug.concentrations || [];
+  const presentations = Array.isArray(drug.presentations) ? drug.presentations : (Array.isArray(drug.concentrations) ? drug.concentrations : []);
   const selectedPresIndex = state.selectedPresentations[drug.id] !== undefined ? state.selectedPresentations[drug.id] : 0;
-  const activePresentation = presentations[selectedPresIndex] || presentations[0];
+  const activePresentation = presentations[selectedPresIndex] || presentations[0] || null;
 
-  const calcResult = calculateDose(drug, selectedContextId, patient, activePresentation);
+  // الحساب السريري الآمن
+  let calcResult = null;
+  try {
+    if (typeof calculateDose === "function") {
+      calcResult = calculateDose(drug, selectedContextId, patient, activePresentation);
+    }
+  } catch (e) {
+    console.error(`Calculation error for drug [${drug.id}]:`, e);
+  }
 
   const isAccAdminOpen = state.openAccordions[`acc-admin-${drug.id}`];
   const isAccWarnOpen = state.openAccordions[`acc-warn-${drug.id}`];
@@ -242,24 +261,24 @@ function renderSingleDrugCardHTML(drug) {
       <div class="flex justify-between items-start gap-2 border-b border-slate-100 pb-2.5">
         <div>
           <div class="flex items-center gap-2 flex-wrap">
-            <h3 class="font-bold text-base text-slate-900">${drug.name.generic}</h3>
+            <h3 class="font-bold text-base text-slate-900">${genericName}</h3>
             ${drug.safety?.highRiskMedication ? `
               <span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded border border-rose-300 text-[10px] font-bold font-mono">⚠️ HIGH ALERT</span>
             ` : ''}
           </div>
           <p class="text-xs text-slate-500 mt-0.5">
-            <strong class="text-blue-900">${drug.name.arabic}</strong>
-            ${drug.name.brandNames?.length ? ` • <bdi dir="ltr" class="font-mono text-slate-400">(${drug.name.brandNames.join(', ')})</bdi>` : ''}
+            <strong class="text-blue-900">${arabicName}</strong>
+            ${brandNames.length ? ` • <bdi dir="ltr" class="font-mono text-slate-400">(${brandNames.join(', ')})</bdi>` : ''}
           </p>
         </div>
 
         <span class="text-[10px] px-2 py-1 bg-slate-100 text-slate-700 rounded-lg border font-mono">
-          ${drug.classification?.category || drug.classification?.triadComponent}
+          ${drug.classification?.category || drug.classification?.triadComponent || "تخدير"}
         </span>
       </div>
 
       <!-- CLINICAL FLAGS BADGES -->
-      ${drug.clinicalFlags?.length ? `
+      ${(Array.isArray(drug.clinicalFlags) && drug.clinicalFlags.length > 0) ? `
         <div class="flex flex-wrap gap-1">
           ${drug.clinicalFlags.map(flag => `
             <span class="px-2 py-0.5 rounded text-[10px] border ${getFlagBadgeStyle(flag)}">
@@ -295,7 +314,7 @@ function renderSingleDrugCardHTML(drug) {
             <label class="block font-bold text-slate-700 mb-1">تركيز الأمبولة / المحلول المتاح:</label>
             <select data-drug-id="${drug.id}" class="presentation-select w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-xs text-slate-900 focus:bg-white focus:outline-none font-mono" dir="ltr">
               ${presentations.map((p, idx) => `
-                <option value="${idx}" ${idx === selectedPresIndex ? 'selected' : ''}>${p.label}</option>
+                <option value="${idx}" ${idx === selectedPresIndex ? 'selected' : ''}>${p.label || `${p.concentration || p.value} ${p.unit || ''}`}</option>
               `).join('')}
             </select>
           </div>
@@ -340,7 +359,7 @@ function renderSingleDrugCardHTML(drug) {
           <span class="text-slate-400 text-[10px]">${isAccWarnOpen ? '▲' : '▼'}</span>
         </button>
         <div id="acc-warn-${drug.id}" class="${isAccWarnOpen ? '' : 'hidden'} p-3 bg-rose-50/50 rounded-xl space-y-2 border border-rose-200 text-[11px] text-rose-950 leading-relaxed">
-          ${drug.warnings?.length ? `
+          ${(Array.isArray(drug.warnings) && drug.warnings.length > 0) ? `
             <div>
               <strong class="text-rose-900 block mb-1">التحذيرات السريرية:</strong>
               <ul class="list-disc list-inside space-y-1 text-slate-800">
@@ -348,7 +367,7 @@ function renderSingleDrugCardHTML(drug) {
               </ul>
             </div>
           ` : ''}
-          ${drug.contraindications?.length ? `
+          ${(Array.isArray(drug.contraindications) && drug.contraindications.length > 0) ? `
             <div class="pt-1 border-t border-rose-200/60">
               <strong class="text-rose-950 block mb-1">موانع الاستعمال (Contraindications):</strong>
               <ul class="list-disc list-inside space-y-1 text-rose-900 font-semibold">
@@ -378,19 +397,24 @@ function renderSingleDrugCardHTML(drug) {
 function renderCalculationResultBoxHTML(calcResult, patient) {
   if (!calcResult) return '';
 
+  // 1) حالة الحجب بسبب نقص المدخلات
   if (calcResult.status === "BLOCKED") {
+    const errorText = (calcResult.blockingErrors && calcResult.blockingErrors.length) 
+      ? calcResult.blockingErrors.join(" • ") 
+      : (calcResult.error || "يرجى استكمال المدخلات");
     return `
       <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs space-y-1">
         <div class="font-bold flex items-center gap-1">
           <span>🛑</span>
-          <span>الحساب معلق (يرجى استكمال المدخلات):</span>
+          <span>الحساب معلق:</span>
         </div>
-        <p class="text-[11px] text-amber-800">${calcResult.blockingErrors?.join(" • ") || calcResult.error}</p>
+        <p class="text-[11px] text-amber-800">${errorText}</p>
       </div>
     `;
   }
 
-  if (calcResult.macResults) {
+  // 2) نتائج الغازات الاستنشاقية (MAC)
+  if (calcResult.macResults && calcResult.macResults.adjusted1Mac) {
     const mac = calcResult.macResults;
     return `
       <div class="p-3 bg-indigo-50/80 border border-indigo-200 rounded-xl space-y-2 text-xs">
@@ -398,57 +422,69 @@ function renderCalculationResultBoxHTML(calcResult, patient) {
           <span>💨 تركيز الـ MAC المصحح لعمر (${mac.patientAge} سنة):</span>
           <span class="font-mono text-indigo-700 text-sm" dir="ltr">1.0 MAC = ${mac.adjusted1Mac}%</span>
         </div>
-        <div class="flex justify-between items-center text-[11px] text-indigo-900">
-          <span>النطاق الجراحي الاسترشادي (0.5 – 1.3 MAC):</span>
-          <span class="font-mono font-bold" dir="ltr">${mac.guidanceRange.min05Mac}% – ${mac.guidanceRange.max13Mac}%</span>
-        </div>
-        <p class="text-[10px] text-indigo-700 italic">${mac.clinicalModifiersNote}</p>
+        ${mac.guidanceRange ? `
+          <div class="flex justify-between items-center text-[11px] text-indigo-900">
+            <span>النطاق الجراحي الاسترشادي (0.5 – 1.3 MAC):</span>
+            <span class="font-mono font-bold" dir="ltr">${mac.guidanceRange.min05Mac}% – ${mac.guidanceRange.max13Mac}%</span>
+          </div>
+        ` : ''}
+        <p class="text-[10px] text-indigo-700 italic">${mac.clinicalModifiersNote || ''}</p>
       </div>
     `;
   }
 
+  // 3) نتائج المشاركة الدوائية (Pairing)
   if (calcResult.pairingResult) {
     const pair = calcResult.pairingResult;
     return `
       <div class="p-3 bg-teal-50 border border-teal-200 rounded-xl space-y-1.5 text-xs">
         <div class="font-bold text-teal-950 flex justify-between items-center">
           <span>💉 جرعة الغليكوبيرولات المقترنة مع (${pair.primaryDoseGivenMg} mg نيوستيغمين):</span>
-          <span class="font-mono text-teal-800 text-sm" dir="ltr">${calcResult.calculatedDose.min} mg</span>
+          <span class="font-mono text-teal-800 text-sm" dir="ltr">${calcResult.calculatedDose?.min || ''} mg</span>
         </div>
         <div class="flex justify-between items-center text-emerald-800 font-bold border-t border-teal-200/60 pt-1">
           <span>الحجم المطلوب سحبه بالسرنجة:</span>
-          <span class="font-mono text-sm" dir="ltr">${calcResult.calculatedVolume.display}</span>
+          <span class="font-mono text-sm" dir="ltr">${calcResult.calculatedVolume?.display || ''}</span>
         </div>
-        <p class="text-[10px] text-teal-700 font-mono">${pair.pairingRatio}</p>
+        <p class="text-[10px] text-teal-700 font-mono">${pair.pairingRatio || ''}</p>
       </div>
     `;
   }
 
+  // 4) نتائج الجرعات الدفعية والتسريب
   const dose = calcResult.calculatedDose;
   const vol = calcResult.calculatedVolume;
   const pump = calcResult.infusionPumpRate;
   const ceiling = calcResult.safetyLimits?.localAnestheticCeiling;
 
-  const doseDisplay = dose?.min === dose?.max ? `${dose.min} ${dose.unit}` : `${dose?.min} – ${dose?.max} ${dose?.unit}`;
+  if (!dose && !vol && !pump && !ceiling) return '';
+
+  let doseDisplay = '';
+  if (dose) {
+    doseDisplay = (dose.min === dose.max) ? `${dose.min} ${dose.unit || ''}` : `${dose.min} – ${dose.max} ${dose.unit || ''}`;
+  }
 
   return `
     <div class="p-3 bg-blue-50/80 border border-blue-200 rounded-xl space-y-2 text-xs">
-      <div class="flex justify-between items-center font-bold text-blue-950">
-        <span>🎯 الجرعة المحسوبة ${patient.weight > 0 ? `(${calcResult.weightResolution.selectedWeight} kg ${calcResult.weightResolution.actualTypeUsed})` : ''}:</span>
-        <span class="font-mono text-blue-900 text-sm" dir="ltr">${doseDisplay}</span>
-      </div>
+      
+      ${dose ? `
+        <div class="flex justify-between items-center font-bold text-blue-950">
+          <span>🎯 الجرعة المحسوبة ${patient.weight > 0 && calcResult.weightResolution ? `(${calcResult.weightResolution.selectedWeight} kg ${calcResult.weightResolution.actualTypeUsed})` : ''}:</span>
+          <span class="font-mono text-blue-900 text-sm" dir="ltr">${doseDisplay}</span>
+        </div>
+      ` : ''}
 
       ${vol ? `
         <div class="flex justify-between items-center font-bold text-emerald-800 border-t border-blue-200/60 pt-1.5">
           <span>💉 حجم السرنجة المطلوب:</span>
-          <span class="font-mono text-sm" dir="ltr">${vol.display}</span>
+          <span class="font-mono text-sm" dir="ltr">${vol.display || `${vol.min} mL`}</span>
         </div>
       ` : ''}
 
       ${pump ? `
         <div class="flex justify-between items-center font-bold text-purple-900 border-t border-blue-200/60 pt-1.5">
           <span>⚡ سرعة مضخة المحاقن (Pump Rate):</span>
-          <span class="font-mono text-sm" dir="ltr">${pump.display}</span>
+          <span class="font-mono text-sm" dir="ltr">${pump.display || `${pump.minMlPerHour} mL/hr`}</span>
         </div>
       ` : ''}
 
@@ -464,6 +500,7 @@ function renderCalculationResultBoxHTML(calcResult, patient) {
           ⚠️ تم تقييد الجرعة القصوى بالسقف الأماني المعتمد للنيوستيغمين (5.0 mg).
         </div>
       ` : ''}
+
     </div>
   `;
 }
