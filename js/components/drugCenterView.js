@@ -2,7 +2,7 @@
  * AnesthesiaX — Drug Center & Clinical Dosing View Component
  * File: js/components/drugCenterView.js
  * 
- * High-Performance View Layer (Instant 0ms Mount & Compact Cards)
+ * High-Performance View Layer (Ultra-Clean & Compact Accordion Layout)
  */
 
 import { drugsData } from "../data/drugs.js";
@@ -75,7 +75,10 @@ function getFlagLabel(flag) {
     last_risk: "🧪 خطر سمية التخدير الموضعي (LAST)",
     pure_vasoconstrictor: "💉 قابض وعائي نقي",
     central_line_preferred: "🎯 يفضل خط وريدي مركزي",
-    ponv_prophylaxis: "✨ وقاية من القيء"
+    ponv_prophylaxis: "✨ وقاية من القيء",
+    analgesics: "مسكن أفيوني",
+    hypnotics: "منوم وريدي",
+    sedatives: "مهدئ ومزيل قلق"
   };
   return labels[normalized] || flag;
 }
@@ -301,10 +304,11 @@ function renderSingleDrugCardHTML(drug) {
     console.error(`Calculation error for drug [${drug.id}]:`, e);
   }
 
+  const isAccPdkOpen = state.openAccordions[`acc-pdk-${drug.id}`];
   const isAccWarnOpen = state.openAccordions[`acc-warn-${drug.id}`];
   const isAccNmtOpen = state.openAccordions[`acc-nmt-${drug.id}`];
 
-  // استخراج زمن بدء المفعول ومدة التأثير بدقة
+  // استخراج زمن بدء المفعول ومدة التأثير
   const onset = drug.pharmacodynamics?.onset || drug.onset || (drug.macModel ? "سريع (استنشاقي)" : "سريع");
   const duration = drug.pharmacodynamics?.clinicalDuration || drug.pharmacodynamics?.duration || drug.duration || (drug.macModel ? "حسب الإيقاف" : "N/A");
 
@@ -386,23 +390,29 @@ function renderSingleDrugCardHTML(drug) {
       <!-- LIVE CALCULATION RESULT BOX (ACTION BOXES) -->
       ${renderCalculationResultBoxHTML(calcResult, patient)}
 
-      <!-- ⏱️ شريط زمن بدء المفعول ومدة التأثير الأنيق والمدمج -->
-      <div class="p-2 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-[11px] font-mono text-slate-800">
-        <div class="flex items-center gap-1">
-          <span class="text-blue-700 font-sans font-bold">⏱️ بدء المفعول (Onset):</span>
-          <strong class="text-slate-900 font-extrabold" dir="ltr">${onset}</strong>
-        </div>
-        <div class="flex items-center gap-1 border-r border-slate-200 pr-2">
-          <span class="text-indigo-700 font-sans font-bold">⏳ مدة التأثير (Duration):</span>
-          <strong class="text-slate-900 font-extrabold" dir="ltr">${duration}</strong>
-        </div>
-      </div>
-
-      <!-- COLLAPSIBLE ACCORDIONS (التحذيرات وموانع الاستعمال) -->
-      <div class="border-t border-slate-100 pt-1 space-y-1 text-xs">
+      <!-- COLLAPSIBLE ACCORDIONS (نظام الأزرار المنسدلة النظيف) -->
+      <div class="border-t border-slate-100 pt-2 space-y-1.5 text-xs">
         
-        <!-- زر التحذيرات وموانع الاستعمال -->
-        <button type="button" data-acc-id="acc-warn-${drug.id}" class="acc-toggle-btn w-full font-bold text-rose-700 py-1.5 hover:underline flex justify-between items-center text-right cursor-pointer">
+        <!-- 1. زر زمن بدء المفعول ومدة التأثير (Accordion) -->
+        <button type="button" data-acc-id="acc-pdk-${drug.id}" class="acc-toggle-btn w-full font-bold text-blue-700 py-1 hover:underline flex justify-between items-center text-right cursor-pointer">
+          <span>⏱️ زمن بدء المفعول ومدة التأثير (Onset & Duration)</span>
+          <span class="text-slate-400 text-[10px]">${isAccPdkOpen ? '▲' : '▼'}</span>
+        </button>
+        <div id="acc-pdk-${drug.id}" class="${isAccPdkOpen ? '' : 'hidden'} p-2.5 bg-blue-50/50 rounded-xl border border-blue-200 space-y-1.5 text-[11px] text-blue-950">
+          <div class="grid grid-cols-2 gap-2 font-mono text-xs">
+            <div class="bg-white p-2 rounded-lg border border-blue-100">
+              <span class="text-slate-500 font-sans font-bold block text-[10px]">بدء المفعول (Onset):</span>
+              <strong class="text-slate-900" dir="ltr">${onset}</strong>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-blue-100">
+              <span class="text-slate-500 font-sans font-bold block text-[10px]">مدة التأثير (Duration):</span>
+              <strong class="text-slate-900" dir="ltr">${duration}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. زر التحذيرات وموانع الاستعمال -->
+        <button type="button" data-acc-id="acc-warn-${drug.id}" class="acc-toggle-btn w-full font-bold text-rose-700 py-1 hover:underline flex justify-between items-center text-right cursor-pointer">
           <span>⚠️ التحذيرات وموانع الاستعمال (Contraindications)</span>
           <span class="text-slate-400 text-[10px]">${isAccWarnOpen ? '▲' : '▼'}</span>
         </button>
@@ -425,9 +435,9 @@ function renderSingleDrugCardHTML(drug) {
           ` : ''}
         </div>
 
-        <!-- زر المراقبة العضلية NMT للمرخيات -->
+        <!-- 3. زر المراقبة العضلية NMT للمرخيات -->
         ${drug.neuromuscularMonitoring || drug.classification?.triadComponent === "muscle_relaxation" ? `
-          <button type="button" data-acc-id="acc-nmt-${drug.id}" class="acc-toggle-btn w-full font-bold text-amber-800 py-1.5 hover:underline flex justify-between items-center text-right cursor-pointer">
+          <button type="button" data-acc-id="acc-nmt-${drug.id}" class="acc-toggle-btn w-full font-bold text-amber-800 py-1 hover:underline flex justify-between items-center text-right cursor-pointer">
             <span>⚡ المراقبة العضلية وتوصيات الإفاقة (NMT Monitoring)</span>
             <span class="text-slate-400 text-[10px]">${isAccNmtOpen ? '▲' : '▼'}</span>
           </button>
