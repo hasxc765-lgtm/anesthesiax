@@ -1,0 +1,626 @@
+/**
+ * AnesthesiaX — Drug Center & Clinical Dosing View Component
+ * Component: Drug Center UI (Triad-based Categorization & Reactive Calculations)
+ * File: js/components/drugCenterView.js
+ *
+ * Architecture:
+ * ES Module View Layer.
+ * Renders interactive drug cards, triad filters, patient parameter inputs,
+ * live syringe volume calculations, and safety ceiling alerts without DOM destroy.
+ *
+ * Consumes:
+ * - ../data/drugsData.js
+ * - ../logic/doseCalculator.js
+ * - ../data/common/doseUnits.js
+ */
+
+import { drugsData } from "../data/drugsData.js";
+import { calculateDose } from "../logic/doseCalculator.js";
+import { DOSE_UNITS } from "../data/common/doseUnits.js";
+
+// =============================================================================
+// 1. MODULE LOCAL RUNTIME STATE
+// =============================================================================
+
+const state = {
+  activeTriadFilter: "ALL", // "ALL" | "analgesia" | "hypnosis" | "muscle_relaxation" | "supporting"
+  searchQuery: "",
+  patientWeight: "",
+  patientAge: "40",
+  patientGender: "male",
+  allergyReviewed: true,
+  monitoringConfirmed: true,
+  
+  // حفظ الخيارات التفاعلية لكل دواء { drugId: contextId / presentationIndex }
+  selectedContexts: {},
+  selectedPresentations: {},
+  openAccordions: {} // { "acc-admin-fentanyl": true }
+};
+
+// =============================================================================
+// 2. HELPER BADGE STYLES & FORMATTERS
+// =============================================================================
+
+function getFlagBadgeStyle(flag) {
+  switch (flag) {
+    case "black_box_warning":
+    case "mh_trigger":
+    case "hyperkalemia_risk":
+      return "bg-rose-100 text-rose-800 border-rose-300 font-bold";
+    case "resp_depression":
+    case "hypotension_risk":
+    case "cardiotoxicity_high_risk":
+      return "bg-amber-100 text-amber-900 border-amber-300 font-bold";
+    case "reversal_with_sugammadex":
+    case "hofmann_elimination":
+    case "hemodynamic_stability":
+      return "bg-emerald-100 text-emerald-800 border-emerald-300";
+    default:
+      return "bg-blue-100 text-blue-800 border-blue-200";
+  }
+}
+
+function getFlagLabel(flag) {
+  const labels = {
+    black_box_warning: "⚠️ Black Box Warning",
+    mh_trigger: "🔥 محرض فرط الحرارة الخبيث (MH Trigger)",
+    hyperkalemia_risk: "⚡ خطر فرط البوتاسيوم",
+    resp_depression: "🫁 تثبيط تنفسي",
+    hypotension_risk: "📉 خطر هبوط الضغط",
+    reversal_with_sugammadex: "🔄 يُعكس بالسوجاماديكس",
+    hofmann_elimination: "🧬 استقلاب هوفمان (آمن كلوياً/كبداً)",
+    hemodynamic_stability: "🛡️ ثبات قلبي وعائي",
+    cardiotoxicity_high_risk: "💔 سمية قلبية عالية",
+    last_risk: "🧪 خطر سمية التخدير الموضعي (LAST)",
+    pure_vasoconstrictor: "💉 قابض وعائي نقي",
+    central_line_preferred: "🎯 يفضل خط وريدي مركزي",
+    ponv_prophylaxis: "✨ وقاية من القيء"
+  };
+  return labels[flag] || flag;
+}
+
+// =============================================================================
+// 3. MAIN RENDER FUNCTION
+// =============================================================================
+
+export function renderDrugCenterView() {
+  return `
+    <div class="space-y-4 max-w-3xl mx-auto font-sans dir-rtl text-right" id="drugCenterContainer">
+
+      <div class="p-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-2xl shadow-md flex justify-between items-center">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">💊</span>
+            <h2 class="font-bold text-base">مركز أدوية التخدير وحاسبة السرنجات</h2>
+          </div>
+          <p class="text-[11px] opacity-80 mt-0.5" dir="ltr">Anesthesia Triad & Emergency Drug Decision Support</p>
+        </div>
+        <button id="btnBackToDashboard" type="button" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+          الرئيسية ↩
+        </button>
+      </div>
+
+      <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+          <strong class="text-slate-800 text-xs flex items-center gap-1.5">
+            <span>⚖️</span>
+            <span>بيانات المريض لحساب الجرعات والحجم التلقائي:</span>
+          </strong>
+          <span class="text-[10px] text-slate-400 font-mono">Live CDS Engine</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">الوزن الفعلي <bdi dir="ltr">(kg)</bdi>:</label>
+            <div class="flex gap-1">
+              <input type="number" id="dcPatientWeight" min="1" max="300" step="0.5" placeholder="مثال: 70" value="${state.patientWeight}" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold font-mono text-center text-slate-900 focus:bg-white focus:border-blue-500 focus:outline-none">
+              <button id="btnClearWeight" type="button" class="px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-[10px] font-bold">مسح</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">العمر <bdi dir="ltr">(Years)</bdi>:</label>
+            <input type="number" id="dcPatientAge" min="0" max="120" placeholder="مثال: 40" value="${state.patientAge}" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold font-mono text-center text-slate-900 focus:bg-white focus:border-blue-500 focus:outline-none">
+          </div>
+
+          <div class="flex flex-col justify-end space-y-1.5 pt-1">
+            <label class="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-700 font-semibold">
+              <input type="checkbox" id="dcAllergyCheck" ${state.allergyReviewed ? 'checked' : ''} class="rounded text-blue-600">
+              <span>السجل التحسسي مراجع</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-700 font-semibold">
+              <input type="checkbox" id="dcMonitoringCheck" ${state.monitoringConfirmed ? 'checked' : ''} class="rounded text-blue-600">
+              <span>أجهزة المراقبة جاهزة</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <div class="relative">
+          <input type="text" id="dcSearchInput" value="${state.searchQuery}" placeholder="🔍 ابحث عن دواء (Propofol, Fentanyl, Rocuronium, Ephedrine, بوبيفاكايين)..." class="w-full p-3 bg-white border-2 border-blue-500/80 rounded-2xl text-xs font-bold shadow-sm focus:outline-none text-slate-900">
+          ${state.searchQuery ? `
+            <button id="btnClearSearch" type="button" class="absolute left-3 top-3 text-slate-400 hover:text-slate-600 font-bold text-xs">✕</button>
+          ` : ''}
+        </div>
+
+        <div class="flex gap-1 overflow-x-auto pb-1 text-xs font-bold" id="triadFiltersContainer">
+          <button data-triad="ALL" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'ALL' ? 'bg-slate-900 text-white border-slate-900 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
+            🌐 جميع الأدوية
+          </button>
+          <button data-triad="analgesia" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'analgesia' ? 'bg-rose-700 text-white border-rose-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
+            💉 1. تسكين الألم (Analgesia)
+          </button>
+          <button data-triad="hypnosis" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'hypnosis' ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
+            💤 2. التنويم والغازات (Hypnosis)
+          </button>
+          <button data-triad="muscle_relaxation" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'muscle_relaxation' ? 'bg-amber-700 text-white border-amber-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
+            ⚡ 3. إرخاء العضلات والعكس (Relaxation)
+          </button>
+          <button data-triad="supporting" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'supporting' ? 'bg-teal-700 text-white border-teal-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
+            🛡️ 4. الطوارئ والتخدير النصفي (Supporting)
+          </button>
+        </div>
+      </div>
+
+      <div id="drugCardsListContainer" class="space-y-3">
+        ${renderDrugCardsListHTML()}
+      </div>
+
+      <div class="p-3 bg-slate-100 border border-slate-200 rounded-2xl text-[11px] text-slate-600 leading-relaxed text-center">
+        <strong>⚠️ تنبيه سريري وقانوني:</strong> جميع الجرعات والأحجام المحسوبة هي لأغراض الاسترشاد الأكاديمي والتدريبي؛ يجب دائماً مطابقة تركيز الأمبولة الفعلي وحالة المريض السريرية قبل الحقن.
+      </div>
+
+    </div>
+  `;
+}
+
+// =============================================================================
+// 4. DRUG CARDS BUILDER
+// =============================================================================
+
+function getFilteredDrugs() {
+  const allDrugs = drugsData.all || [];
+  const cleanQuery = state.searchQuery.toLowerCase().trim();
+
+  return allDrugs.filter(drug => {
+    // 1. Triad Filter
+    const matchesTriad = state.activeTriadFilter === "ALL" || drug.classification?.triadComponent === state.activeTriadFilter;
+    if (!matchesTriad) return false;
+
+    // 2. Search Query Match
+    if (!cleanQuery) return true;
+
+    const genericMatch = drug.name?.generic?.toLowerCase().includes(cleanQuery);
+    const arabicMatch = drug.name?.arabic?.toLowerCase().includes(cleanQuery);
+    const brandMatch = Array.isArray(drug.name?.brandNames) && drug.name.brandNames.some(b => b.toLowerCase().includes(cleanQuery));
+    const indicationMatch = Array.isArray(drug.indications) && drug.indications.some(ind => {
+      const text = typeof ind === "string" ? ind : (ind.label?.en + " " + ind.label?.ar);
+      return text?.toLowerCase().includes(cleanQuery);
+    });
+
+    return genericMatch || arabicMatch || brandMatch || indicationMatch;
+  });
+}
+
+function renderDrugCardsListHTML() {
+  const filtered = getFilteredDrugs();
+
+  if (filtered.length === 0) {
+    return `
+      <div class="p-8 bg-white border border-slate-200 rounded-2xl text-center text-slate-400 text-xs space-y-2">
+        <span class="text-3xl block">🔍</span>
+        <strong class="text-slate-600 block">لا توجد أدوية مطابقة للبحث أو الفئة المحددة.</strong>
+        <p class="text-[11px]">جرب البحث باسم علمي أو تجاري آخر (مثل: Fentanyl, Propofol, Ketamine).</p>
+      </div>
+    `;
+  }
+
+  return filtered.map(drug => renderSingleDrugCardHTML(drug)).join("");
+}
+
+function renderSingleDrugCardHTML(drug) {
+  const patient = {
+    weight: parseFloat(state.patientWeight) || 0,
+    age: parseFloat(state.patientAge) || 40,
+    gender: state.patientGender,
+    allergyReviewed: state.allergyReviewed,
+    monitoringConfirmed: state.monitoringConfirmed
+  };
+
+  const contexts = drug.clinicalContexts || [];
+  const selectedContextId = state.selectedContexts[drug.id] || (contexts.find(c => c.isDefault)?.id) || contexts[0]?.id;
+  const activeContext = contexts.find(c => c.id === selectedContextId) || contexts[0];
+
+  // Presentations / Concentrations
+  const presentations = drug.presentations || drug.concentrations || [];
+  const selectedPresIndex = state.selectedPresentations[drug.id] !== undefined ? state.selectedPresentations[drug.id] : 0;
+  const activePresentation = presentations[selectedPresIndex] || presentations[0];
+
+  // Calculate live dose via Logic Engine
+  const calcResult = calculateDose(drug, selectedContextId, patient, activePresentation);
+
+  // Accordion open states
+  const isAccAdminOpen = state.openAccordions[`acc-admin-${drug.id}`];
+  const isAccWarnOpen = state.openAccordions[`acc-warn-${drug.id}`];
+  const isAccNmtOpen = state.openAccordions[`acc-nmt-${drug.id}`];
+
+  return `
+    <article class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3 transition hover:border-slate-300" id="card-${drug.id}">
+      
+      <div class="flex justify-between items-start gap-2 border-b border-slate-100 pb-2.5">
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="font-bold text-base text-slate-900">${drug.name.generic}</h3>
+            ${drug.safety?.highRiskMedication ? `
+              <span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded border border-rose-300 text-[10px] font-bold font-mono">⚠️ HIGH ALERT</span>
+            ` : ''}
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">
+            <strong class="text-blue-900">${drug.name.arabic}</strong>
+            ${drug.name.brandNames?.length ? ` • <bdi dir="ltr" class="font-mono text-slate-400">(${drug.name.brandNames.join(', ')})</bdi>` : ''}
+          </p>
+        </div>
+
+        <span class="text-[10px] px-2 py-1 bg-slate-100 text-slate-700 rounded-lg border font-mono">
+          ${drug.classification?.category || drug.classification?.triadComponent}
+        </span>
+      </div>
+
+      ${drug.clinicalFlags?.length ? `
+        <div class="flex flex-wrap gap-1">
+          ${drug.clinicalFlags.map(flag => `
+            <span class="px-2 py-0.5 rounded text-[10px] border ${getFlagBadgeStyle(flag)}">
+              ${getFlagLabel(flag)}
+            </span>
+          `).join('')}
+        </div>
+      ` : ''}
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+        
+        ${contexts.length > 0 ? `
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">السياق السريري والاستطباب:</label>
+            <select data-drug-id="${drug.id}" class="context-select w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-xs text-slate-900 focus:bg-white focus:outline-none">
+              ${contexts.map(c => `
+                <option value="${c.id}" ${c.id === selectedContextId ? 'selected' : ''}>${c.label}</option>
+              `).join('')}
+            </select>
+          </div>
+        ` : `
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">النموذج السريري:</label>
+            <div class="p-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs">
+              ${drug.macModel ? '💨 استنشاق عبر المبخرة (Age-Adjusted MAC)' : 'استخدام سريري مرجعي'}
+            </div>
+          </div>
+        `}
+
+        ${presentations.length > 0 ? `
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">تركيز الأمبولة / المحلول المتاح:</label>
+            <select data-drug-id="${drug.id}" class="presentation-select w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-xs text-slate-900 focus:bg-white focus:outline-none font-mono" dir="ltr">
+              ${presentations.map((p, idx) => `
+                <option value="${idx}" ${idx === selectedPresIndex ? 'selected' : ''}>${p.label}</option>
+              `).join('')}
+            </select>
+          </div>
+        ` : `
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">العبوة:</label>
+            <div class="p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-700 text-xs" dir="ltr">
+              100% Volatile Liquid
+            </div>
+          </div>
+        `}
+
+      </div>
+
+      ${renderCalculationResultBoxHTML(calcResult, patient)}
+
+      <div class="border-t border-slate-100 pt-2 space-y-1 text-xs">
+        
+        <button type="button" data-acc-id="acc-admin-${drug.id}" class="acc-toggle-btn w-full font-bold text-blue-700 py-1.5 hover:underline flex justify-between items-center text-right cursor-pointer">
+          <span>💉 طريقة الإعطاء، التخفيف، وحركية الدواء</span>
+          <span class="text-slate-400 text-[10px]">${isAccAdminOpen ? '▲' : '▼'}</span>
+        </button>
+        <div id="acc-admin-${drug.id}" class="${isAccAdminOpen ? '' : 'hidden'} p-3 bg-slate-50 rounded-xl space-y-2 border border-slate-200 text-[11px] text-slate-800 leading-relaxed">
+          ${activeContext?.administration?.method ? `
+            <p><strong>طريقة الحقن:</strong> <span class="font-mono text-slate-900">${activeContext.administration.method}</span></p>
+          ` : ''}
+          ${activeContext?.administration?.dilutionRequirement || activeContext?.administration?.dilutionProtocol ? `
+            <p class="text-indigo-900 bg-indigo-50/70 p-2 rounded border border-indigo-200">
+              <strong>تعليمات التخفيف:</strong> ${activeContext.administration.dilutionRequirement || activeContext.administration.dilutionProtocol}
+            </p>
+          ` : ''}
+          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/60 font-mono text-[10px]">
+            <div><span class="text-slate-500">Onset:</span> <strong>${drug.pharmacodynamics?.onset || 'سريع'}</strong></div>
+            <div><span class="text-slate-500">Duration:</span> <strong>${drug.pharmacodynamics?.clinicalDuration || drug.pharmacodynamics?.duration || 'N/A'}</strong></div>
+          </div>
+        </div>
+
+        <button type="button" data-acc-id="acc-warn-${drug.id}" class="acc-toggle-btn w-full font-bold text-rose-700 py-1.5 hover:underline flex justify-between items-center text-right cursor-pointer">
+          <span>⚠️ التحذيرات وموانع الاستعمال</span>
+          <span class="text-slate-400 text-[10px]">${isAccWarnOpen ? '▲' : '▼'}</span>
+        </button>
+        <div id="acc-warn-${drug.id}" class="${isAccWarnOpen ? '' : 'hidden'} p-3 bg-rose-50/50 rounded-xl space-y-2 border border-rose-200 text-[11px] text-rose-950 leading-relaxed">
+          ${drug.warnings?.length ? `
+            <div>
+              <strong class="text-rose-900 block mb-1">التحذيرات السريرية:</strong>
+              <ul class="list-disc list-inside space-y-1 text-slate-800">
+                ${drug.warnings.map(w => `<li>${w}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+          ${drug.contraindications?.length ? `
+            <div class="pt-1 border-t border-rose-200/60">
+              <strong class="text-rose-950 block mb-1">موانع الاستعمال (Contraindications):</strong>
+              <ul class="list-disc list-inside space-y-1 text-rose-900 font-semibold">
+                ${drug.contraindications.map(c => `<li>${c}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+        </div>
+
+        ${drug.neuromuscularMonitoring || drug.classification?.triadComponent === "muscle_relaxation" ? `
+          <button type="button" data-acc-id="acc-nmt-${drug.id}" class="acc-toggle-btn w-full font-bold text-amber-800 py-1.5 hover:underline flex justify-between items-center text-right cursor-pointer">
+            <span>⚡ المراقبة العضلية وتوصيات الإفاقة (NMT Monitoring)</span>
+            <span class="text-slate-400 text-[10px]">${isAccNmtOpen ? '▲' : '▼'}</span>
+          </button>
+          <div id="acc-nmt-${drug.id}" class="${isAccNmtOpen ? '' : 'hidden'} p-3 bg-amber-50/60 rounded-xl space-y-1.5 border border-amber-200 text-[11px] text-amber-950 leading-relaxed">
+            <p><strong>نمط المراقبة الموصى به:</strong> <bdi dir="ltr" class="font-mono font-bold">${drug.neuromuscularMonitoring?.modality || 'Quantitative NMT'}</bdi></p>
+            <p><strong>معيار نزع الأنبوب الآمن (Extubation Target):</strong> <bdi dir="ltr" class="font-mono font-bold text-emerald-800">TOF Ratio ≥ 0.9</bdi></p>
+          </div>
+        ` : ''}
+
+      </div>
+
+    </article>
+  `;
+}
+
+function renderCalculationResultBoxHTML(calcResult, patient) {
+  if (!calcResult) return '';
+
+  // 1) حالة الحجب بسبب نقص المدخلات الإلزامية (Hard Safety Gate)
+  if (calcResult.status === "BLOCKED") {
+    return `
+      <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs space-y-1">
+        <div class="font-bold flex items-center gap-1">
+          <span>🛑</span>
+          <span>الحساب معلق (يرجى استكمال المدخلات):</span>
+        </div>
+        <p class="text-[11px] text-amber-800">${calcResult.blockingErrors?.join(" • ") || calcResult.error}</p>
+      </div>
+    `;
+  }
+
+  // 2) نتائج الغازات الاستنشاقية (Age-adjusted MAC)
+  if (calcResult.macResults) {
+    const mac = calcResult.macResults;
+    return `
+      <div class="p-3 bg-indigo-50/80 border border-indigo-200 rounded-xl space-y-2 text-xs">
+        <div class="flex justify-between items-center border-b border-indigo-200/60 pb-1.5 font-bold text-indigo-950">
+          <span>💨 تركيز الـ MAC المصحح لعمر (${mac.patientAge} سنة):</span>
+          <span class="font-mono text-indigo-700 text-sm" dir="ltr">1.0 MAC = ${mac.adjusted1Mac}%</span>
+        </div>
+        <div class="flex justify-between items-center text-[11px] text-indigo-900">
+          <span>النطاق الجراحي الاسترشادي (0.5 – 1.3 MAC):</span>
+          <span class="font-mono font-bold" dir="ltr">${mac.guidanceRange.min05Mac}% – ${mac.guidanceRange.max13Mac}%</span>
+        </div>
+        <p class="text-[10px] text-indigo-700 italic">${mac.clinicalModifiersNote}</p>
+      </div>
+    `;
+  }
+
+  // 3) نتائج المشاركة الدوائية (Pairing)
+  if (calcResult.pairingResult) {
+    const pair = calcResult.pairingResult;
+    return `
+      <div class="p-3 bg-teal-50 border border-teal-200 rounded-xl space-y-1.5 text-xs">
+        <div class="font-bold text-teal-950 flex justify-between items-center">
+          <span>💉 جرعة الغليكوبيرولات المقترنة مع (${pair.primaryDoseGivenMg} mg نيوستيغمين):</span>
+          <span class="font-mono text-teal-800 text-sm" dir="ltr">${calcResult.calculatedDose.min} mg</span>
+        </div>
+        <div class="flex justify-between items-center text-emerald-800 font-bold border-t border-teal-200/60 pt-1">
+          <span>الحجم المطلوب سحبه بالسرنجة:</span>
+          <span class="font-mono text-sm" dir="ltr">${calcResult.calculatedVolume.display}</span>
+        </div>
+        <p class="text-[10px] text-teal-700 font-mono">${pair.pairingRatio}</p>
+      </div>
+    `;
+  }
+
+  // 4) نتائج الجرعات الدفعية والتسريب العادي
+  const dose = calcResult.calculatedDose;
+  const vol = calcResult.calculatedVolume;
+  const pump = calcResult.infusionPumpRate;
+  const ceiling = calcResult.safetyLimits?.localAnestheticCeiling;
+
+  const doseDisplay = dose?.min === dose?.max ? `${dose.min} ${dose.unit}` : `${dose?.min} – ${dose?.max} ${dose?.unit}`;
+
+  return `
+    <div class="p-3 bg-blue-50/80 border border-blue-200 rounded-xl space-y-2 text-xs">
+      
+      <div class="flex justify-between items-center font-bold text-blue-950">
+        <span>🎯 الجرعة المحسوبة ${patient.weight > 0 ? `(${calcResult.weightResolution.selectedWeight} kg ${calcResult.weightResolution.actualTypeUsed})` : ''}:</span>
+        <span class="font-mono text-blue-900 text-sm" dir="ltr">${doseDisplay}</span>
+      </div>
+
+      ${vol ? `
+        <div class="flex justify-between items-center font-bold text-emerald-800 border-t border-blue-200/60 pt-1.5">
+          <span>💉 حجم السرنجة المطلوب:</span>
+          <span class="font-mono text-sm" dir="ltr">${vol.display}</span>
+        </div>
+      ` : ''}
+
+      ${pump ? `
+        <div class="flex justify-between items-center font-bold text-purple-900 border-t border-blue-200/60 pt-1.5">
+          <span>⚡ سرعة مضخة المحاقن (Pump Rate):</span>
+          <span class="font-mono text-sm" dir="ltr">${pump.display}</span>
+        </div>
+      ` : ''}
+
+      ${ceiling ? `
+        <div class="mt-1.5 p-2 bg-amber-100/70 border border-amber-300 rounded-lg text-[11px] text-amber-950 font-semibold flex justify-between items-center">
+          <span>🛑 السقف الحجمي الآمن للرشح:</span>
+          <span class="font-mono font-bold" dir="ltr">${ceiling.maxSafeDoseMg} mg (${ceiling.maxSafeVolumeMl} mL max)</span>
+        </div>
+      ` : ''}
+
+      ${calcResult.safetyLimits?.clamped ? `
+        <div class="p-1.5 bg-rose-100 text-rose-900 rounded border border-rose-300 text-[10px] font-bold">
+          ⚠️ تم تقييد الجرعة القصوى بالسقف الأماني المعتمد للنيوستيغمين (5.0 mg).
+        </div>
+      ` : ''}
+
+    </div>
+  `;
+}
+
+// =============================================================================
+// 5. TARGETED LIVE DOM UPDATES & EVENT BINDINGS
+// =============================================================================
+
+function updateLiveDrugCards() {
+  const container = document.getElementById("drugCardsListContainer");
+  if (container) {
+    container.innerHTML = renderDrugCardsListHTML();
+    bindDrugCardInternalEvents();
+  }
+}
+
+function bindDrugCardInternalEvents() {
+  const container = document.getElementById("drugCenterContainer");
+  if (!container) return;
+
+  // Context Selectors
+  container.querySelectorAll(".context-select").forEach(sel => {
+    sel.addEventListener("change", e => {
+      const drugId = e.target.getAttribute("data-drug-id");
+      state.selectedContexts[drugId] = e.target.value;
+      updateLiveDrugCards();
+    });
+  });
+
+  // Presentation Selectors
+  container.querySelectorAll(".presentation-select").forEach(sel => {
+    sel.addEventListener("change", e => {
+      const drugId = e.target.getAttribute("data-drug-id");
+      state.selectedPresentations[drugId] = parseInt(e.target.value, 10);
+      updateLiveDrugCards();
+    });
+  });
+
+  // Accordion Toggles
+  container.querySelectorAll(".acc-toggle-btn").forEach(btn => {
+    btn.addEventListener("click", e => {
+      const accId = e.currentTarget.getAttribute("data-acc-id");
+      state.openAccordions[accId] = !state.openAccordions[accId];
+      
+      const targetDiv = document.getElementById(accId);
+      if (targetDiv) {
+        targetDiv.classList.toggle("hidden");
+        const arrow = e.currentTarget.querySelector("span:last-child");
+        if (arrow) arrow.textContent = state.openAccordions[accId] ? "▲" : "▼";
+      }
+    });
+  });
+}
+
+export function initDrugCenterEvents() {
+  const container = document.getElementById("drugCenterContainer");
+  if (!container) return;
+
+  // Back Button
+  const btnBack = document.getElementById("btnBackToDashboard");
+  if (btnBack) {
+    btnBack.addEventListener("click", () => {
+      if (typeof window.navigateTo === "function") window.navigateTo("dashboard");
+    });
+  }
+
+  // Patient Weight Input (Targeted update without focus loss)
+  const weightInput = document.getElementById("dcPatientWeight");
+  if (weightInput) {
+    weightInput.addEventListener("input", e => {
+      state.patientWeight = e.target.value;
+      updateLiveDrugCards();
+    });
+  }
+
+  // Clear Weight Button
+  const btnClearWeight = document.getElementById("btnClearWeight");
+  if (btnClearWeight && weightInput) {
+    btnClearWeight.addEventListener("click", () => {
+      state.patientWeight = "";
+      weightInput.value = "";
+      updateLiveDrugCards();
+    });
+  }
+
+  // Patient Age Input
+  const ageInput = document.getElementById("dcPatientAge");
+  if (ageInput) {
+    ageInput.addEventListener("input", e => {
+      state.patientAge = e.target.value;
+      updateLiveDrugCards();
+    });
+  }
+
+  // Safety Confirmation Checkboxes
+  const allergyCheck = document.getElementById("dcAllergyCheck");
+  if (allergyCheck) {
+    allergyCheck.addEventListener("change", e => {
+      state.allergyReviewed = e.target.checked;
+      updateLiveDrugCards();
+    });
+  }
+
+  const monitoringCheck = document.getElementById("dcMonitoringCheck");
+  if (monitoringCheck) {
+    monitoringCheck.addEventListener("change", e => {
+      state.monitoringConfirmed = e.target.checked;
+      updateLiveDrugCards();
+    });
+  }
+
+  // Search Input
+  const searchInput = document.getElementById("dcSearchInput");
+  if (searchInput) {
+    searchInput.addEventListener("input", e => {
+      state.searchQuery = e.target.value;
+      updateLiveDrugCards();
+    });
+  }
+
+  // Clear Search Button
+  const btnClearSearch = document.getElementById("btnClearSearch");
+  if (btnClearSearch && searchInput) {
+    btnClearSearch.addEventListener("click", () => {
+      state.searchQuery = "";
+      searchInput.value = "";
+      updateLiveDrugCards();
+    });
+  }
+
+  // Triad Tabs Switching
+  container.querySelectorAll(".triad-tab-btn").forEach(btn => {
+    btn.addEventListener("click", e => {
+      state.activeTriadFilter = e.currentTarget.getAttribute("data-triad");
+      reRenderFull();
+    });
+  });
+
+  // Bind initial card selectors & accordions
+  bindDrugCardInternalEvents();
+}
+
+function reRenderFull() {
+  const appContent = document.getElementById("app-content");
+  if (appContent) {
+    appContent.innerHTML = renderDrugCenterView();
+    initDrugCenterEvents();
+  }
+}
