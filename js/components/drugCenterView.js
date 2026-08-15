@@ -24,7 +24,7 @@ const state = {
   selectedContexts: {},
   selectedPresentations: {},
   openAccordions: {},
-  renderedLimit: 12 // التحميل التدريجي السريع لأول 12 بطاقة ثم إكمال البقية
+  renderedLimit: 12
 };
 
 // =============================================================================
@@ -234,7 +234,20 @@ function renderSingleDrugCardHTML(drug) {
   const brandNames = (drug.name && Array.isArray(drug.name.brandNames)) ? drug.name.brandNames : [];
 
   const contexts = Array.isArray(drug.clinicalContexts) ? drug.clinicalContexts : [];
-  const selectedContextId = state.selectedContexts[drug.id] || (contexts.find(c => c.isDefault)?.id) || contexts[0]?.id;
+  
+  // توجيه تلقائي ذكي بحسب العمر للبروبوفول
+  let defaultContextId = (contexts.find(c => c.isDefault)?.id) || contexts[0]?.id;
+  if (drug.id === "propofol" && patient.age) {
+    if (patient.age < 16) {
+      defaultContextId = contexts.find(c => c.id === "pediatric_induction")?.id || defaultContextId;
+    } else if (patient.age >= 65) {
+      defaultContextId = contexts.find(c => c.id === "elderly_debilitated_induction")?.id || defaultContextId;
+    } else {
+      defaultContextId = contexts.find(c => c.id === "healthy_adult_induction")?.id || defaultContextId;
+    }
+  }
+
+  const selectedContextId = state.selectedContexts[drug.id] || defaultContextId;
   const activeContext = contexts.find(c => c.id === selectedContextId) || contexts[0] || null;
 
   const presentations = Array.isArray(drug.presentations) ? drug.presentations : (Array.isArray(drug.concentrations) ? drug.concentrations : []);
@@ -349,8 +362,8 @@ function renderSingleDrugCardHTML(drug) {
             </p>
           ` : ''}
           <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/60 font-mono text-[10px]">
-            <div><span class="text-slate-500">Onset:</span> <strong>${drug.pharmacodynamics?.onset || 'سريع'}</strong></div>
-            <div><span class="text-slate-500">Duration:</span> <strong>${drug.pharmacodynamics?.clinicalDuration || drug.pharmacodynamics?.duration || 'N/A'}</strong></div>
+            <div><span class="text-slate-500">زمن بدء المفعول (Onset):</span> <strong>${drug.pharmacodynamics?.onset || 'سريع'}</strong></div>
+            <div><span class="text-slate-500">مدة التأثير (Duration):</span> <strong>${drug.pharmacodynamics?.clinicalDuration || drug.pharmacodynamics?.duration || 'N/A'}</strong></div>
           </div>
         </div>
 
@@ -466,28 +479,28 @@ function renderCalculationResultBoxHTML(calcResult, patient) {
       ${dose ? `
         <div class="flex justify-between items-center font-bold text-blue-950">
           <span>🎯 الجرعة المحسوبة ${patient.weight > 0 && calcResult.weightResolution ? `(${calcResult.weightResolution.selectedWeight} kg ${calcResult.weightResolution.actualTypeUsed})` : ''}:</span>
-          <span class="font-mono text-blue-900 text-sm" dir="ltr">${doseDisplay}</span>
+          <span class="font-mono text-blue-900 text-sm" dir="ltr"><bdi>${doseDisplay}</bdi></span>
         </div>
       ` : ''}
 
       ${vol ? `
         <div class="flex justify-between items-center font-bold text-emerald-800 border-t border-blue-200/60 pt-1.5">
           <span>💉 حجم السرنجة المطلوب:</span>
-          <span class="font-mono text-sm" dir="ltr">${vol.display || `${vol.min} mL`}</span>
+          <span class="font-mono text-sm" dir="ltr"><bdi>${vol.display || `${vol.min} mL`}</bdi></span>
         </div>
       ` : ''}
 
       ${pump ? `
         <div class="flex justify-between items-center font-bold text-purple-900 border-t border-blue-200/60 pt-1.5">
           <span>⚡ سرعة مضخة المحاقن (Pump Rate):</span>
-          <span class="font-mono text-sm" dir="ltr">${pump.display || `${pump.minMlPerHour} mL/hr`}</span>
+          <span class="font-mono text-sm" dir="ltr"><bdi>${pump.display || `${pump.minMlPerHour} mL/hr`}</bdi></span>
         </div>
       ` : ''}
 
       ${ceiling ? `
         <div class="mt-1.5 p-2 bg-amber-100/70 border border-amber-300 rounded-lg text-[11px] text-amber-950 font-semibold flex justify-between items-center">
           <span>🛑 السقف الحجمي الآمن للرشح:</span>
-          <span class="font-mono font-bold" dir="ltr">${ceiling.maxSafeDoseMg} mg (${ceiling.maxSafeVolumeMl} mL max)</span>
+          <span class="font-mono font-bold" dir="ltr"><bdi>${ceiling.maxSafeDoseMg} mg (${ceiling.maxSafeVolumeMl} mL max)</bdi></span>
         </div>
       ` : ''}
 
@@ -552,7 +565,6 @@ export function initDrugCenterEvents() {
   const container = document.getElementById("drugCenterContainer");
   if (!container) return;
 
-  // 1. فتح فوري بدون انتظار عبر requestAnimationFrame
   requestAnimationFrame(() => {
     updateLiveDrugCards();
   });
@@ -585,6 +597,8 @@ export function initDrugCenterEvents() {
   if (ageInput) {
     ageInput.addEventListener("input", e => {
       state.patientAge = e.target.value;
+      // إعادة ضبط السياق المختار للبروبوفول ليتغير تلقائياً مع العمر ما لم يختر المستخدم سياقاً مخصصاً يدوياً
+      delete state.selectedContexts["propofol"];
       updateLiveDrugCards();
     });
   }
