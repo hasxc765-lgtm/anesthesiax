@@ -1,20 +1,28 @@
 @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
 
 /* ==========================================================================
    1. الإعدادات العامة
    ========================================================================== */
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Tajawal', 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   direction: rtl;
   text-align: right;
   background-color: #f8fafc;
   color: #0f172a;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* إجبار النص داخل حقول الكتابة والقوائم على الظهور باللون الأسود الواضح */
+/* إجبار النص داخل حقول الكتابة والقوائم على الظهور باللون الأسود والخط الواضح */
 input, select, textarea {
   color: #0f172a !important;
   background-color: #ffffff !important;
+  font-family: 'Tajawal', 'Cairo', sans-serif;
+}
+
+.font-mono, input[type="number"], select.font-mono {
+  font-family: 'JetBrains Mono', monospace !important;
 }
 
 .cat-btn.active {
@@ -26,6 +34,8 @@ input, select, textarea {
 /* ==========================================================================
    2. معالجة انعكاس الأرقام والجرعات والأوقات (Bidi / LTR Isolation)
    ========================================================================== */
+bdi,
+.bdi,
 .ltr-text,
 .dose-value,
 .dose-range,
@@ -68,8 +78,8 @@ input, select, textarea {
 .collapsible-panel,
 .info-subpanel,
 .drug-details-panel {
-  direction: ltr !important;
-  text-align: left !important;
+  direction: rtl !important;
+  text-align: right !important;
   background-color: #f1f5f9 !important;
   border-radius: 0.75rem;
   padding: 0.85rem 1rem;
@@ -92,7 +102,10 @@ input, select, textarea {
   align-items: center;
   gap: 0.25rem;
 }
-/* إصلاح عام للوضع المظلم لجميع البطاقات والكروت */
+
+/* ==========================================================================
+   6. إصلاح عام للوضع المظلم لجميع البطاقات والكروت
+   ========================================================================== */
 .dark .bg-white {
   background-color: #0f172a !important; /* خلفية داكنة للبطاقات */
   color: #f8fafc !important;
@@ -118,8 +131,18 @@ input, select, textarea {
 }
 
 .dark input, 
-.dark select {
+.dark select,
+.dark textarea {
   background-color: #0f172a !important;
   color: #ffffff !important;
   border-color: #475569 !important;
+}
+
+.dark .expanded-panel,
+.dark .collapsible-panel,
+.dark .info-subpanel,
+.dark .drug-details-panel {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
 }
