@@ -6,8 +6,7 @@
  */
 
 import { store } from '../state/store.js';
-import { calculateAirwayParams } from '../logic/airwayCalculator.js';
-
+import { calculateAirwayParams } from '../calculators/airwayCalculator.js';
 export function renderAirwayView() {
   const savedWeight = store.state?.patientWeight || '';
   const savedAge = store.state?.patientAge || '';
