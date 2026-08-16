@@ -7,6 +7,54 @@
 import { pedsData } from "../data/pedsData.js";
 import { PedsCalculator } from "../calculators/pedsCalculator.js";
 
+// دالة مساعدة لعزل اتجاه نصوص التيوبات ومنع انعكاس الأقواس والأرقام
+function renderPedsEttBadge(airway, isCuffed = false) {
+  if (!airway) return `<span class="text-slate-400 font-mono">N/A</span>`;
+
+  const primary = isCuffed ? airway.primaryCuffed : airway.primaryUncuffed;
+  const backup = isCuffed ? airway.backupCuffed : airway.backupUncuffed;
+
+  if (primary && backup) {
+    const badgeStyle = isCuffed 
+      ? "bg-blue-100 text-blue-900 border-blue-200" 
+      : "bg-slate-100 text-slate-700 border-slate-200";
+    const primaryColor = isCuffed ? "text-blue-950" : "text-slate-900";
+
+    return `
+      <div class="flex items-center gap-1.5 justify-end flex-wrap">
+        <span class="text-[10px] ${badgeStyle} px-2 py-0.5 rounded-lg border font-sans font-medium flex items-center gap-1">
+          <span>احتياطي:</span>
+          <bdi dir="ltr" class="font-mono font-bold">${backup}</bdi>
+        </span>
+        <strong dir="ltr" class="font-mono ${primaryColor} text-sm font-extrabold">${primary} mm</strong>
+      </div>
+    `;
+  }
+
+  const str = isCuffed 
+    ? (airway.cuffedDisplay || (airway.cuffedSizeMm ? `${airway.cuffedSizeMm} mm` : "غير موصى به"))
+    : (airway.uncuffedDisplay || (airway.uncuffedSizeMm ? `${airway.uncuffedSizeMm} mm` : "N/A"));
+
+  const match = String(str).match(/^(.*?)\s*\(احتياطي:\s*(.*?)\)$/);
+  if (match) {
+    const p = match[1].trim();
+    const b = match[2].trim();
+    const badgeStyle = isCuffed ? "bg-blue-100 text-blue-900 border-blue-200" : "bg-slate-100 text-slate-700 border-slate-200";
+    const primaryColor = isCuffed ? "text-blue-950" : "text-slate-900";
+    return `
+      <div class="flex items-center gap-1.5 justify-end flex-wrap">
+        <span class="text-[10px] ${badgeStyle} px-2 py-0.5 rounded-lg border font-sans font-medium flex items-center gap-1">
+          <span>احتياطي:</span>
+          <bdi dir="ltr" class="font-mono font-bold">${b}</bdi>
+        </span>
+        <strong dir="ltr" class="font-mono ${primaryColor} text-sm font-extrabold">${p}</strong>
+      </div>
+    `;
+  }
+
+  return `<strong dir="ltr" class="font-mono text-slate-900 text-xs font-bold">${str}</strong>`;
+}
+
 export class PedsDashboard {
   constructor(containerId) {
     this.container = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
@@ -197,19 +245,16 @@ export class PedsDashboard {
       return `<div class="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-bold leading-relaxed">⚠️ ${errMsgs}</div>`;
     }
 
-    const cuffedDisplay = airway.cuffedDisplay || (airway.cuffedSizeMm ? `${airway.cuffedSizeMm} mm` : "غير موصى به");
-    const uncuffedDisplay = airway.uncuffedDisplay || (airway.uncuffedSizeMm ? `${airway.uncuffedSizeMm} mm` : "N/A");
-
     return `
       <div class="space-y-2.5 text-xs">
-        <div class="p-2.5 bg-blue-50/70 rounded-xl border border-blue-100 flex justify-between items-center">
-          <span class="font-bold text-blue-950">الأنبوب مع كاف <span dir="ltr" class="text-[10px] text-blue-700 font-normal">(Cuffed ID)</span>:</span>
-          <span class="text-blue-900 font-mono font-extrabold text-xs" dir="ltr">${cuffedDisplay}</span>
+        <div class="p-2.5 bg-blue-50/70 rounded-xl border border-blue-100 flex justify-between items-center gap-2">
+          <span class="font-bold text-blue-950 whitespace-nowrap">الأنبوب مع كاف <span dir="ltr" class="text-[10px] text-blue-700 font-normal">(Cuffed ID)</span>:</span>
+          ${renderPedsEttBadge(airway, true)}
         </div>
 
-        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
-          <span class="font-bold text-slate-700">الأنبوب بدون كاف <span dir="ltr" class="text-[10px] text-slate-400 font-normal">(Uncuffed ID)</span>:</span>
-          <span class="text-slate-900 font-mono font-bold text-xs" dir="ltr">${uncuffedDisplay}</span>
+        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center gap-2">
+          <span class="font-bold text-slate-700 whitespace-nowrap">الأنبوب بدون كاف <span dir="ltr" class="text-[10px] text-slate-400 font-normal">(Uncuffed ID)</span>:</span>
+          ${renderPedsEttBadge(airway, false)}
         </div>
 
         <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-100 flex justify-between items-center">
