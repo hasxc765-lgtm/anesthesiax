@@ -5,7 +5,7 @@
  */
 
 import { pedsData } from "../data/pedsData.js";
-import { PedsCalculator } from "../logic/PedsCalculator.js";
+import { PedsCalculator } from "../calculators/pedsCalculator.js";
 
 export class PedsDashboard {
   constructor(containerId) {
