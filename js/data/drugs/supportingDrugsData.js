@@ -25,28 +25,10 @@ export const supportingDrugsData = [
       category: "vasopressor_inotrope",
       subcategory: "mixed_sympathomimetic"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA",
-      documentTitle: "Ephedrine Sulfate Injection Prescribing Information",
-      evidenceLevel: "regulatory"
-    },
     safety: {
       highRiskMedication: false,
-      operationalSafetyRequirements: [
-        "continuous_hemodynamic_monitoring",
-        "continuous_ecg_monitoring"
-      ]
-    },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
     clinicalFlags: ["tachyphylaxis_risk", "indirect_acting", "tachycardia_risk"],
     indications: [
@@ -75,8 +57,7 @@ export const supportingDrugsData = [
     pharmacodynamics: {
       onset: "فوري (وريدياً)",
       peak: "2 – 5 دقائق",
-      clinicalDuration: "10 – 60 دقيقة",
-      variabilityFactors: ["endogenous_catecholamine_stores", "repeat_dosing"]
+      clinicalDuration: "10 – 60 دقيقة"
     },
     clinicalContexts: [
       {
@@ -93,11 +74,6 @@ export const supportingDrugsData = [
           method: "slow_iv_push",
           dilutionProtocol: "يُسحب 1 مل (50 ملغ) مع 9 مل سالاين ليصبح التركيز 5 ملغ/مل ويُحقن 1-2 مل لكل جرعة."
         },
-        doseLimits: {
-          maximumSingleDoseMg: 10.0,
-          tachyphylaxisThresholdMg: 50.0,
-          note: "تكرار الجرعات يؤدي لظاهرة زوال الاستجابة (Tachyphylaxis) لنفاد مخازن النورأدرينالين الذاتية؛ يلزم التبديل لرافع ضغط مباشر عند انعدام الاستجابة."
-        },
         validation: {
           requireMonitoringConfirmation: true
         },
@@ -105,22 +81,13 @@ export const supportingDrugsData = [
         note: "يرفع الضغط الشرياني والنبض والنتاج القلبي عبر تنبيه مستقبلات ألفا وبيتا المباشر وغير المباشر."
       }
     ],
-    toxicitySignals: ["severe_hypertension", "tachyarrhythmias"],
     warnings: [
       "تسرع ضربات القلب اللانظمي وخطر نقص تروية العضلة القلبية في مرضى داء الشرايين التاجية.",
-      "ظاهرة زوال الاستجابة السريع (Tachyphylaxis) مع تكرار الجرعات."
+      "ظاهرة زوال الاستجابة السريع (Tachyphylaxis) مع تكرار الجرعات نتيجة نفاد الكاتيكولامينات الذاتية."
     ],
     contraindications: [
       "فرط الحساسية للإفيدرين.",
       "تزامن الاستخدام مع مثبطات MAOIs."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Ephedrine Sulfate Injection Prescribing Information",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
     ]
   },
 
@@ -136,28 +103,10 @@ export const supportingDrugsData = [
       category: "vasopressor_inotrope",
       subcategory: "pure_alpha1_agonist"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA",
-      documentTitle: "Phenylephrine Hydrochloride Injection Prescribing Information",
-      evidenceLevel: "regulatory"
-    },
     safety: {
       highRiskMedication: true,
-      operationalSafetyRequirements: [
-        "continuous_hemodynamic_monitoring",
-        "continuous_ecg_monitoring"
-      ]
-    },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order", "automatic_infusion_start"],
-      requireClinicianConfirmation: true
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
     clinicalFlags: ["pure_vasoconstrictor", "reflex_bradycardia", "coronary_safe"],
     indications: [
@@ -232,32 +181,8 @@ export const supportingDrugsData = [
           requireMonitoringConfirmation: true
         },
         note: "تسريب وريدي بمعدل ثابت بالدقيقة للمحافظة على الضغط الشرياني الوسطي (MAP)."
-      },
-      {
-        id: "weight_based_infusion",
-        population: "adult",
-        route: "IV Infusion",
-        label: "تسريب وريدي معتمد على وزن المريض (Weight-Based Infusion)",
-        doseMin: 0.1,
-        doseMax: 0.5,
-        unit: DOSE_UNITS.MCG_PER_KG_MIN,
-        doseType: "weight_infusion_min",
-        basis: "titrated_to_map_target",
-        administration: {
-          method: "infusion_pump_only"
-        },
-        weightPolicy: {
-          allowed: ["TBW", "IBW"],
-          preferred: "TBW"
-        },
-        validation: {
-          requireWeight: true,
-          requireMonitoringConfirmation: true
-        },
-        note: "تتم المعايرة لتحقيق ضغط شرياني وسطي (MAP ≥ 65 mmHg)."
       }
     ],
-    toxicitySignals: ["severe_hypertension", "marked_reflex_bradycardia", "reduced_cardiac_output"],
     warnings: [
       "بطء قلب انعكاسي (Reflex Bradycardia) ناجم عن التنبيه المبهمي استجابة لارتفاع الضغط؛ يُستخدم بحذر إذا كان النبض منخفضاً.",
       "زيادة الحمل اللاحق (Afterload) وخفض النتاج القلبي في مرضى القصور القلبي الشديد."
@@ -266,14 +191,6 @@ export const supportingDrugsData = [
       "ارتفاع الضغط الشرياني الشديد.",
       "تسرع القلب البطيني أو الرجفان.",
       "فرط الحساسية للفينيليفرين."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Neo-Synephrine (Phenylephrine HCl Injection) Prescribing Information",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
     ]
   },
 
@@ -289,32 +206,12 @@ export const supportingDrugsData = [
       category: "vasopressor_inotrope",
       subcategory: "potent_alpha_beta1_agonist"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA",
-      documentTitle: "Levophed (Norepinephrine Bitartrate Injection) Prescribing Information",
-      evidenceLevel: "regulatory"
-    },
     safety: {
       highRiskMedication: true,
-      operationalSafetyRequirements: [
-        "central_venous_access_preferred",
-        "continuous_arterial_line_or_nibp",
-        "continuous_ecg_monitoring",
-        "infusion_pump_mandatory"
-      ]
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display", "unit_conversion_for_review"],
-      prohibitedCalculations: ["automatic_infusion_start", "patient_specific_prescription"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["central_line_preferred", "first_line_septic_shock", "tissue_necrosis_risk", "potent_vasoconstrictor"],
+    clinicalFlags: ["central_line_preferred", "first_line_septic_shock", "potent_vasoconstrictor"],
     indications: [
       {
         id: "shock_hypotension",
@@ -335,19 +232,12 @@ export const supportingDrugsData = [
         concentration: 32,
         unit: DOSE_UNITS.MCG_PER_ML,
         label: "32 mcg/mL (محلول تسريب مركز: 8 ملغ في 250 مل D5W)"
-      },
-      {
-        value: 1,
-        concentration: 1,
-        unit: DOSE_UNITS.MG_PER_ML,
-        label: "1 mg/mL Concentrate (أمبولة مركزة 4 ملغ في 4 مل - تتطلب التخفيف الإلزامي)",
-        requiresDilution: true
       }
     ],
     pharmacodynamics: {
       onset: "1 – 2 دقيقة من بدء التسريب",
       peak: "سريع",
-      clinicalDuration: "1 – 2 دقيقة بعد إيقاف التسريب (عمر نصف بلازمي فائق القصر)"
+      clinicalDuration: "1 – 2 دقيقة بعد إيقاف التسريب (عمر نصف فائق القصر)"
     },
     clinicalContexts: [
       {
@@ -362,10 +252,9 @@ export const supportingDrugsData = [
         basis: "titrated_to_target_map",
         administration: {
           method: "continuous_infusion_only",
-          dilutionProtocol: "تُخفف أمبولة 4 ملغ في 250-500 مل ديكستروز 5% (D5W) أو ديكستروز سالاين (D5NS). يُمنع التخفيف بالسالاين المنفرد لتجنب تأكسد الدواء وفقدان فعاليته."
+          dilutionProtocol: "تُخفف أمبولة 4 ملغ في 250-500 مل ديكستروز 5% (D5W). يُمنع التخفيف بالسالاين المنفرد لتجنب تأكسد الدواء."
         },
         weightPolicy: {
-          allowed: ["TBW", "IBW"],
           preferred: "TBW"
         },
         validation: {
@@ -373,24 +262,15 @@ export const supportingDrugsData = [
           requireMonitoringConfirmation: true
         },
         isDefault: true,
-        note: "تتم المعايرة لتحقيق ضغط شرياني وسطي (MAP ≥ 65 mmHg)؛ الجرعات القصوى قد تتجاوز 1 mcg/kg/min في الصدمة المعندة."
+        note: "تتم المعايرة لتحقيق ضغط شرياني وسطي (MAP ≥ 65 mmHg)."
       }
     ],
-    toxicitySignals: ["peripheral_ischemia", "tissue_necrosis_extravasation", "severe_arrhythmias"],
     warnings: [
-      "⚠️ خطر النخر النسيجي والتنخر الإقفاري الشديد (Extravasation Necrosis): يجب تفضيل القثطرة المركزية؛ عند حدوث تسرب محيطي، يُحقن فوراً مضاد ألفا (Phentolamine 5-10 mg في 10 مل سالاين) موضعياً في موقع التسرب.",
-      "نقص تروية الأعضاء المحيطية والأطراف والكلية عند الجرعات العالية جداً في غياب الإنعاش الكافي بالسوائل."
+      "⚠️ خطر النخر النسيجي عند التسرب المحيطي (Extravasation Necrosis): يجب تفضيل القثطرة المركزية؛ عند التسرب يُحقن الفنتولامين (Phentolamine) موضعياً.",
+      "نقص تروية الأعضاء المحيطية والأطراف والكلية عند الجرعات العالية في غياب الإنعاش الكافي بالسوائل."
     ],
     contraindications: [
       "نقص حجم الدم غير المعوض بالسوائل (إلا كإجراء طارئ مؤقت أثناء الإنعاش بالسوائل)."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Levophed (Norepinephrine Bitartrate) Prescribing Information",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
     ]
   },
 
@@ -406,31 +286,12 @@ export const supportingDrugsData = [
       category: "vasopressor_inotrope",
       subcategory: "potent_direct_alpha_beta_agonist"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "AHA / FDA",
-      documentTitle: "AHA ACLS Guidelines & Adrenalin Injection Labeling",
-      evidenceLevel: "regulatory_and_guideline"
-    },
     safety: {
       highRiskMedication: true,
-      operationalSafetyRequirements: [
-        "defibrillator_available",
-        "continuous_ecg_monitoring",
-        "hemodynamic_monitoring"
-      ]
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order", "automatic_infusion_start"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["anaphylaxis_first_line", "acls_cardiac_arrest", "potent_inotrope", "high_alert"],
+    clinicalFlags: ["anaphylaxis_first_line", "acls_cardiac_arrest", "potent_inotrope"],
     indications: [
       {
         id: "cardiac_arrest_acls",
@@ -439,10 +300,6 @@ export const supportingDrugsData = [
       {
         id: "anaphylaxis_severe",
         label: { en: "Severe anaphylaxis and life-threatening bronchospasm", ar: "الصدمة التحسسية التأقية الشديدة والتشنج القصبي الحرج" }
-      },
-      {
-        id: "post_cardiac_surgery_inotropic",
-        label: { en: "Cardiogenic shock and inotropic support", ar: "الصدمة القلبية والدعم المنشط للقلوصية بعد جراحة القلب" }
       }
     ],
     presentations: [
@@ -458,12 +315,6 @@ export const supportingDrugsData = [
         concentration: 100,
         unit: DOSE_UNITS.MCG_PER_ML,
         label: "100 mcg/mL (1:10,000 Syringe - 1 mg / 10 mL مخصص لتوقف القلب ACLS)"
-      },
-      {
-        value: 16,
-        concentration: 16,
-        unit: DOSE_UNITS.MCG_PER_ML,
-        label: "16 mcg/mL (محلول تسريب: 4 ملغ في 250 مل D5W)"
       }
     ],
     pharmacodynamics: {
@@ -510,46 +361,14 @@ export const supportingDrugsData = [
           requireAge: true
         },
         note: "يُستخدم تركيز 1:1,000 (1 mg/mL) غير مخفف؛ تُكرر الجرعة كل 5-15 دقيقة عند عدم الاستجابة."
-      },
-      {
-        id: "inotropic_vasopressor_infusion",
-        population: "adult",
-        route: "IV Infusion",
-        label: "التسريب الوريدي المنشط والرافع للضغط (Continuous Inotropic Infusion)",
-        doseMin: 0.01,
-        doseMax: 0.5,
-        unit: DOSE_UNITS.MCG_PER_KG_MIN,
-        doseType: "weight_infusion_min",
-        basis: "titrated_to_hemodynamic_target",
-        administration: {
-          method: "infusion_pump_only",
-          note: "الجرعات المنخفضة (0.01-0.05) تسيطر عليها تأثيرات بيتا المنشطة للقلوصية؛ الجرعات العالية (>0.1) تسيطر عليها تأثيرات ألفا القابضة للأوعية."
-        },
-        weightPolicy: {
-          allowed: ["TBW", "IBW"],
-          preferred: "TBW"
-        },
-        validation: {
-          requireWeight: true,
-          requireMonitoringConfirmation: true
-        }
       }
     ],
-    toxicitySignals: ["ventricular_fibrillation", "myocardial_ischemia", "severe_hypertension", "hyperglycemia"],
     warnings: [
-      "⚠️ خطأ الجرعة والتراكيز: الخلط بين تركيز 1:1,000 (الحقن العضلي) و 1:10,000 (الحقن الوريدي) يسبب نوبات فرط ضغط كارثية واحتشاء عضلة القلب ورجفان بطيني.",
+      "⚠️ خطأ الجرعة والتراكيز: الخلط بين تركيز 1:1,000 (العضلي) و 1:10,000 (الوريدي) يسبب نوبات فرط ضغط كارثية ورجفان بطيني.",
       "يرفع استهلاك القلب للأكسجين ويزيد بشكل ملحوظ مستوى سكر الدم وحمض اللاكتيك."
     ],
     contraindications: [
       "لا توجد موانع استعمال مطلقة في حالات الطوارئ القاتلة (توقف القلب والصدمة التأقية الشديدة)."
-    ],
-    references: [
-      {
-        organization: "AHA",
-        title: "ACLS Guidelines for Cardiopulmonary Resuscitation and Emergency Cardiovascular Care",
-        year: "2024",
-        evidenceLevel: "guideline"
-      }
     ]
   },
 
@@ -565,31 +384,12 @@ export const supportingDrugsData = [
       category: "vasopressor_inotrope",
       subcategory: "dose_dependent_inotropic_vasopressor"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA / AHA",
-      documentTitle: "Dopamine Hydrochloride Injection Prescribing Information",
-      evidenceLevel: "regulatory_and_guideline"
-    },
     safety: {
       highRiskMedication: true,
-      operationalSafetyRequirements: [
-        "continuous_ecg_monitoring",
-        "continuous_hemodynamic_monitoring",
-        "infusion_pump_mandatory"
-      ]
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_infusion_start"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["dose_dependent_receptors", "tachyarrhythmia_risk", "extravasation_risk"],
+    clinicalFlags: ["dose_dependent_receptors", "tachyarrhythmia_risk"],
     indications: [
       {
         id: "cardiogenic_distributive_shock",
@@ -604,12 +404,6 @@ export const supportingDrugsData = [
         label: "40 mg/mL (أمبولة 200 ملغ في 5 مل - مركز يتطلب التخفيف الإلزامي)",
         requiresDilution: true,
         isDefault: true
-      },
-      {
-        value: 1.6,
-        concentration: 1.6,
-        unit: DOSE_UNITS.MG_PER_ML,
-        label: "1.6 mg/mL = 1600 mcg/mL (محلول تسريب: 400 ملغ في 250 مل D5W)"
       }
     ],
     pharmacodynamics: {
@@ -633,7 +427,6 @@ export const supportingDrugsData = [
           dilutionProtocol: "يُخفف 400 ملغ في 250 أو 500 مل ديكستروز 5% أو سالاين."
         },
         weightPolicy: {
-          allowed: ["TBW", "IBW"],
           preferred: "TBW"
         },
         validation: {
@@ -641,49 +434,16 @@ export const supportingDrugsData = [
           requireMonitoringConfirmation: true
         },
         isDefault: true,
-        note: "الجرعة المتوسطة (2-10 mcg/kg/min) تنبه مستقبلات بيتا-1 فتزيد من قلوصية العضلة القلبية والنبض والنتاج القلبي."
-      },
-      {
-        id: "vasopressor_infusion_high",
-        population: "adult",
-        route: "IV Infusion",
-        label: "التسريب الرافع للضغط (Alpha-1 Vasopressor Range)",
-        doseMin: 10.0,
-        doseMax: 20.0,
-        unit: DOSE_UNITS.MCG_PER_KG_MIN,
-        doseType: "weight_infusion_min",
-        basis: "titrated_to_target_map",
-        administration: {
-          method: "continuous_infusion_only"
-        },
-        weightPolicy: {
-          allowed: ["TBW", "IBW"],
-          preferred: "TBW"
-        },
-        validation: {
-          requireWeight: true,
-          requireMonitoringConfirmation: true
-        },
-        note: "الجرعة العالية (>10 mcg/kg/min) تسيطر عليها تأثيرات ألفا-1 القابضة للأوعية؛ تزيد من خطر اللانظميات التسرعية ونقص التروية المحيطية."
+        note: "الجرعة المتوسطة (2-10 mcg/kg/min) تزيد من قلوصية العضلة القلبية والنبض والنتاج القلبي."
       }
     ],
-    toxicitySignals: ["severe_tachyarrhythmias", "tissue_necrosis_extravasation", "myocardial_ischemia"],
     warnings: [
-      "معدل مرتفع لحدوث تسرع القلب اللانظمي والرجفان الأذيني والبطيني مقارنة بالنورأدرينالين.",
-      "⚠️ مفهوم الجرعة الكلوية المنخفضة (Renal-dose Dopamine <2 mcg/kg/min) لم يعد مدعوماً بالأدلة السريرية الحديثة لحماية الكلى.",
+      "معدل مرتفع لحدوث تسرع القلب اللانظمي والرجفان الأذيني مقارنة بالنورأدرينالين.",
       "التسرب المحيطي يسبب نخراً نسيجياً (يُعالج بحقن الفنتولامين موضعياً)."
     ],
     contraindications: [
       "الرجفان البطيني وتسرع القلب البطيني غير المسيطر عليه.",
       "ورم القواتم (Pheochromocytoma)."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Dopamine Hydrochloride Injection Prescribing Information",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
     ]
   },
 
@@ -702,30 +462,12 @@ export const supportingDrugsData = [
       category: "emergency_resuscitation",
       subcategory: "antimuscarinic_anticholinergic"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "AHA / FDA",
-      documentTitle: "AHA ACLS Guidelines for Bradycardia & Atropine Labeling",
-      evidenceLevel: "regulatory_and_guideline"
-    },
     safety: {
       highRiskMedication: false,
-      operationalSafetyRequirements: [
-        "continuous_ecg_monitoring",
-        "hemodynamic_monitoring"
-      ]
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["paradoxical_bradycardia_low_dose", "crosses_bbb", "acls_bradycardia"],
+    clinicalFlags: ["acls_bradycardia"],
     indications: [
       {
         id: "symptomatic_bradycardia",
@@ -766,10 +508,6 @@ export const supportingDrugsData = [
         administration: {
           method: "rapid_iv_push"
         },
-        doseLimits: {
-          maximumCumulativeDoseMg: 3.0,
-          note: "الجرعة الإجمالية القصوى 3.0 mg (تحقق الحصار المبهمي الكامل)."
-        },
         validation: {
           requireMonitoringConfirmation: true
         },
@@ -777,23 +515,13 @@ export const supportingDrugsData = [
         note: "توصي إرشادات ACLS بجرعة بدئية معيارية 1.0 mg وريدياً (لتفادي بطء القلب التناقضي)، وتُكرر كل 3-5 دقائق عند الحاجة (بحد أقصى 3 mg)."
       }
     ],
-    toxicitySignals: ["severe_tachycardia", "anticholinergic_syndrome_cns", "urinary_retention"],
     warnings: [
       "⚠️ بطء قلب تناقضي (Paradoxical Bradycardia): إعطاء جرعات وريدية منخفضة جداً (<0.5 mg) أو الحقن البطيء جداً يسبب بطء قلب تناقضياً ناجم عن تنبيه مبهمي مركزي ومحيطي.",
-      "يعبر الحاجز الدموي الدماغي (BBB) وقد يسبب متلازمة مضادات الكولين المركزية (Central Anticholinergic Syndrome) والتخليط العقلي والهذيان خاصة في كبار السن (يُعكس بالفيزوستيغمين Physostigmine).",
-      "غير فعال في حصار القلب من الدرجة الثانية النوع الثاني (Mobitz II) وحصار القلب التام (Third-degree AV Block) مع مركب QRS عريض."
+      "يعبر الحاجز الدموي الدماغي (BBB) وقد يسبب متلازمة مضادات الكولين المركزية والتخليط العقلي لدى كبار السن."
     ],
     contraindications: [
       "الزرق ضيق الزاوية الحاد غير المعالج.",
       "الانسداد البولي أو الهضمي الميكانيكي."
-    ],
-    references: [
-      {
-        organization: "AHA",
-        title: "ACLS Management of Bradycardia Guidelines",
-        year: "2024",
-        evidenceLevel: "guideline"
-      }
     ]
   },
 
@@ -809,39 +537,16 @@ export const supportingDrugsData = [
       category: "emergency_resuscitation",
       subcategory: "class_iii_antiarrhythmic"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "AHA / FDA",
-      documentTitle: "Amiodarone Hydrochloride Injection Prescribing Information",
-      evidenceLevel: "regulatory_and_guideline"
-    },
     safety: {
       highRiskMedication: true,
-      operationalSafetyRequirements: [
-        "continuous_ecg_monitoring",
-        "continuous_hemodynamic_monitoring",
-        "defibrillator_available"
-      ]
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order", "automatic_infusion_start"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["acls_antiarrhythmic", "hypotension_risk", "prolonged_half_life"],
+    clinicalFlags: ["acls_antiarrhythmic", "hypotension_risk"],
     indications: [
       {
         id: "acls_pulseless_vf_vt",
         label: { en: "Pulseless VF and VT unresponsive to CPR and defibrillation", ar: "إنعاش الرجفان البطيني وتسرع القلب البطيني عديم النبض المعند على الصدمات" }
-      },
-      {
-        id: "stable_wide_complex_tachycardia",
-        label: { en: "Hemodynamically stable wide-complex monomorphic VT", ar: "علاج تسرع القلب البطيني المستقر ذو المركب العريض" }
       }
     ],
     presentations: [
@@ -897,43 +602,15 @@ export const supportingDrugsData = [
           requireMonitoringConfirmation: true
         },
         note: "الجرعة الثانية التكميلية 150 mg (أمبولة واحدة) بعد الصدمة التالية عند استمرار الرجفان."
-      },
-      {
-        id: "stable_vt_infusion",
-        population: "adult",
-        route: "IV Infusion",
-        label: "تسريب تسرع القلب البطيني النبضي المستقر (Stable VT with Pulse Loading)",
-        doseMin: 150.0,
-        doseMax: 150.0,
-        unit: DOSE_UNITS.MG_FIXED,
-        doseType: "fixed_infusion_min",
-        basis: "acls_guideline_protocol",
-        administration: {
-          method: "slow_infusion_over_time",
-          duration: "تُحل 150 ملغ في 100 مل ديكستروز 5% وتُسرّب على مدى 10 دقائق."
-        },
-        validation: {
-          requireMonitoringConfirmation: true
-        },
-        note: "تليها جرعة صيانة تسريب 1 mg/min لمدة 6 ساعات ثم 0.5 mg/min لمدة 18 ساعة."
       }
     ],
-    toxicitySignals: ["severe_hypotension", "severe_bradycardia", "qt_prolongation_torsades"],
     warnings: [
-      "هبوط حاد في الضغط الشرياني وبطء القلب أثناء التسريب السريع في المرضى ذوي النبض بسبب المذيبات (Polysorbate 80 / Benzyl alcohol).",
+      "هبوط حاد في الضغط الشرياني وبطء القلب أثناء التسريب السريع في المرضى ذوي النبض بسبب المذيبات.",
       "تطاول فاصل QT واحتمالية تحريض اللانظميات البطينية (Torsades de Pointes)."
     ],
     contraindications: [
-      "الصدمة القلبية وبطء القلب الشديد في غياب ناظمة قلبية (في المرضى ذوي النبض المستقر).",
+      "الصدمة القلبية وبطء القلب الشديد في غياب ناظمة قلبية.",
       "فرط الحساسية لليود أو الأميودارون."
-    ],
-    references: [
-      {
-        organization: "AHA",
-        title: "ACLS Cardiac Arrest & Arrhythmia Guidelines",
-        year: "2024",
-        evidenceLevel: "guideline"
-      }
     ]
   },
 
@@ -949,39 +626,16 @@ export const supportingDrugsData = [
       category: "emergency_resuscitation",
       subcategory: "cardiac_membrane_stabilizer"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA / ACLS",
-      documentTitle: "Calcium Chloride 10% Injection USP Prescribing Information",
-      evidenceLevel: "regulatory_and_guideline"
-    },
     safety: {
       highRiskMedication: true,
-      operationalSafetyRequirements: [
-        "continuous_ecg_monitoring",
-        "secure_iv_or_central_line",
-        "extravasation_monitoring"
-      ]
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["hyperkalemia_membrane_stabilizer", "severe_tissue_necrosis_risk", "central_line_preferred"],
+    clinicalFlags: ["hyperkalemia_risk", "central_line_preferred"],
     indications: [
       {
         id: "hyperkalemia_cardiac_protection",
         label: { en: "Cardiac membrane stabilization in severe hyperkalemia / hypermagnesemia", ar: "تثبيت الغشاء الخلوي القلبي والوقاية من توقف القلب في فرط البوتاسيوم وفرط المغنيسيوم الشديد" }
-      },
-      {
-        id: "ccb_overdose_hypocalcemia",
-        label: { en: "Calcium channel blocker overdose and acute severe hypocalcemia", ar: "علاج التسمم بحاصرات قنوات الكالسيوم ونقص الكالسيوم الحاد بعد نقل الدم الكتلي" }
       }
     ],
     presentations: [
@@ -989,7 +643,7 @@ export const supportingDrugsData = [
         value: 100,
         concentration: 100,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "10% Solution (100 mg/mL = 1 g / 10 mL = 270 mg Elemental Calcium = 13.6 mEq Ca2+)",
+        label: "10% Solution (100 mg/mL = 1 g / 10 mL = 270 mg Elemental Calcium)",
         isDefault: true
       }
     ],
@@ -1017,26 +671,16 @@ export const supportingDrugsData = [
           requireMonitoringConfirmation: true
         },
         isDefault: true,
-        note: "يحتوي على ثلاثة أضعاف كمية الكالسيوم الشاردي مقارنة بغلوكونات الكالسيوم (27 mg elemental Ca/mL مقابل 9 mg/mL)."
+        note: "يحتوي على ثلاثة أضعاف كمية الكالسيوم الشاردي مقارنة بغلوكونات الكالسيوم."
       }
     ],
-    toxicitySignals: ["severe_tissue_necrosis", "hypercalcemia", "bradycardia_rapid_iv"],
     warnings: [
-      "⚠️ خطر النخر النسيجي الكارثي (Severe Extravasation Necrosis): التسرب خارج الوريد يسبب حروقاً كيميائية وتنخراً خلوياً شديداً؛ يُفضل الحقن عبر خط وريدي مركزي أو وريد محيطي كبير وسليم.",
-      "الحقن الوريدي السريع قد يسبب بطء قلب حاد، هبوط ضغط، وتوقف انقباض.",
-      "يُمنع خلطه في نفس الخط الوريدي مع بيكربونات الصوديوم لتفادي ترسب كربونات الكالسيوم غير المنحلة."
+      "⚠️ خطر النخر النسيجي الشديد عند التسرب خارج الوريد؛ يُفضل الحقن عبر خط وريدي مركزي أو وريد كبير.",
+      "الحقن السريع يسبب بطء قلب حاد وهبوط ضغط.",
+      "يُمنع خلطه مع بيكربونات الصوديوم في نفس الخط لتفادي الترسب."
     ],
     contraindications: [
-      "الرجفان البطيني أثناء الإنعاش القلبي (إلا إذا كان ناجماً عن فرط البوتاسيوم أو نقص الكالسيوم).",
-      "فرط كالسيوم الدم المثبت وتسمم الديجوكسين (خطر تحريض اللانظميات القاتلة Stone Heart)."
-    ],
-    references: [
-      {
-        organization: "FDA / AHA",
-        title: "Calcium Chloride Injection USP Guidelines",
-        year: "2024",
-        evidenceLevel: "regulatory_and_guideline"
-      }
+      "فرط كالسيوم الدم وتسمم الديجوكسين (خطر تحريض اللانظميات القاتلة Stone Heart)."
     ]
   },
 
@@ -1052,37 +696,16 @@ export const supportingDrugsData = [
       category: "emergency_resuscitation",
       subcategory: "cardiac_membrane_stabilizer"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA / Guidelines",
-      documentTitle: "Calcium Gluconate Injection USP Prescribing Information",
-      evidenceLevel: "regulatory_and_guideline"
-    },
     safety: {
       highRiskMedication: false,
-      operationalSafetyRequirements: [
-        "continuous_ecg_monitoring"
-      ]
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["hyperkalemia_membrane_stabilizer", "peripheral_line_safer"],
+    clinicalFlags: ["hyperkalemia_risk"],
     indications: [
       {
         id: "hyperkalemia_peripheral_safe",
         label: { en: "Cardiac membrane stabilization in hyperkalemia (peripheral IV preferred)", ar: "تثبيت الغشاء القلبي في فرط البوتاسيوم (الخيار المفضل والأكثر أماناً للحقن المحيطي)" }
-      },
-      {
-        id: "hypocalcemia_tetany",
-        label: { en: "Treatment of acute hypocalcemia and tetany", ar: "علاج نقص الكالسيوم الحاد والتكزز العضلي ونقص الكالسيوم بعد نقل الدم" }
       }
     ],
     presentations: [
@@ -1090,7 +713,7 @@ export const supportingDrugsData = [
         value: 100,
         concentration: 100,
         unit: DOSE_UNITS.MG_PER_ML,
-        label: "10% Solution (100 mg/mL = 1 g / 10 mL = 90 mg Elemental Calcium = 4.6 mEq Ca2+)",
+        label: "10% Solution (100 mg/mL = 1 g / 10 mL = 90 mg Elemental Calcium)",
         isDefault: true
       }
     ],
@@ -1118,24 +741,15 @@ export const supportingDrugsData = [
           requireMonitoringConfirmation: true
         },
         isDefault: true,
-        note: "أقل تهييجاً وتخريشاً للأوردة المحيطية مقارنة بكلوريد الكالسيوم؛ يحتوي على ثلث كمية الكالسيوم الشاردي لكل مل مقارنة بالكلوريد."
+        note: "أقل تهييجاً للأوردة المحيطية مقارنة بكلوريد الكالسيوم؛ يحتوي على ثلث كمية الكالسيوم الشاردي."
       }
     ],
-    toxicitySignals: ["hypercalcemia", "bradycardia_rapid_push"],
     warnings: [
-      "الحقن السريع جداً يسبب بطء القلب، تورد الوجه، وهبوط الضغط.",
-      "يُمنع الخلط مع بيكربونات الصوديوم في نفس الخط الوريدي."
+      "الحقن السريع جداً يسبب بطء القلب وتورد الوجه وهبوط الضغط.",
+      "يُمنع الخلط مع بيكربونات الصوديوم في نفس الخط."
     ],
     contraindications: [
       "فرط كالسيوم الدم وتسمم الديجوكسين."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Calcium Gluconate Injection USP Labeling",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
     ]
   },
 
@@ -1151,38 +765,20 @@ export const supportingDrugsData = [
       category: "emergency_resuscitation",
       subcategory: "alkalinizing_agent"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA / ACLS",
-      documentTitle: "Sodium Bicarbonate 8.4% Injection Prescribing Information",
-      evidenceLevel: "regulatory_and_guideline"
-    },
     safety: {
       highRiskMedication: true,
-      operationalSafetyRequirements: [
-        "arterial_blood_gas_monitoring",
-        "adequate_ventilation_ensured"
-      ]
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["tca_toxicity_antidote", "hyperkalemia_adjunct", "hyperosmolar", "abg_guided"],
+    clinicalFlags: ["hyperkalemia_risk"],
     indications: [
       {
         id: "tca_sodium_channel_toxicity",
-        label: { en: "Tricyclic antidepressant (TCA) and sodium-channel blocker toxicity with wide QRS", ar: "الترياق النوعي لتسمم مضادات الاكتئاب ثلاثية الحلقات (TCA) وتطاول QRS وتسمم حاصرات قنوات الصوديوم" }
+        label: { en: "Tricyclic antidepressant (TCA) toxicity with wide QRS", ar: "الترياق النوعي لتسمم مضادات الاكتئاب ثلاثية الحلقات (TCA) وتطاول مركب QRS" }
       },
       {
         id: "severe_metabolic_acidosis",
-        label: { en: "Severe metabolic acidosis (pH < 7.1) and hyperkalemia adjunct", ar: "علاج الحماض الاستقلابي الشديد (pH < 7.1) والمساعدة في إدخال البوتاسيوم للخلايا" }
+        label: { en: "Severe metabolic acidosis (pH < 7.1)", ar: "علاج الحماض الاستقلابي الشديد (pH < 7.1) والمساعدة في خفض البوتاسيوم" }
       }
     ],
     presentations: [
@@ -1190,7 +786,7 @@ export const supportingDrugsData = [
         value: 1,
         concentration: 1,
         unit: DOSE_UNITS.MEQ_PER_ML,
-        label: "8.4% Solution (1 mEq/mL = 84 mg/mL in 50 mL Vial = 50 mEq)",
+        label: "8.4% Solution (1 mEq/mL in 50 mL Vial = 50 mEq)",
         isDefault: true
       }
     ],
@@ -1211,11 +807,9 @@ export const supportingDrugsData = [
         doseType: "weight_bolus",
         basis: "emergency_toxicology_protocol",
         administration: {
-          method: "rapid_iv_push",
-          note: "حقن وريدي مباشر بهدف قلوية الدم (Target Arterial pH 7.45 - 7.55 وتضييق مركب QRS)."
+          method: "rapid_iv_push"
         },
         weightPolicy: {
-          allowed: ["TBW", "IBW"],
           preferred: "TBW"
         },
         validation: {
@@ -1223,44 +817,17 @@ export const supportingDrugsData = [
           requireMonitoringConfirmation: true
         },
         isDefault: true,
-        note: "تُعطى 1 - 2 mEq/kg (تقريباً 50-100 mL من محلول 8.4%) حتى تراجع عرض مركب QRS."
-      },
-      {
-        id: "severe_acidosis_cardiac_arrest",
-        population: "adult",
-        route: "IV",
-        label: "الحماض الاستقلابي الشديد في توقف القلب المطول (Arrest Acidosis Bolus)",
-        doseMin: 50.0,
-        doseMax: 50.0,
-        unit: DOSE_UNITS.MEQ_FIXED,
-        doseType: "fixed_bolus",
-        basis: "acls_guideline_protocol",
-        administration: {
-          method: "slow_iv_push"
-        },
-        validation: {
-          requireMonitoringConfirmation: true
-        },
-        note: "50 mEq (قارورة 50 مل كاملة)؛ يُشترط كفاية التهوية للتخلص من غاز CO2 الناتج عن التعديل."
+        note: "تُعطى 1 - 2 mEq/kg (تقريباً 50-100 mL من محلول 8.4%) لتضييق مركب QRS وقلوية الدم."
       }
     ],
-    toxicitySignals: ["severe_alkalosis", "hypernatremia", "hypokalemia", "paradoxical_csf_acidosis"],
     warnings: [
-      "تعديل البيكربونات يولد غاز CO2؛ إذا لم تكن التهوية الآلية كافية لطرحه، يعبر CO2 إلى داخل الخلايا والدماغ مسبباً حماضاً خلوياً ودماغياً تناقضياً (Paradoxical Intracellular Acidosis).",
-      "محلول عالي التناضح (Hyperosmolar ≈ 2000 mOsm/L) يسبب فرط صوديوم الدم وهبوط بوتاسيوم الدم الحاد.",
-      "⚠️ غير متوافق تماماً مع محاليل الكالسيوم أو الكاتيكولامينات؛ يجب غسل الوريد بالسالاين جيداً قبل وبعد الحقن."
+      "تعديل البيكربونات يولد CO2؛ يجب التأكد من كفاية التهوية للتخلص منه وتجنب الحماض الدماغي التناقضي.",
+      "محلول عالي التناضح يسبب فرط صوديوم الدم وهبوط بوتاسيوم الدم الحاد.",
+      "غير متوافق مع محاليل الكالسيوم أو الكاتيكولامينات؛ يجب غسل الوريد بالسالاين جيداً."
     ],
     contraindications: [
       "القلاء الاستقلابي أو التنفسي.",
       "نقص بوتاسيوم الدم الشديد ونقص كالسيوم الدم الحاد."
-    ],
-    references: [
-      {
-        organization: "FDA / ACLS",
-        title: "Sodium Bicarbonate 8.4% Injection Prescribing Information",
-        year: "2024",
-        evidenceLevel: "regulatory_and_guideline"
-      }
     ]
   },
 
@@ -1276,33 +843,12 @@ export const supportingDrugsData = [
       category: "emergency_resuscitation",
       subcategory: "ryanodine_receptor_antagonist"
     },
-    availability: {
-      status: "institution_dependent",
-      regionDependent: true,
-      note: "ترياق طوارئ نوعي وإلزامي التوفر في كل مركز يستخدم غازات التخدير الهالوجينية أو السكوسينيل كولين."
-    },
-    evidence: {
-      sourceOrganization: "MHAUS / FDA",
-      documentTitle: "MHAUS Malignant Hyperthermia Treatment Protocol & Dantrium Labeling",
-      evidenceLevel: "regulatory_and_guideline"
-    },
     safety: {
       highRiskMedication: true,
-      operationalSafetyRequirements: [
-        "mh_treatment_cart_available",
-        "core_temperature_monitoring",
-        "continuous_etco2_monitoring",
-        "arterial_blood_gas_available"
-      ]
+      requiresAirwayReady: true,
+      requiresRespiratoryMonitoring: true
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["malignant_hyperthermia_antidote", "ryanodine_blocker", "life_saving"],
+    clinicalFlags: ["mh_trigger"],
     indications: [
       {
         id: "malignant_hyperthermia_crisis",
@@ -1327,9 +873,9 @@ export const supportingDrugsData = [
       }
     ],
     pharmacodynamics: {
-      onset: "سريع (خلال دقائق من الحقن الوريدي المباشر)",
+      onset: "سريع (خلال دقائق من الحقن)",
       peak: "سريع",
-      clinicalDuration: "4 – 8 ساعات (تثبيط تحرر الكالسيوم من الشبكة الهيولية العضلية)"
+      clinicalDuration: "4 – 8 ساعات"
     },
     clinicalContexts: [
       {
@@ -1347,7 +893,6 @@ export const supportingDrugsData = [
           reconstitutionNote: "كل قارورة Dantrium (20 mg) تُحل حصراً بـ 60 مل ماء معقم للحقن خالٍ من المواد الحافظة وتُرج بقوة حتى تمام الشفافية."
         },
         weightPolicy: {
-          allowed: ["TBW"],
           preferred: "TBW"
         },
         validation: {
@@ -1355,24 +900,15 @@ export const supportingDrugsData = [
           requireMonitoringConfirmation: true
         },
         isDefault: true,
-        note: "تُكرر الجرعة (2.5 mg/kg) كل 5-10 دقائق حتى هبوط الـ EtCO2 واسترخاء العضلات واستقرار الحرارة والنبض (الجرعة الإجمالية قد تتجاوز 10 mg/kg)."
+        note: "تُكرر الجرعة (2.5 mg/kg) كل 5-10 دقائق حتى هبوط الـ EtCO2 واسترخاء العضلات واستقرار الحرارة."
       }
     ],
-    toxicitySignals: ["marked_muscle_weakness", "phlebitis", "hepatotoxicity_chronic"],
     warnings: [
-      "⚠️ يُمنع إعطاء حاصرات قنوات الكالسيوم (CCBs مثل الفيراباميل أو الديلتيازيم) تزامناً مع الدانترولين لخطورة حدوث انهيار قلبي وعائي وفرط بوتاسيوم دم قاتل.",
-      "ضعف عضلي عام وشديد بعد الإعطاء يتطلب استمرار دعم المجرى الهوائي والتهوية الآلية."
+      "⚠️ يُمنع إعطاء حاصرات قنوات الكالسيوم (مثل الفيراباميل) تزامناً مع الدانترولين لخطورة حدوث انهيار قلبي وعائي وفرط بوتاسيوم مميت.",
+      "ضعف عضلي عام وشديد بعد الإعطاء يتطلب استمرار دعم المجرى الهوائي والتهوية."
     ],
     contraindications: [
       "لا توجد موانع استعمال في تدبير أزمة فرط الحرارة الخبيث المهددة للحياة."
-    ],
-    references: [
-      {
-        organization: "MHAUS",
-        title: "Malignant Hyperthermia Emergency Management Protocol",
-        year: "2024",
-        evidenceLevel: "guideline"
-      }
     ]
   },
 
@@ -1388,32 +924,12 @@ export const supportingDrugsData = [
       category: "emergency_resuscitation",
       subcategory: "lipid_sink_antidote"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false,
-      note: "ترياق طوارئ نوعي وإلزامي التوفر في كل موقع يُجرى فيه تخدير نصفي أو موضعي بحجوم كبيرة."
-    },
-    evidence: {
-      sourceOrganization: "ASRA",
-      documentTitle: "ASRA Practice Advisory on Local Anesthetic Systemic Toxicity (LAST)",
-      evidenceLevel: "guideline"
-    },
     safety: {
       highRiskMedication: true,
-      operationalSafetyRequirements: [
-        "defibrillator_available",
-        "airway_equipment_available",
-        "continuous_ecg_monitoring"
-      ]
+      requiresAirwayReady: true,
+      requiresRespiratoryMonitoring: true
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order", "automatic_infusion_start"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["last_antidote", "lipid_sink", "asra_checklist"],
+    clinicalFlags: ["last_risk"],
     indications: [
       {
         id: "last_resuscitation",
@@ -1430,7 +946,7 @@ export const supportingDrugsData = [
       }
     ],
     pharmacodynamics: {
-      onset: "فوري (امتصاص السموم الجزيئية الدهنية Lipid Sink وتنشيط استقلاب القلب)",
+      onset: "فوري (امتصاص السموم الجزيئية الدهنية Lipid Sink)",
       peak: "سريع",
       clinicalDuration: "مستمر أثناء التسريب"
     },
@@ -1450,16 +966,14 @@ export const supportingDrugsData = [
           duration: "حقن وريدي دفعي على مدى 2 إلى 3 دقائق (حوالي 100 مل للبالغ بوزن 70 كجم)"
         },
         weightPolicy: {
-          allowed: ["TBW", "IBW"],
-          preferred: "IBW",
-          note: "في مرضى السمنة المفرطة، توصي إرشادات ASRA بالحساب على الوزن المثالي (IBW)."
+          preferred: "IBW"
         },
         validation: {
           requireWeight: true,
           requireMonitoringConfirmation: true
         },
         isDefault: true,
-        note: "تُتبع فوراً ببدء التسريب المستمر (0.25 mL/kg/min)؛ يمكن تكرار الجرعة الدفعية مرة أو مرتين إذا استمر عدم الاستقرار القلبي."
+        note: "تُتبع فوراً ببدء التسريب المستمر (0.25 mL/kg/min)؛ يمكن تكرار الجرعة الدفعية إذا استمر عدم الاستقرار القلبي."
       },
       {
         id: "last_continuous_infusion",
@@ -1474,12 +988,8 @@ export const supportingDrugsData = [
         administration: {
           method: "continuous_infusion_only"
         },
-        doseLimits: {
-          maximumCumulativeDoseMlKg: 12.0,
-          note: "الحد الأقصى التراكمي الموصى به للإعطاء خلال أول 30 دقيقة هو 10 - 12 mL/kg."
-        },
         weightPolicy: {
-          allowed: ["IBW"]
+          preferred: "IBW"
         },
         validation: {
           requireWeight: true,
@@ -1488,21 +998,12 @@ export const supportingDrugsData = [
         note: "يستمر التسريب لمدة لا تقل عن 10 دقائق بعد استقرار المؤشرات الديناميكية الوعائية."
       }
     ],
-    toxicitySignals: ["hypertriglyceridemia", "pancreatitis", "interference_with_lab_tests"],
     warnings: [
-      "الإنعاش المتقدم في LAST: يجب خفض جرعات الأدرينالين (Epinephrine) الفردية إلى <1 mcg/kg وتجنب حاصرات بيتا وحاصرات قنوات الكالسيوم والفازوبريسين.",
-      "يسبب عكارة شديدة في الدم قد تتداخل مع الفحوصات المخبرية الدموية."
+      "الإنعاش في LAST: يجب خفض جرعات الأدرينالين الفردية إلى <1 mcg/kg وتجنب حاصرات بيتا وقنوات الكالسيوم والفازوبريسين.",
+      "يسبب عكارة شديدة في الدم تتداخل مؤقتاً مع الفحوصات المخبرية."
     ],
     contraindications: [
       "لا توجد موانع استعمال في تدبير أزمة LAST المهددة للحياة."
-    ],
-    references: [
-      {
-        organization: "ASRA",
-        title: "Checklist for Treatment of Local Anesthetic Systemic Toxicity",
-        year: "2024",
-        evidenceLevel: "guideline"
-      }
     ]
   },
 
@@ -1521,29 +1022,12 @@ export const supportingDrugsData = [
       category: "antiemetic",
       subcategory: "5ht3_receptor_antagonist"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA",
-      documentTitle: "Zofran (Ondansetron HCl Injection) Prescribing Information",
-      evidenceLevel: "regulatory"
-    },
     safety: {
       highRiskMedication: false,
-      operationalSafetyRequirements: [
-        "continuous_ecg_monitoring_if_long_qt"
-      ]
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["ponv_prophylaxis", "qt_prolongation_risk"],
+    clinicalFlags: ["ponv_prophylaxis"],
     indications: [
       {
         id: "ponv_prevention_treatment",
@@ -1584,43 +1068,15 @@ export const supportingDrugsData = [
         },
         isDefault: true,
         note: "الجرعة القياسية الثابتة للبالغين هي 4 mg وريدياً."
-      },
-      {
-        id: "ponv_prophylaxis_pediatric",
-        population: "pediatric",
-        route: "IV",
-        label: "الوقاية للأطفال (Pediatric PONV Prophylaxis)",
-        doseMin: 0.1,
-        doseMax: 0.1,
-        unit: DOSE_UNITS.MG_PER_KG,
-        doseType: "weight_bolus",
-        basis: "weight_based_reference",
-        doseLimits: {
-          maximumSingleDoseMg: 4.0
-        },
-        validation: {
-          requireAge: true,
-          requireWeight: true
-        },
-        note: "0.1 mg/kg بحد أقصى 4 mg وريدياً."
       }
     ],
-    toxicitySignals: ["qt_prolongation", "serotonin_syndrome"],
     warnings: [
-      "تطاول فاصل QT المعتمد على الجرعة؛ يُستخدم بحذر في مرضى متلازمة QT الطويلة الخلقية أو عند التزامن مع أدوية تطيل فاصل QT.",
+      "تطاول فاصل QT المعتمد على الجرعة؛ يُستخدم بحذر في مرضى متلازمة QT الطويلة الخلقية.",
       "الصداع والإمساك العابر من أكثر الآثار الجانبية شيوعاً."
     ],
     contraindications: [
-      "الاستخدام المتزامن مع دواء الأبومورفين (Apomorphine) لخطورة حدوث هبوط ضغط حاد وفقدان وعي.",
-      "فرط الحساسية للأوندانسيترون أو مضادات 5-HT3 الأخرى."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Zofran (Ondansetron Hydrochloride) Prescribing Information",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
+      "الاستخدام المتزامن مع دواء الأبومورفين (Apomorphine) لخطورة حدوث هبوط ضغط حاد.",
+      "فرط الحساسية للأوندانسيترون."
     ]
   },
 
@@ -1636,27 +1092,12 @@ export const supportingDrugsData = [
       category: "antiemetic",
       subcategory: "corticosteroid"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA",
-      documentTitle: "Dexamethasone Sodium Phosphate Injection Prescribing Information",
-      evidenceLevel: "regulatory"
-    },
     safety: {
       highRiskMedication: false,
-      operationalSafetyRequirements: []
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["ponv_prophylaxis", "airway_edema_reduction", "perineal_burning_awake"],
+    clinicalFlags: ["ponv_prophylaxis", "bronchodilator"],
     indications: [
       {
         id: "ponv_prophylaxis",
@@ -1674,18 +1115,12 @@ export const supportingDrugsData = [
         unit: DOSE_UNITS.MG_PER_ML,
         label: "4 mg/mL (أمبولة 4 ملغ في 1 مل / 8 ملغ في 2 مل)",
         isDefault: true
-      },
-      {
-        value: 8,
-        concentration: 8,
-        unit: DOSE_UNITS.MG_PER_ML,
-        label: "8 mg/mL (فيال عالي التركيز)"
       }
     ],
     pharmacodynamics: {
-      onset: "1 – 2 ساعة (يتطلب وقتاً للتأثير الجيني والخلوي)",
+      onset: "1 – 2 ساعة (يتطلب وقتاً للتأثير الخلوي)",
       peak: "4 – 8 ساعات",
-      clinicalDuration: "24 – 72 ساعة (تأثير ممتد طويل الأمد)"
+      clinicalDuration: "24 – 72 ساعة (تأثير ممتد)"
     },
     clinicalContexts: [
       {
@@ -1706,25 +1141,16 @@ export const supportingDrugsData = [
           requireAge: true
         },
         isDefault: true,
-        note: "إعطاؤه في بداية العملية أفضل بكثير من نهايتها؛ يقلل أيضاً من آلام ما بعد الجراحة واستهلاك الأفيونات."
+        note: "إعطاؤه في بداية العملية أفضل بكثير من نهايتها؛ يقلل أيضاً من آلام ما بعد الجراحة."
       }
     ],
-    toxicitySignals: ["transient_hyperglycemia", "perineal_pruritus_burning"],
     warnings: [
-      "حقنه وريدياً بسرعة للمريض المستيقظ يسبب حرقة وألماً عجانياً شرجياً عابراً ومزعجاً جداً (Perineal Burning)؛ يُفضل إعطاؤه بعد تنويم المريض.",
-      "ارتفاع عابر في سكر الدم (Hyperglycemia) يستمر 24 ساعة؛ يُراعى ضبط جرعات الأنسولين لدى مرضى السكري."
+      "حقنه وريدياً بسرعة للمريض المستيقظ يسبب حرقة وألماً عجانياً عابراً؛ يُفضل إعطاؤه بعد تنويم المريض.",
+      "ارتفاع عابر في سكر الدم (Hyperglycemia)؛ يُراعى ضبط جرعات الأنسولين لدى مرضى السكري."
     ],
     contraindications: [
       "الإنتان الفطري الجهازي غير المعالج.",
       "فرط الحساسية للديكساميثازون."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Dexamethasone Sodium Phosphate Injection Labeling",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
     ]
   },
 
@@ -1740,35 +1166,16 @@ export const supportingDrugsData = [
       category: "aspiration_prophylaxis",
       subcategory: "dopamine_d2_antagonist_prokinetic"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA",
-      documentTitle: "Reglan (Metoclopramide Injection) Prescribing Information",
-      evidenceLevel: "regulatory"
-    },
     safety: {
       highRiskMedication: false,
-      operationalSafetyRequirements: []
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["prokinetic", "lower_esophageal_sphincter_tone", "extrapyramidal_symptoms_risk"],
+    clinicalFlags: ["ponv_prophylaxis"],
     indications: [
       {
         id: "gastric_emptying_aspiration_prophylaxis",
         label: { en: "Acceleration of gastric emptying and aspiration prophylaxis", ar: "تسريع إفراغ المعدة وزيادة مقوية معصرة المريء السفلية للوقاية من الارتجاف الرئوي" }
-      },
-      {
-        id: "ponv_treatment",
-        label: { en: "Prevention and treatment of postoperative nausea and vomiting", ar: "علاج والوقاية من الغثيان والقيء بعد العمليات الجراحية" }
       }
     ],
     presentations: [
@@ -1798,33 +1205,23 @@ export const supportingDrugsData = [
         basis: "fixed_adult_dose",
         administration: {
           method: "slow_iv_push",
-          duration: "حقن وريدي بطيء على مدى 2 إلى 3 دقائق لتجنب القلق والتململ الحركي الحاد (Akathisia)"
+          duration: "حقن وريدي بطيء على مدى 2 إلى 3 دقائق لتجنب التململ الحركي الحاد (Akathisia)"
         },
         validation: {
           requireAge: true
         },
         isDefault: true,
-        note: "تُعطى 10 mg وريدياً ببطء قبل العملية بـ 15-30 دقيقة في حالات المعدة الممتلئة والعمليات الطارئة."
+        note: "تُعطى 10 mg وريدياً ببطء قبل العملية بـ 15-30 دقيقة في حالات المعدة الممتلئة."
       }
     ],
-    toxicitySignals: ["extrapyramidal_symptoms", "acute_dystonia", "akathisia", "tardive_dyskinesia"],
     warnings: [
-      "أعراض خارج هرمية واختلاجات عضلية حادة (Extrapyramidal Symptoms / Acute Dystonia) خاصة لدى اليافعين والشباب؛ تُعالج فوراً بالدايفينهيدرامين (Diphenhydramine) أو البنزوتروبين.",
-      "الحقن الوريدي السريع يسبب شعوراً شديداً بالتململ الحركي والذعر والتوتر المفاجئ (Akathisia)."
+      "أعراض خارج هرمية واختلاجات عضلية حادة (Extrapyramidal Symptoms)؛ تُعالج بالدايفينهيدرامين.",
+      "الحقن الوريدي السريع يسبب شعوراً بالتململ الحركي والذعر والتوتر المفاجئ (Akathisia)."
     ],
     contraindications: [
       "الانسداد أو الانثقاب أو النزف الهضمي الميكانيكي.",
       "مرض باركنسون واضطرابات الحركة الصرعية.",
-      "ورم القواتم (Pheochromocytoma).",
-      "فرط الحساسية للميتوكلوبراميد."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Reglan (Metoclopramide Injection) Prescribing Information & Boxed Warning",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
+      "ورم القواتم (Pheochromocytoma)."
     ]
   },
 
@@ -1840,32 +1237,16 @@ export const supportingDrugsData = [
       category: "aspiration_prophylaxis",
       subcategory: "h2_receptor_antagonist"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false,
-      note: "البديل الحديث والآمن لمثبطات H2 بعد السحب العالمي لعقار الرانيتيدين."
-    },
-    evidence: {
-      sourceOrganization: "FDA",
-      documentTitle: "Pepcid (Famotidine Injection) Prescribing Information",
-      evidenceLevel: "regulatory"
-    },
     safety: {
       highRiskMedication: false,
-      operationalSafetyRequirements: []
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["aspiration_risk_reduction", "ph_elevation"],
+    clinicalFlags: ["ponv_prophylaxis"],
     indications: [
       {
         id: "aspiration_prophylaxis",
-        label: { en: "Reduction of gastric acid volume and elevation of gastric pH", ar: "الوقاية من متلازمة الارتجاف الرئوي الحامضي (Mendelson's Syndrome) في المرضى المعرضين للارتجاع" }
+        label: { en: "Reduction of gastric acid volume and elevation of gastric pH", ar: "الوقاية من متلازمة الارتجاف الرئوي الحامضي (Mendelson's Syndrome) في المعرضين للارتجاع" }
       }
     ],
     presentations: [
@@ -1895,7 +1276,7 @@ export const supportingDrugsData = [
         basis: "fixed_adult_dose",
         administration: {
           method: "slow_iv_push",
-          duration: "تُخفف في 5-10 مل سالاين وتُحقن ببطء على مدى دقيقتين لتفادي بطء القلب وهبوط الضغط."
+          duration: "تُخفف في 5-10 مل سالاين وتُحقن ببطء على مدى دقيقتين."
         },
         validation: {
           requireAge: true
@@ -1904,21 +1285,12 @@ export const supportingDrugsData = [
         note: "تُعطى قبل العملية بـ 45-60 دقيقة لرفع درجة حموضة محتوى المعدة (>2.5)."
       }
     ],
-    toxicitySignals: ["bradycardia_rapid_iv", "headache"],
     warnings: [
-      "الحقن الوريدي السريع قد يسبب هبوطاً عابراً في ضغط الدم وبطء قلب نادراً.",
-      "تتطلب خفض الجرعة إلى 50% أو إطالة الفاصل الزمني في مرضى القصور الكلوي الشديد (CrCl < 50 mL/min)."
+      "الحقن الوريدي السريع قد يسبب هبوطاً عابراً في ضغط الدم.",
+      "تتطلب خفض الجرعة إلى 50% في مرضى القصور الكلوي الشديد."
     ],
     contraindications: [
       "فرط الحساسية المعروفة للفاموتيدين أو مضادات مستقبلات H2 الأخرى."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Pepcid (Famotidine) Injection Prescribing Information",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
     ]
   },
 
@@ -1934,31 +1306,16 @@ export const supportingDrugsData = [
       category: "aspiration_prophylaxis",
       subcategory: "non_particulate_antacid"
     },
-    availability: {
-      status: "standard",
-      regionDependent: true
-    },
-    evidence: {
-      sourceOrganization: "FDA / Anesthesia Guidelines",
-      documentTitle: "Sodium Citrate Oral Solution USP Labeling",
-      evidenceLevel: "regulatory"
-    },
     safety: {
       highRiskMedication: false,
-      operationalSafetyRequirements: []
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: [],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["emergency_c_section", "rapid_gastric_neutralization", "non_particulate"],
+    clinicalFlags: ["ponv_prophylaxis"],
     indications: [
       {
         id: "emergency_aspiration_prophylaxis",
-        label: { en: "Rapid neutralization of gastric acidity prior to emergency anesthesia / Cesarean section", ar: "المعادلة الفورية السريعة لحموضة المعدة قبل عمليات الولادة القيصرية الإسعافية وحالات المعدة الممتلئة" }
+        label: { en: "Rapid neutralization of gastric acidity prior to emergency Cesarean section", ar: "المعادلة الفورية السريعة لحموضة المعدة قبل عمليات الولادة القيصرية الإسعافية" }
       }
     ],
     presentations: [
@@ -1971,7 +1328,7 @@ export const supportingDrugsData = [
       }
     ],
     pharmacodynamics: {
-      onset: "فوري (خلال 5 – 10 دقائق من الشرب الفموي)",
+      onset: "فوري (خلال 5 – 10 دقائق فموياً)",
       peak: "فوري",
       clinicalDuration: "1 – 2 ساعة"
     },
@@ -1994,25 +1351,16 @@ export const supportingDrugsData = [
           requireAge: true
         },
         isDefault: true,
-        note: "مضاد حموضة غير جزيئي (Non-particulate)؛ لا يسبب أذية رئة حبيبية عند الارتجاف الرئوي بخلاف هيدروكسيد المغنيسيوم/الألمنيوم."
+        note: "مضاد حموضة غير جزيئي (Non-particulate)؛ لا يسبب أذية رئة حبيبية عند الارتجاف الرئوي."
       }
     ],
-    toxicitySignals: ["nausea_vomiting_unpleasant_taste"],
     warnings: [
-      "يرفع حجم محتوى المعدة بشكل طفيف ولكنه يرفع درجة الـ pH إلى > 5.0 مما يلغي خطر الحروق الكيميائية الرئوية (Mendelson's Syndrome).",
+      "يرفع درجة الـ pH إلى > 5.0 مما يلغي خطر الحروق الكيميائية الرئوية (Mendelson's Syndrome).",
       "غير مخصص للحقن الوريدي؛ يُعطى فموياً حصراً."
     ],
     contraindications: [
       "القصور الكلوي الحاد الشديد أو فرط صوديوم الدم الحاد.",
       "المرضى الفاقدون للوعي قبل تأمين المجرى الهوائي."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Sodium Citrate and Citric Acid Oral Solution USP",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
     ]
   },
 
@@ -2031,31 +1379,12 @@ export const supportingDrugsData = [
       category: "local_regional_anesthetic",
       subcategory: "amino_amide"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA",
-      documentTitle: "Marcaine (Bupivacaine HCl) Injection Prescribing Information",
-      evidenceLevel: "regulatory"
-    },
     safety: {
       highRiskMedication: true,
-      operationalSafetyRequirements: [
-        "lipid_emulsion_20_available",
-        "continuous_ecg_monitoring",
-        "resuscitation_equipment_ready"
-      ]
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["cardiotoxicity_high_risk", "spinal_heavy_vs_plain", "last_risk", "long_acting"],
+    clinicalFlags: ["cardiotoxicity_high_risk", "last_risk"],
     indications: [
       {
         id: "spinal_anesthesia",
@@ -2091,15 +1420,13 @@ export const supportingDrugsData = [
       }
     ],
     pharmacodynamics: {
-      onset: "5 – 15 دقيقة (حصر محيطي) / 2 – 5 دقائق (تخدير نصفي شوكي)",
+      onset: "5 – 15 دقيقة (حصر محيطي) / 2 – 5 دقائق (شوكي)",
       peak: "15 – 30 دقيقة",
       clinicalDuration: "3 – 6 ساعات (تخدير طويل الأمد)"
     },
     doseLimits: {
       maxSingleDosePlainMgKg: 2.0,
       absoluteMaxPlainMg: 175.0,
-      maxWithEpiMgKg: 2.5,
-      absoluteMaxWithEpiMg: 225.0,
       note: "الحد الأقصى للجرعة الساذجة هو 2.0 mg/kg بما لا يتجاوز 175 mg لتفادي التسمم الجهازي."
     },
     clinicalContexts: [
@@ -2144,24 +1471,15 @@ export const supportingDrugsData = [
         note: "يوفر حصراً حسياً وحركياً عميقاً يدوم 2 إلى 3 ساعات."
       }
     ],
-    toxicitySignals: ["refractory_ventricular_arrhythmias", "seizures", "cardiovascular_collapse"],
     warnings: [
-      "⚠️ سمية قلبية شديدة (Severe Cardiotoxicity): يرتبط بقوة وبشكل غير عكوس بقنوات الصوديوم القلبية؛ الحقن الوريدي غير المقصود يسبب رجفاناً بطينياً معنداً وتوقف قلب حاد يصعب إنعاشه.",
+      "⚠️ سمية قلبية شديدة (Severe Cardiotoxicity): يرتبط بقوة وبطء بقنوات الصوديوم القلبية؛ الحقن الوريدي الخاطئ يسبب رجفاناً بطينياً معنداً وتوقف قلب حاد.",
       "⚠️ يُمنع منعاً باتاً استخدامه في التخدير الناحي الوريدي (Bier Block).",
-      "الشفط السلبي المتكرر (Aspiration) قبل وأثناء الحقن إلزامي لاستبعاد الدخول الوعائي."
+      "الشفط السلبي المتكرر (Aspiration) قبل وأثناء الحقن إلزامي."
     ],
     contraindications: [
       "التخدير الناحي الوريدي (IVRA / Bier Block) — مانع استعمال مطلق لخطورة الوفاة.",
       "فرط الحساسية للمخدرات الموضعية من زمرة الأميدات.",
-      "موانع التخدير النصفي الشوكي (رفض المريض، اعتلال الخثرة الحاد، إنتان موقع الحقن، الصدمة نقص الحجم الشديدة)."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Marcaine (Bupivacaine HCl) Prescribing Information & Boxed Warnings",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
+      "موانع التخدير النصفي الشوكي (رفض المريض، اعتلال الخثرة الحاد، إنتان موقع الحقن)."
     ]
   },
 
@@ -2177,31 +1495,12 @@ export const supportingDrugsData = [
       category: "local_regional_anesthetic",
       subcategory: "amino_amide"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA / AHA",
-      documentTitle: "Xylocaine (Lidocaine HCl Injection) Prescribing Information",
-      evidenceLevel: "regulatory_and_guideline"
-    },
     safety: {
       highRiskMedication: true,
-      operationalSafetyRequirements: [
-        "lipid_emulsion_20_available",
-        "resuscitation_equipment_ready",
-        "continuous_ecg_monitoring"
-      ]
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display", "unit_conversion_for_review"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["last_risk", "iv_blunting_airway", "antiarrhythmic_class_1b", "infiltration_max_dose"],
+    clinicalFlags: ["last_risk", "cardiotoxicity_high_risk"],
     indications: [
       {
         id: "local_infiltration_nerve_block",
@@ -2210,10 +1509,6 @@ export const supportingDrugsData = [
       {
         id: "iv_intubation_blunting",
         label: { en: "IV blunting of airway reflexes and intubation response", ar: "تثبيط ردود الفعل الحنجرية والوعائية للتنبيب وتقليل ألم حقن البروبوفول" }
-      },
-      {
-        id: "ventricular_arrhythmias_acls",
-        label: { en: "Treatment of ventricular arrhythmias (VT/VF in ACLS)", ar: "علاج اللانظميات البطينية كبديل للأميودارون في بروتوكول ACLS" }
       }
     ],
     presentations: [
@@ -2231,20 +1526,6 @@ export const supportingDrugsData = [
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 2.0,
         label: "2% Plain (20 mg/mL - 200 mg / 10 mL)"
-      },
-      {
-        value: 10,
-        concentration: 10,
-        unit: DOSE_UNITS.MG_PER_ML,
-        percentage: 1.0,
-        label: "1% with Epinephrine 1:100,000 (10 mg/mL + 10 mcg/mL Epi)"
-      },
-      {
-        value: 20,
-        concentration: 20,
-        unit: DOSE_UNITS.MG_PER_ML,
-        percentage: 2.0,
-        label: "2% with Epinephrine 1:200,000 (20 mg/mL + 5 mcg/mL Epi)"
       }
     ],
     pharmacodynamics: {
@@ -2275,7 +1556,6 @@ export const supportingDrugsData = [
           timing: "يُعطى وريدياً قبل تنظير الحنجرة بـ 90 ثانية أو متزامناً مع البروبوفول."
         },
         weightPolicy: {
-          allowed: ["TBW", "IBW"],
           preferred: "IBW"
         },
         validation: {
@@ -2285,29 +1565,6 @@ export const supportingDrugsData = [
         },
         isDefault: true,
         note: "يقلل السعال والضغط الشرياني واستجابة القصبات أثناء إدخال الأنبوب الرغامي."
-      },
-      {
-        id: "acls_vt_vf_arrest_bolus",
-        population: "adult",
-        route: "IV",
-        label: "اللانظميات البطينية في توقف القلب (ACLS Refractory VF/pVT Bolus)",
-        doseMin: 1.0,
-        doseMax: 1.5,
-        unit: DOSE_UNITS.MG_PER_KG,
-        doseType: "weight_bolus",
-        basis: "acls_guideline_protocol",
-        administration: {
-          method: "rapid_iv_push"
-        },
-        weightPolicy: {
-          allowed: ["TBW", "IBW"],
-          preferred: "TBW"
-        },
-        validation: {
-          requireWeight: true,
-          requireMonitoringConfirmation: true
-        },
-        note: "الجرعة الأولى 1.0 - 1.5 mg/kg؛ يمكن تكرار 0.5 - 0.75 mg/kg كل 5-10 دقائق (الحد الأقصى الإجمالي 3 mg/kg)."
       },
       {
         id: "local_infiltration_max_dose",
@@ -2324,7 +1581,6 @@ export const supportingDrugsData = [
           note: "يجب الشفط السلبي المستمر قبل الحقن لاستبعاد الدخول الوعائي غير المقصود."
         },
         weightPolicy: {
-          allowed: ["IBW", "TBW"],
           preferred: "IBW"
         },
         validation: {
@@ -2333,22 +1589,13 @@ export const supportingDrugsData = [
         note: "تأكد من عدم تجاوز السقف الحجمي المسموح به بناءً على تركيز المحلول المستخدم."
       }
     ],
-    toxicitySignals: ["metallic_taste", "perioral_numbness", "tinnitus", "seizures", "cardiac_arrest"],
     warnings: [
-      "⚠️ علامات التسمم الجهازي الباكرة (LAST Early Signs): طعم معدني في الفم، خدر حول الشفاه، طنين في الأذن، رجفان، تلعثم الكلام، يليه اختلاجات صرعية وتثبيط قلبي وعائي.",
-      "يُمنع استخدام المحاليل المحتوية على الأدرينالين في التخدير الموضعي للأطراف والنهايات الحركية المعلقة (الأصابع، الأنف، صيوان الأذن، القضيب) لخطر النخر الإقفاري."
+      "⚠️ علامات التسمم الجهازي الباكرة (LAST): طعم معدني، خدر حول الفم، طنين، رجفان، اختلاجات صرعية ثم تثبيط قلبي.",
+      "يُمنع استخدام المحاليل المحتوية على الأدرينالين في التخدير الموضعي للأطراف والنهايات المعلقة (الأصابع، الأنف، القضيب)."
     ],
     contraindications: [
       "فرط الحساسية للمخدرات الموضعية من زمرة الأميدات.",
-      "حصار القلب المتقدم من الدرجة الثانية أو الثالثة (عند الاستخدام الوريدي كخافض للنظم)."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Xylocaine (Lidocaine HCl) Prescribing Information",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
+      "حصار القلب المتقدم من الدرجة الثانية أو الثالثة."
     ]
   },
 
@@ -2364,31 +1611,12 @@ export const supportingDrugsData = [
       category: "local_regional_anesthetic",
       subcategory: "pure_s_enantiomer_amino_amide"
     },
-    availability: {
-      status: "standard",
-      regionDependent: false
-    },
-    evidence: {
-      sourceOrganization: "FDA",
-      documentTitle: "Naropin (Ropivacaine HCl Injection) Prescribing Information",
-      evidenceLevel: "regulatory"
-    },
     safety: {
       highRiskMedication: true,
-      operationalSafetyRequirements: [
-        "lipid_emulsion_20_available",
-        "resuscitation_equipment_ready",
-        "continuous_ecg_monitoring"
-      ]
+      requiresAirwayReady: false,
+      requiresRespiratoryMonitoring: false
     },
-    calculationPolicy: {
-      mode: "reference_only_with_non_actionable_math",
-      automaticDoseCalculation: false,
-      permittedCalculations: ["volume_conversion_for_display"],
-      prohibitedCalculations: ["automatic_bolus_order"],
-      requireClinicianConfirmation: true
-    },
-    clinicalFlags: ["reduced_cardiotoxicity", "motor_sparing", "epidural_nerve_blocks", "long_acting"],
+    clinicalFlags: ["last_risk", "cardiotoxicity_high_risk"],
     indications: [
       {
         id: "epidural_labor_surgery",
@@ -2421,13 +1649,6 @@ export const supportingDrugsData = [
         unit: DOSE_UNITS.MG_PER_ML,
         percentage: 0.75,
         label: "0.75% (7.5 mg/mL - للتخدير الجراحي فوق الجافية للجراحة والقيصرية)"
-      },
-      {
-        value: 10,
-        concentration: 10,
-        unit: DOSE_UNITS.MG_PER_ML,
-        percentage: 1.0,
-        label: "1.0% (10 mg/mL - للتخدير الجراحي العميق فوق الجافية)"
       }
     ],
     pharmacodynamics: {
@@ -2438,8 +1659,6 @@ export const supportingDrugsData = [
     doseLimits: {
       maxSingleDosePlainMgKg: 3.0,
       absoluteMaxPlainMg: 225.0,
-      maxWithEpiMgKg: 3.5,
-      absoluteMaxWithEpiMg: 250.0,
       note: "السقف الأقصى الموصى به للجرعة المفردة هو 3.0 mg/kg بما لا يتجاوز 225 mg."
     },
     clinicalContexts: [
@@ -2461,7 +1680,7 @@ export const supportingDrugsData = [
           requireMonitoringConfirmation: true
         },
         isDefault: true,
-        note: "يتميز بخاصية الحفاظ الحركي (Motor Sparing) حيث يوفر تسكيناً حسياً ممتازاً مع شلل حركي أقل بكثير من البوبيفاكايين."
+        note: "يتميز بخاصية الحفاظ الحركي (Motor Sparing)؛ تسكين حسي مع شلل حركي أقل بكثير من البوبيفاكايين."
       },
       {
         id: "peripheral_nerve_block",
@@ -2480,25 +1699,16 @@ export const supportingDrugsData = [
         validation: {
           requireMonitoringConfirmation: true
         },
-        note: "يوفر تسكيناً جراحياً ممتداً يدوم حتى 12-24 ساعة عند المشاركة في تسكين ما بعد العمليات."
+        note: "يوفر تسكيناً جراحياً ممتداً يدوم حتى 12-24 ساعة."
       }
     ],
-    toxicitySignals: ["cns_toxicity", "cardiovascular_depression"],
     warnings: [
-      "على الرغم من أن الروبيفاكايين يمتلك هامش أمان قلبي وعائي أوسع وأقل سمية قلبية من البوبيفاكايين (لأنه S-enantiomer نقي)، إلا أن التسمم الجهازي (LAST) وارد الحدوث عند الحقن الوعائي الخاطئ.",
+      "أقل سمية قلبية من البوبيفاكايين (S-enantiomer نقي)، لكن التسمم الجهازي (LAST) وارد عند الحقن الوعائي الخاطئ.",
       "الشفط السلبي المتكرر قبل وأثناء الحقن إلزامي."
     ],
     contraindications: [
       "فرط الحساسية للمخدرات الموضعية من زمرة الأميدات.",
       "التخدير الناحي الوريدي (Bier Block)."
-    ],
-    references: [
-      {
-        organization: "FDA",
-        title: "Naropin (Ropivacaine HCl) Prescribing Information",
-        year: "2024",
-        evidenceLevel: "regulatory"
-      }
     ]
   }
 ];
