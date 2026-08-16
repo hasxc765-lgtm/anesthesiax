@@ -1,11 +1,12 @@
 /**
  * Pediatric Calculation & Safety Engine
  * AnesthesiaX — Phase 7.5 (Fully Audited & Patched)
- * File: js/logic/PedsCalculator.js
+ * File: js/calculators/pedsCalculator.js
  * 
  * Clinical Reference & Standards:
  * - PALS / AHA Pediatric Resuscitation Standards
  * - Khine & Motoyama Cuffed/Uncuffed ETT Formulas (0.5 mm step standardization)
+ * - CDC / WHO Pediatric Growth Percentiles (Physiological Boundary Checks)
  * - Holliday-Segar Fluid Maintenance Framework
  */
 
@@ -51,16 +52,32 @@ export class PedsCalculator {
       errors.push("العمر المدخل يتجاوز الفئة العمرية لطب الأطفال (الأعمار فوق 18 سنة تُحسب في حاسبة البالغين).");
     }
 
-    // 🛡️ فحص التناسق السريري بين الوزن والعمر لمنع الأخطاء المطبعية (Sanity Check)
+    // 🛡️ فحص التناسق السريري الدقيق بين الوزن والعمر (Sanity Bounds)
     if (!isNaN(weight) && !isNaN(age) && errors.length === 0) {
-      if (age < 1 && weight > 15) {
-        errors.push(`الوزن المدخل (${weight} كجم) مرتفع جداً وغير متوافق مع رضيع أقل من سنة.`);
-      } else if (age <= 2 && weight > 35) {
-        errors.push(`الوزن المدخل (${weight} كجم) غير منطقي لعمر (${age.toFixed(1)} سنة).`);
-      } else if (age <= 6 && weight > 65) {
-        errors.push(`الوزن المدخل (${weight} كجم) يتجاوز الحدود الفيزيولوجية لعمر (${age.toFixed(1)} سنة).`);
-      } else if (age <= 12 && weight > 120) {
-        errors.push(`الوزن المدخل (${weight} كجم) غير متناسب مع عمر (${age.toFixed(1)} سنة).`);
+      // 1. الرضع (أقل من سنة)
+      if (age < 1) {
+        if (weight < 1.0) errors.push(`الوزن المدخل (${weight} كجم) منخفض جداً ويخص الخدج الشديدين.`);
+        if (weight > 14.0) errors.push(`الوزن المدخل (${weight} كجم) غير منطقي لرضيع بعمر أقل من سنة (الحد الأقصى 14 كجم).`);
+      }
+      // 2. الأطفال من 1 إلى 2 سنة (الحد الأقصى الطبيعي 18 كغم)
+      else if (age <= 2) {
+        if (weight < 5.0) errors.push(`الوزن المدخل (${weight} كجم) منخفض جداً لعمر (${age.toFixed(1)} سنة).`);
+        if (weight > 18.0) errors.push(`الوزن المدخل (${weight} كجم) مرتفع جداً وغير متوافق مع عمر (${age.toFixed(1)} سنة - الحد الأقصى 18 كجم).`);
+      }
+      // 3. الأطفال من 3 إلى 5 سنوات (الحد الأقصى 30 كغم)
+      else if (age <= 5) {
+        if (weight < 8.0) errors.push(`الوزن المدخل (${weight} كجم) منخفض جداً لعمر (${age.toFixed(1)} سنوات).`);
+        if (weight > 30.0) errors.push(`الوزن المدخل (${weight} كجم) غير معقول لعمر (${age.toFixed(1)} سنوات - الحد الأقصى 30 كجم).`);
+      }
+      // 4. الأطفال من 6 إلى 10 سنوات (الحد الأقصى 55 كغم)
+      else if (age <= 10) {
+        if (weight < 12.0) errors.push(`الوزن المدخل (${weight} كجم) منخفض جداً لعمر (${age.toFixed(1)} سنوات).`);
+        if (weight > 55.0) errors.push(`الوزن المدخل (${weight} كجم) غير متوافق مع عمر (${age.toFixed(1)} سنوات - الحد الأقصى 55 كجم).`);
+      }
+      // 5. اليافعون من 11 إلى 15 سنة (الحد الأقصى 95 كغم)
+      else if (age <= 15) {
+        if (weight < 18.0) errors.push(`الوزن المدخل (${weight} كجم) منخفض جداً لهذه الفئة العمرية.`);
+        if (weight > 95.0) errors.push(`الوزن المدخل (${weight} كجم) يتجاوز الحد السريري المعقول لعمر (${age.toFixed(1)} سنة).`);
       }
     }
 
@@ -82,9 +99,9 @@ export class PedsCalculator {
     };
   }
 
-  // =========================================================================
+  // =========================================================
   // 2. ETT & AIRWAY ENGINE (معايرة 0.5 mm المعتمدة)
-  // =========================================================================
+  // =========================================================
   static calculateAirway(weightKg, ageYears) {
     const validation = this.validateInputs(weightKg, ageYears);
     if (!validation.isValid) {
@@ -125,6 +142,10 @@ export class PedsCalculator {
         cuffedSizeMm: primaryCuffed,
         cuffedDisplay: `${primaryCuffed.toFixed(1)} mm (احتياطي: ${(primaryCuffed - 0.5).toFixed(1)} / ${(primaryCuffed + 0.5).toFixed(1)})`,
         uncuffedDisplay: `${primaryUncuffed.toFixed(1)} mm (احتياطي: ${(primaryUncuffed - 0.5).toFixed(1)} / ${(primaryUncuffed + 0.5).toFixed(1)})`,
+        primaryCuffed: primaryCuffed.toFixed(1),
+        backupCuffed: `${(primaryCuffed - 0.5).toFixed(1)} / ${(primaryCuffed + 0.5).toFixed(1)}`,
+        primaryUncuffed: primaryUncuffed.toFixed(1),
+        backupUncuffed: `${(primaryUncuffed - 0.5).toFixed(1)} / ${(primaryUncuffed + 0.5).toFixed(1)}`,
         estimatedOralDepthCm: activeRange.estimatedOralDepthCm,
         oralDepthRangeCm: activeRange.oralDepthRangeMinCm ? `${activeRange.oralDepthRangeMinCm}–${activeRange.oralDepthRangeMaxCm}` : `${activeRange.estimatedOralDepthCm}`,
         estimatedNasalDepthCm: activeRange.estimatedNasalDepthCm || (activeRange.estimatedOralDepthCm + 2),
@@ -162,6 +183,10 @@ export class PedsCalculator {
       cuffedSizeMm: primaryCuffed,
       cuffedDisplay: `${primaryCuffed.toFixed(1)} mm (احتياطي: ${(primaryCuffed - 0.5).toFixed(1)} / ${(primaryCuffed + 0.5).toFixed(1)})`,
       uncuffedDisplay: `${primaryUncuffed.toFixed(1)} mm (احتياطي: ${(primaryUncuffed - 0.5).toFixed(1)} / ${(primaryUncuffed + 0.5).toFixed(1)})`,
+      primaryCuffed: primaryCuffed.toFixed(1),
+      backupCuffed: `${(primaryCuffed - 0.5).toFixed(1)} / ${(primaryCuffed + 0.5).toFixed(1)}`,
+      primaryUncuffed: primaryUncuffed.toFixed(1),
+      backupUncuffed: `${(primaryUncuffed - 0.5).toFixed(1)} / ${(primaryUncuffed + 0.5).toFixed(1)}`,
       estimatedOralDepthCm: parseFloat(oralDepth.toFixed(1)),
       estimatedNasalDepthCm: parseFloat(nasalDepth.toFixed(1)),
       blade,
@@ -179,9 +204,9 @@ export class PedsCalculator {
     };
   }
 
-  // =========================================================================
+  // =========================================================
   // 3. EMERGENCY DRUG CALCULATION ENGINE
-  // =========================================================================
+  // =========================================================
   static calculateDrugDose(drugId, indicationId, weightKg, ageYears, selectedMgPerMl = null) {
     const validation = this.validateInputs(weightKg, ageYears);
     if (!validation.isValid) {
@@ -338,9 +363,9 @@ export class PedsCalculator {
     };
   }
 
-  // =========================================================================
+  // =========================================================
   // 4. MAINTENANCE FLUID ENGINE (Holliday-Segar)
-  // =========================================================================
+  // =========================================================
   static calculateMaintenanceFluids(weightKg, ageDays = 30) {
     const validation = this.validateInputs(weightKg, null, ageDays);
     if (!validation.isValid) {
