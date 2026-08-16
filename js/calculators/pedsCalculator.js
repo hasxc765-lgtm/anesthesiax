@@ -1,13 +1,20 @@
 /**
  * Pediatric Calculation & Safety Engine
  * AnesthesiaX — Phase 7.5 (Fully Audited & Patched)
- * Version: 7.5-engine-strict-v4
+ * File: js/logic/PedsCalculator.js
  * 
- * Dependencies:
- * - ../data/pedsData.js
+ * Clinical Reference & Standards:
+ * - PALS / AHA Pediatric Resuscitation Standards
+ * - Khine & Motoyama Cuffed/Uncuffed ETT Formulas (0.5 mm step standardization)
+ * - Holliday-Segar Fluid Maintenance Framework
  */
 
 import { pedsData } from "../data/pedsData.js";
+
+// دالة مساعدة لتقريب قياسات الأنابيب لأقرب نصف مليمتر (0.5 mm)
+function roundToHalf(value) {
+  return Math.round(value * 2) / 2;
+}
 
 export class PedsCalculator {
 
@@ -29,34 +36,40 @@ export class PedsCalculator {
     }
 
     if (isNaN(weight) || weight <= 0) {
-      errors.push(pedsData?.plausibilityConstraints?.messages?.invalidWeight || "الوزن غير صحيح.");
+      errors.push(pedsData?.plausibilityConstraints?.messages?.invalidWeight || "يرجى إدخال وزن صحيح بالكيلوغرام.");
     }
 
     if (isNaN(age) || age < 0) {
-      errors.push(pedsData?.plausibilityConstraints?.messages?.invalidAge || "العمر غير صحيح.");
+      errors.push(pedsData?.plausibilityConstraints?.messages?.invalidAge || "يرجى إدخال عمر صحيح بالسنوات.");
     }
 
-    if (pedsData?.plausibilityConstraints) {
+    if (weight > 150) {
+      errors.push("الوزن المدخل يتجاوز النطاق المخصص لطب الأطفال (أقصى وزن 150 كغم).");
+    }
+
+    if (age > 18) {
+      errors.push("العمر المدخل يتجاوز الفئة العمرية لطب الأطفال (الأعمار فوق 18 سنة تُحسب في حاسبة البالغين).");
+    }
+
+    // 🛡️ فحص التناسق السريري بين الوزن والعمر لمنع الأخطاء المطبعية (Sanity Check)
+    if (!isNaN(weight) && !isNaN(age) && errors.length === 0) {
+      if (age < 1 && weight > 15) {
+        errors.push(`الوزن المدخل (${weight} كجم) مرتفع جداً وغير متوافق مع رضيع أقل من سنة.`);
+      } else if (age <= 2 && weight > 35) {
+        errors.push(`الوزن المدخل (${weight} كجم) غير منطقي لعمر (${age.toFixed(1)} سنة).`);
+      } else if (age <= 6 && weight > 65) {
+        errors.push(`الوزن المدخل (${weight} كجم) يتجاوز الحدود الفيزيولوجية لعمر (${age.toFixed(1)} سنة).`);
+      } else if (age <= 12 && weight > 120) {
+        errors.push(`الوزن المدخل (${weight} كجم) غير متناسب مع عمر (${age.toFixed(1)} سنة).`);
+      }
+    }
+
+    if (pedsData?.plausibilityConstraints && errors.length === 0) {
       if (weight > pedsData.plausibilityConstraints.highWeightThresholdKg) {
         alerts.push(pedsData.plausibilityConstraints.messages.highWeightWarning);
       }
-
-      if (age > pedsData.plausibilityConstraints.maxPediatricAgeYears) {
-        alerts.push(pedsData.plausibilityConstraints.messages.overAgeWarning);
-      }
-
       if (age < (28 / 365.25)) {
         alerts.push(pedsData.plausibilityConstraints.messages.neonatalWarning);
-      }
-    }
-
-    // 🛡️ فحص التناسق السريري بين الوزن والعمر (Weight-for-Age Plausibility Check)
-    if (!isNaN(weight) && !isNaN(age) && age > 0 && age <= 12) {
-      const maxPlausibleWeight = (age * 4) + 20;
-      if (weight > maxPlausibleWeight) {
-        alerts.push(
-          `🚨 تحذير أمان سريري حاد: الوزن المدخل (${weight} كجم) مرتفع وغير متناسب مع عمر الطفل (${age} سنة). يرجى التأكد من عدم وجود خطأ إملائي (Typo).`
-        );
       }
     }
 
@@ -70,7 +83,7 @@ export class PedsCalculator {
   }
 
   // =========================================================================
-  // 2. ETT & AIRWAY ENGINE
+  // 2. ETT & AIRWAY ENGINE (معايرة 0.5 mm المعتمدة)
   // =========================================================================
   static calculateAirway(weightKg, ageYears) {
     const validation = this.validateInputs(weightKg, ageYears);
@@ -83,6 +96,7 @@ export class PedsCalculator {
 
     const minAgeFormulas = pedsData?.airwayRules?.childFormulas?.minAgeYearsInclusive ?? 1;
 
+    // الرضع وحديثو الولادة (أقل من سنة واحدة - مطابقة الوزن)
     if (age < minAgeFormulas) {
       const ranges = pedsData?.airwayRules?.neonatalInfantRanges || [];
       const match = ranges.find(range => {
@@ -100,56 +114,67 @@ export class PedsCalculator {
         blade: "Miller 0 / 1"
       };
 
+      const primaryUncuffed = activeRange.uncuffedSizeMm;
+      const primaryCuffed = activeRange.cuffedSizeMm;
+
       return {
         success: true,
         method: match ? "weight_based_lookup" : "weight_based_fallback",
         isNeonatalInfant: true,
-        uncuffedSizeMm: activeRange.uncuffedSizeMm,
-        cuffedSizeMm: activeRange.cuffedSizeMm,
+        uncuffedSizeMm: primaryUncuffed,
+        cuffedSizeMm: primaryCuffed,
+        cuffedDisplay: `${primaryCuffed.toFixed(1)} mm (احتياطي: ${(primaryCuffed - 0.5).toFixed(1)} / ${(primaryCuffed + 0.5).toFixed(1)})`,
+        uncuffedDisplay: `${primaryUncuffed.toFixed(1)} mm (احتياطي: ${(primaryUncuffed - 0.5).toFixed(1)} / ${(primaryUncuffed + 0.5).toFixed(1)})`,
         estimatedOralDepthCm: activeRange.estimatedOralDepthCm,
         oralDepthRangeCm: activeRange.oralDepthRangeMinCm ? `${activeRange.oralDepthRangeMinCm}–${activeRange.oralDepthRangeMaxCm}` : `${activeRange.estimatedOralDepthCm}`,
         estimatedNasalDepthCm: activeRange.estimatedNasalDepthCm || (activeRange.estimatedOralDepthCm + 2),
         blade: activeRange.blade,
         backupSizesMm: {
-          smaller: parseFloat((activeRange.uncuffedSizeMm - 0.5).toFixed(1)),
-          larger: parseFloat((activeRange.uncuffedSizeMm + 0.5).toFixed(1))
+          smaller: parseFloat((primaryUncuffed - 0.5).toFixed(1)),
+          larger: parseFloat((primaryUncuffed + 0.5).toFixed(1))
         },
-        warnings: [...warnings, pedsData?.airwayRules?.clinicalWarnings?.depthWarning || "تحقق من عمق الأنبوب بسماع الأصوات التنفسية."]
+        warnings: [...warnings, pedsData?.airwayRules?.clinicalWarnings?.depthWarning || "تحقق من عمق الأنبوب بسماع الأصوات التنفسية وتخطيط الـ Capnography."]
       };
     }
 
-    // معادلات الأطفال فوق سنة واحدة
-    const uncuffed = (age / 4) + 4;
-    const cuffed = (age / 4) + 3.5;
+    // معادلات الأطفال من عمر سنة فما فوق بنظام التقريب لـ 0.5 mm
+    const rawUncuffed = (age / 4) + 4.0;
+    const rawCuffed = (age / 4) + 3.5;
+    
+    // التقريب الدقيق لأقرب 0.5 mm
+    const primaryUncuffed = roundToHalf(rawUncuffed);
+    const primaryCuffed = roundToHalf(rawCuffed);
+
     const oralDepth = (age / 2) + 12;
     const nasalDepth = (age / 2) + 15;
 
     let blade = "Macintosh 2";
     if (age < 2) blade = "Miller 1 / Mac 1";
-    else if (age >= 2 && age <= 6) blade = "Macintosh 2";
-    else if (age > 6 && age <= 12) blade = "Macintosh 3";
+    else if (age >= 2 && age <= 6) blade = "Macintosh 2 / Miller 2";
+    else if (age > 6 && age <= 12) blade = "Macintosh 2 – 3";
     else blade = "Macintosh 3 / 4";
 
     return {
       success: true,
-      method: "age_based_formula",
+      method: "age_based_formula_rounded_0.5mm",
       isNeonatalInfant: false,
-      uncuffedSizeMm: parseFloat(uncuffed.toFixed(1)),
-      cuffedSizeMm: parseFloat(cuffed.toFixed(1)),
+      uncuffedSizeMm: primaryUncuffed,
+      cuffedSizeMm: primaryCuffed,
+      cuffedDisplay: `${primaryCuffed.toFixed(1)} mm (احتياطي: ${(primaryCuffed - 0.5).toFixed(1)} / ${(primaryCuffed + 0.5).toFixed(1)})`,
+      uncuffedDisplay: `${primaryUncuffed.toFixed(1)} mm (احتياطي: ${(primaryUncuffed - 0.5).toFixed(1)} / ${(primaryUncuffed + 0.5).toFixed(1)})`,
       estimatedOralDepthCm: parseFloat(oralDepth.toFixed(1)),
       estimatedNasalDepthCm: parseFloat(nasalDepth.toFixed(1)),
       blade,
       backupSizesMm: {
-        smallerCuffed: parseFloat((cuffed - 0.5).toFixed(1)),
-        largerCuffed: parseFloat((cuffed + 0.5).toFixed(1)),
-        smallerUncuffed: parseFloat((uncuffed - 0.5).toFixed(1)),
-        largerUncuffed: parseFloat((uncuffed + 0.5).toFixed(1))
+        smallerCuffed: parseFloat((primaryCuffed - 0.5).toFixed(1)),
+        largerCuffed: parseFloat((primaryCuffed + 0.5).toFixed(1)),
+        smallerUncuffed: parseFloat((primaryUncuffed - 0.5).toFixed(1)),
+        largerUncuffed: parseFloat((primaryUncuffed + 0.5).toFixed(1))
       },
       warnings: [
         ...warnings,
-        pedsData?.airwayRules?.clinicalWarnings?.sizeWarning || "حجم الأنبوب تقديري؛ جهّز مقاساً أصغر ومقاساً أكبر.",
-        pedsData?.airwayRules?.clinicalWarnings?.depthWarning || "تأكد من موقع الأنبوب بتنصت الطرفين وتخطيط ثاني أكسيد الكربون.",
-        pedsData?.airwayRules?.clinicalWarnings?.cuffPressureWarning || "حافظ على ضغط الكاف أقل من 20 cmH2O."
+        "مقاس الأنبوب الرغامي مقرب لأقرب 0.5 mm مع تجهيز مقاس احتياطي أصغر وأكبر.",
+        pedsData?.airwayRules?.clinicalWarnings?.cuffPressureWarning || "حافظ على ضغط الكاف أقل من 20 cmH2O في الأنابيب ذات الكاف."
       ]
     };
   }
@@ -167,7 +192,7 @@ export class PedsCalculator {
     const emergencyDrugs = pedsData?.emergencyDrugs || [];
     const drug = emergencyDrugs.find(d => d.id === drugId);
     if (!drug) {
-      return { success: false, errors: [`الدواء المطلوب (${drugId}) غير موجود.`] };
+      return { success: false, errors: [`الدواء المطلوب (${drugId}) غير موجود في قاعدة بيانات الأطفال.`] };
     }
 
     const indication = drug.indications?.find(i => i.id === indicationId);
@@ -183,7 +208,6 @@ export class PedsCalculator {
       safetyAlerts.push(...indication.warnings);
     }
 
-    // تحديد التركيز
     let concentrationMgPerMl = selectedMgPerMl;
     if (!concentrationMgPerMl) {
       if (indication.concentration && indication.concentration.mgPerMl) {
@@ -199,7 +223,6 @@ export class PedsCalculator {
     let defaultDose = null;
     let unit = indication.doseUnit || "mg";
 
-    // حساب الجرعة حسب النوع (تمت إضافة fixed_mcg_kg)
     if (indication.doseType === "fixed_mg_kg") {
       rawDose = weight * indication.doseValue;
       unit = "mg";
@@ -231,7 +254,6 @@ export class PedsCalculator {
       rawDose = indication.doseValue;
     }
 
-    // معالجة السقف الأقصى وتوافق الوحدات (Unit Alignment Fix)
     let maxLimit = null;
 
     if (unit === "mcg") {
@@ -268,10 +290,9 @@ export class PedsCalculator {
     if (maxLimit !== null && appliedDose > maxLimit) {
       appliedDose = maxLimit;
       isCapped = true;
-      safetyAlerts.push(`الجرعة المحسوبة (${rawDose.toFixed(2)} ${unit}) تتجاوز الحد الأقصى الموصى به (${maxLimit} ${unit}). تم تقييد الجرعة عند ${maxLimit} ${unit}.`);
+      safetyAlerts.push(`الجرعة المحسوبة (${rawDose.toFixed(2)} ${unit}) تتجاوز الحد الأقصى الآمن (${maxLimit} ${unit}). تم تقييد الجرعة عند ${maxLimit} ${unit}.`);
     }
 
-    // حساب الحجم بالـ mL
     let calculatedVolumeMl = null;
     if (indication.doseType.includes("ml_kg")) {
       calculatedVolumeMl = appliedDose;
@@ -318,7 +339,7 @@ export class PedsCalculator {
   }
 
   // =========================================================================
-  // 4. MAINTENANCE FLUID ENGINE
+  // 4. MAINTENANCE FLUID ENGINE (Holliday-Segar)
   // =========================================================================
   static calculateMaintenanceFluids(weightKg, ageDays = 30) {
     const validation = this.validateInputs(weightKg, null, ageDays);
