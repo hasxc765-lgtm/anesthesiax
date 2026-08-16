@@ -2,7 +2,7 @@
  * AnesthesiaX — Drug Center & Clinical Dosing View Component
  * File: js/components/drugCenterView.js
  * 
- * High-Performance View Layer (Ultra-Clean & Compact Accordion Layout)
+ * High-Performance View Layer (6-Phase Clinical Chronological OR Layout)
  */
 
 import { drugsData } from "../data/drugs.js";
@@ -14,7 +14,7 @@ import { DOSE_UNITS } from "../data/common/doseUnits.js";
 // =============================================================================
 
 const state = {
-  activeTriadFilter: "analgesia",
+  activeTriadFilter: "sedation", // البداية بالمهدئات كأول خطوة سريرية
   searchQuery: "",
   patientWeight: "",
   patientAge: "40",
@@ -142,34 +142,47 @@ export function renderDrugCenterView() {
         </div>
       </div>
 
-      <!-- SEARCH & CATEGORY TABS -->
+      <!-- SEARCH & CATEGORY TABS (الترتيب الزمني المعتمد لـ 6 تبويبات) -->
       <div class="space-y-2">
         <div class="relative">
-          <input type="text" id="dcSearchInput" value="${state.searchQuery}" placeholder="🔍 ابحث عن دواء (Propofol, Fentanyl, Rocuronium, Midazolam, Ephedrine)..." class="w-full p-3 bg-white border-2 border-blue-500/80 rounded-2xl text-xs font-bold shadow-sm focus:outline-none text-slate-900">
+          <input type="text" id="dcSearchInput" value="${state.searchQuery}" placeholder="🔍 ابحث عن دواء (Midazolam, Propofol, Fentanyl, Rocuronium, Sevoflurane, Ephedrine)..." class="w-full p-3 bg-white border-2 border-blue-500/80 rounded-2xl text-xs font-bold shadow-sm focus:outline-none text-slate-900">
           ${state.searchQuery ? `
             <button id="btnClearSearch" type="button" class="absolute left-3 top-3 text-slate-400 hover:text-slate-600 font-bold text-xs">✕</button>
           ` : ''}
         </div>
 
         <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs font-bold" id="triadFiltersContainer">
-          <button data-triad="analgesia" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'analgesia' ? 'bg-rose-700 text-white border-rose-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
-            💉 1. المسكنات (Analgesia)
-          </button>
-          <button data-triad="hypnosis" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'hypnosis' ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
-            💤 2. المنومات والاستحثاث (Hypnotics)
-          </button>
+          
+          <!-- 1. المهدئات -->
           <button data-triad="sedation" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'sedation' ? 'bg-sky-700 text-white border-sky-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
-            😌 3. المهدئات ومضادات القلق (Sedation)
+            😌 1. المهدئات (Sedation)
           </button>
-          <button data-triad="inhalation" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'inhalation' ? 'bg-purple-700 text-white border-purple-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
-            💨 4. الغازات الاستنشاقية (Inhalation MAC)
+
+          <!-- 2. المسكنات -->
+          <button data-triad="analgesia" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'analgesia' ? 'bg-rose-700 text-white border-rose-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
+            💉 2. المسكنات (Analgesia)
           </button>
+
+          <!-- 3. المنومات والاستحثاث -->
+          <button data-triad="hypnosis" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'hypnosis' ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
+            💤 3. المنومات (Hypnotics)
+          </button>
+
+          <!-- 4. المرخيات العضلية -->
           <button data-triad="muscle_relaxation" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'muscle_relaxation' ? 'bg-amber-700 text-white border-amber-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
-            ⚡ 5. المرخيات والعكس (Relaxants)
+            ⚡ 4. المرخيات العضلية (Muscle Relaxants)
           </button>
-          <button data-triad="supporting" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'supporting' ? 'bg-teal-700 text-white border-teal-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
-            🛡️ 6. الطوارئ والضغط (Emergency)
+
+          <!-- 5. الغازات الاستنشاقية -->
+          <button data-triad="inhalation" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'inhalation' ? 'bg-purple-700 text-white border-purple-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
+            💨 5. الغازات الاستنشاقية (Inhalation MAC)
           </button>
+
+          <!-- 6. العكس والطوارئ والضغط -->
+          <button data-triad="reversal_emergency" class="triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${state.activeTriadFilter === 'reversal_emergency' ? 'bg-teal-700 text-white border-teal-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
+            🛡️ 6. العكس والطوارئ والضغط (Reversal, Emergency & Pressors)
+          </button>
+
         </div>
       </div>
 
@@ -206,22 +219,37 @@ function getFilteredDrugs() {
 
     let matchesCategory = false;
 
-    if (filter === "analgesia") {
-      matchesCategory = triad === "analgesia" || cat.includes("analgesic") || cat.includes("opioid");
-    } else if (filter === "hypnosis") {
-      matchesCategory = (triad === "hypnosis" || cat.includes("hypnotic") || cat.includes("induction")) 
-        && id !== "midazolam" && id !== "dexmedetomidine" && !drug.macModel && id !== "sevoflurane" && id !== "isoflurane" && id !== "desflurane";
-    } else if (filter === "sedation") {
+    // 1. المهدئات ومزيلات القلق
+    if (filter === "sedation") {
       matchesCategory = cat.includes("sedat") || subCat.includes("sedat") || cat.includes("anxiolytic") 
         || id === "midazolam" || id === "dexmedetomidine" || id === "diazepam" || id === "lorazepam";
-    } else if (filter === "inhalation") {
+    }
+    // 2. المسكنات
+    else if (filter === "analgesia") {
+      matchesCategory = triad === "analgesia" || cat.includes("analgesic") || cat.includes("opioid");
+    }
+    // 3. المنومات والاستحثاث الوريدي
+    else if (filter === "hypnosis") {
+      matchesCategory = (triad === "hypnosis" || cat.includes("hypnotic") || cat.includes("induction")) 
+        && id !== "midazolam" && id !== "dexmedetomidine" && !drug.macModel && id !== "sevoflurane" && id !== "isoflurane" && id !== "desflurane";
+    }
+    // 4. المرخيات العضلية (الشلل العضلي فقط)
+    else if (filter === "muscle_relaxation") {
+      matchesCategory = (triad === "muscle_relaxation" || cat.includes("relaxant") || cat.includes("neuromuscular"))
+        && id !== "sugammadex" && id !== "neostigmine";
+    }
+    // 5. الغازات الاستنشاقية ومبخرات الـ MAC
+    else if (filter === "inhalation") {
       matchesCategory = Boolean(drug.macModel) || cat.includes("inhalat") || cat.includes("volatile")
         || id === "sevoflurane" || id === "isoflurane" || id === "desflurane" || id === "halothane";
-    } else if (filter === "muscle_relaxation") {
-      matchesCategory = triad === "muscle_relaxation" || cat.includes("relaxant") || cat.includes("neuromuscular") || cat.includes("reversal") || id === "sugammadex" || id === "neostigmine";
-    } else if (filter === "supporting") {
-      matchesCategory = triad === "supporting" || cat.includes("emergency") || cat.includes("vasopressor") || cat.includes("anticholinergic") || cat.includes("local_anesthetic");
-    } else {
+    }
+    // 6. العكس والطوارئ والضغط
+    else if (filter === "reversal_emergency") {
+      matchesCategory = triad === "supporting" || cat.includes("emergency") || cat.includes("vasopressor") 
+        || cat.includes("reversal") || id === "sugammadex" || id === "neostigmine" || id === "atropine" || id === "ephedrine"
+        || id === "noradrenaline" || id === "adrenaline" || id === "phenylephrine" || id === "intralipid";
+    }
+    else {
       matchesCategory = triad === filter;
     }
 
@@ -308,7 +336,6 @@ function renderSingleDrugCardHTML(drug) {
   const isAccWarnOpen = state.openAccordions[`acc-warn-${drug.id}`];
   const isAccNmtOpen = state.openAccordions[`acc-nmt-${drug.id}`];
 
-  // استخراج زمن بدء المفعول ومدة التأثير
   const onset = drug.pharmacodynamics?.onset || drug.onset || (drug.macModel ? "سريع (استنشاقي)" : "سريع");
   const duration = drug.pharmacodynamics?.clinicalDuration || drug.pharmacodynamics?.duration || drug.duration || (drug.macModel ? "حسب الإيقاف" : "N/A");
 
@@ -393,7 +420,7 @@ function renderSingleDrugCardHTML(drug) {
       <!-- COLLAPSIBLE ACCORDIONS (نظام الأزرار المنسدلة النظيف) -->
       <div class="border-t border-slate-100 pt-2 space-y-1.5 text-xs">
         
-        <!-- 1. زر زمن بدء المفعول ومدة التأثير (Accordion) -->
+        <!-- 1. زر زمن بدء المفعول ومدة التأثير -->
         <button type="button" data-acc-id="acc-pdk-${drug.id}" class="acc-toggle-btn w-full font-bold text-blue-700 py-1 hover:underline flex justify-between items-center text-right cursor-pointer">
           <span>⏱️ زمن بدء المفعول ومدة التأثير (Onset & Duration)</span>
           <span class="text-slate-400 text-[10px]">${isAccPdkOpen ? '▲' : '▼'}</span>
@@ -698,12 +725,12 @@ export function initDrugCenterEvents() {
       });
 
       const activeColors = {
+        sedation: "bg-sky-700 text-white border-sky-700 shadow-sm",
         analgesia: "bg-rose-700 text-white border-rose-700 shadow-sm",
         hypnosis: "bg-indigo-700 text-white border-indigo-700 shadow-sm",
-        sedation: "bg-sky-700 text-white border-sky-700 shadow-sm",
-        inhalation: "bg-purple-700 text-white border-purple-700 shadow-sm",
         muscle_relaxation: "bg-amber-700 text-white border-amber-700 shadow-sm",
-        supporting: "bg-teal-700 text-white border-teal-700 shadow-sm"
+        inhalation: "bg-purple-700 text-white border-purple-700 shadow-sm",
+        reversal_emergency: "bg-teal-700 text-white border-teal-700 shadow-sm"
       };
 
       e.currentTarget.className = `triad-tab-btn px-3 py-2 rounded-xl border transition whitespace-nowrap cursor-pointer ${activeColors[state.activeTriadFilter] || 'bg-slate-900 text-white'}`;
