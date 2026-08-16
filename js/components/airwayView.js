@@ -2,11 +2,46 @@
  * AnesthesiaX — Airway Calculator View Component
  * File: js/components/airwayView.js
  * 
- * Clean 0.5mm Increment Layout & Physiological Sanity Feedback
+ * Clean 0.5mm Increment Layout & BiDi-Proof Isolated Formatting
  */
 
 import { store } from '../state/store.js';
 import { calculateAirwayParams } from '../calculators/airwayCalculator.js';
+
+// دالة ذكية لعزل اتجاه النصوص والأقواس ومنع التشوه في اللغتين العربية والإنجليزية
+function renderEttItemHTML(val, isCuffed = false) {
+  if (!val || val === 'N/A') return `<span class="text-slate-400 font-mono">N/A</span>`;
+
+  const str = String(val).trim();
+
+  if (str.includes("غير مستخدم") || str.includes("غير مخصص") || str.includes("يتطلب")) {
+    return `<span class="text-slate-500 font-semibold text-[11px]">${str}</span>`;
+  }
+
+  // فصل المقاس الأساسي عن المقاسات الاحتياطية لعرضها في بادج مخصص
+  const match = str.match(/^(.*?)\s*\(احتياطي:\s*(.*?)\)$/);
+  if (match) {
+    const primary = match[1].trim();
+    const backup = match[2].trim();
+    const badgeStyle = isCuffed 
+      ? "bg-blue-100/90 text-blue-900 border-blue-200" 
+      : "bg-slate-100 text-slate-700 border-slate-200";
+    const primaryColor = isCuffed ? "text-blue-950" : "text-slate-900";
+
+    return `
+      <div class="flex items-center gap-1.5 justify-end flex-wrap">
+        <span class="text-[10px] ${badgeStyle} px-2 py-0.5 rounded-lg border font-sans font-medium flex items-center gap-1">
+          <span>احتياطي:</span>
+          <bdi dir="ltr" class="font-mono font-bold">${backup}</bdi>
+        </span>
+        <strong dir="ltr" class="font-mono ${primaryColor} text-sm font-extrabold">${primary}</strong>
+      </div>
+    `;
+  }
+
+  return `<strong dir="ltr" class="font-mono text-slate-900 text-sm font-bold">${str}</strong>`;
+}
+
 export function renderAirwayView() {
   const savedWeight = store.state?.patientWeight || '';
   const savedAge = store.state?.patientAge || '';
@@ -119,70 +154,54 @@ export function renderAirwayResultsHTML(results) {
     `;
   }
 
-  // دالة ذكية لتهيئة النص ومنع تكرار الوحدات
-  const formatValue = (val, unit) => {
-    if (!val || val === 'N/A') return 'N/A';
-    const str = String(val).trim();
-    if (str.includes(unit) || /[\u0600-\u06FF]/.test(str)) return str;
-    return `${str} ${unit}`;
-  };
-
-  const ettCuffedText = formatValue(results.ettCuffed, 'mm');
-  const ettUncuffedText = formatValue(results.ettUncuffed, 'mm');
-  const ettDepthText = formatValue(results.ettDepth, 'cm');
-
   return `
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       
       <!-- 1. Endotracheal Tube (ETT) Card -->
-      <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-2">
+      <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-2.5">
         <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
           <span class="text-lg">🩺</span>
           <h4 class="font-bold text-xs text-blue-700">الأنبوب الرغامي (ETT)</h4>
         </div>
 
         <div class="space-y-2 text-xs">
-          <div class="bg-blue-50/60 p-2.5 rounded-xl border border-blue-100">
-            <span class="text-blue-900 font-bold block text-[11px] mb-0.5">أنبوب مع كَف (Cuffed ID):</span>
-            <strong dir="ltr" class="font-mono text-blue-950 text-xs font-extrabold block text-left">
-              ${ettCuffedText}
-            </strong>
+          <div class="bg-blue-50/60 p-2.5 rounded-xl border border-blue-100 flex justify-between items-center gap-2">
+            <span class="text-blue-950 font-bold text-[11px] whitespace-nowrap">أنبوب مع كَف (Cuffed):</span>
+            ${renderEttItemHTML(results.ettCuffed, true)}
           </div>
 
-          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-            <span class="text-slate-700 font-semibold block text-[11px] mb-0.5">أنبوب بدون كَف (Uncuffed ID):</span>
-            <strong dir="ltr" class="font-mono text-slate-800 text-xs font-bold block text-left">
-              ${ettUncuffedText}
-            </strong>
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex justify-between items-center gap-2">
+            <span class="text-slate-700 font-semibold text-[11px] whitespace-nowrap">أنبوب بدون كَف (Uncuffed):</span>
+            ${renderEttItemHTML(results.ettUncuffed, false)}
           </div>
 
-          <div class="bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
-            <span class="text-emerald-950 font-bold block text-[11px] mb-0.5">عمق الإدخال عند القواطع / الشفة:</span>
-            <strong dir="ltr" class="font-mono text-emerald-900 text-sm font-extrabold block text-left">
-              ${ettDepthText}
+          <div class="bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 flex justify-between items-center">
+            <span class="text-emerald-950 font-bold text-[11px]">عمق الإدخال عند الشفة:</span>
+            <strong dir="ltr" class="font-mono text-emerald-900 text-sm font-extrabold">
+              ${results.ettDepth}
             </strong>
           </div>
         </div>
       </div>
 
       <!-- 2. Laryngeal Mask Airway (LMA) Card -->
-      <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-2">
+      <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-2.5">
         <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
           <span class="text-lg">🎭</span>
           <h4 class="font-bold text-xs text-blue-700">القناع الحنجري (LMA)</h4>
         </div>
 
         <div class="space-y-2 text-xs">
-          <div class="bg-indigo-50/60 p-2.5 rounded-xl border border-indigo-100">
-            <span class="text-indigo-900 font-bold block text-[11px] mb-0.5">مقاس LMA المناسب:</span>
-            <strong dir="ltr" class="font-mono text-indigo-950 text-sm font-extrabold block text-left">
+          <div class="bg-indigo-50/60 p-2.5 rounded-xl border border-indigo-100 flex justify-between items-center">
+            <span class="text-indigo-900 font-bold text-[11px]">مقاس LMA المناسب:</span>
+            <strong dir="ltr" class="font-mono text-indigo-950 text-sm font-extrabold">
               ${results.lmaSize}
             </strong>
           </div>
 
-          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-            <span class="text-slate-700 font-semibold block text-[11px] mb-0.5">أقصى حجم نفخ للكَف:</span>
-            <strong dir="ltr" class="font-mono text-slate-800 text-xs font-bold block text-left">
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex justify-between items-center">
+            <span class="text-slate-700 font-semibold text-[11px]">أقصى حجم نفخ للكَف:</span>
+            <strong dir="ltr" class="font-mono text-slate-800 text-xs font-bold">
               ${results.lmaCuffAir}
             </strong>
           </div>
@@ -196,9 +215,9 @@ export function renderAirwayResultsHTML(results) {
           <h4 class="font-bold text-xs text-blue-700">شفرة منظار الحنجرة (Blade)</h4>
         </div>
 
-        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs">
-          <span class="text-slate-700 font-semibold block text-[11px] mb-0.5">الشفرة الموصى بها:</span>
-          <strong dir="ltr" class="font-mono text-slate-900 text-xs font-bold block text-left">
+        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+          <span class="text-slate-700 font-semibold text-[11px]">الشفرة الموصى بها:</span>
+          <strong dir="ltr" class="font-mono text-slate-900 text-xs font-bold">
             ${results.bladeSize}
           </strong>
         </div>
@@ -211,9 +230,9 @@ export function renderAirwayResultsHTML(results) {
           <h4 class="font-bold text-xs text-blue-700">الأنبوب الفموي (Guedel OPA)</h4>
         </div>
 
-        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs">
-          <span class="text-slate-700 font-semibold block text-[11px] mb-0.5">مقاس Guedel المناسب:</span>
-          <strong dir="ltr" class="font-mono text-slate-900 text-xs font-bold block text-left">
+        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+          <span class="text-slate-700 font-semibold text-[11px]">مقاس Guedel المناسب:</span>
+          <strong class="text-slate-900 text-xs font-bold">
             ${results.opaSize}
           </strong>
         </div>
