@@ -1,10 +1,11 @@
 /**
  * Pediatric Dashboard UI Component
- * AnesthesiaX — Formatted & Translated BiDi Version
+ * AnesthesiaX — Formatted & Translated BiDi Version (Audited 0.5mm ETT Layout)
+ * File: js/components/PedsDashboard.js
  */
 
 import { pedsData } from "../data/pedsData.js";
-import { PedsCalculator } from "../calculators/pedsCalculator.js";
+import { PedsCalculator } from "../logic/PedsCalculator.js";
 
 export class PedsDashboard {
   constructor(containerId) {
@@ -44,14 +45,14 @@ export class PedsDashboard {
                 الوزن بالكجم <span dir="ltr" class="text-[11px] font-normal text-slate-500">(Weight in kg)</span>:
               </label>
               <input type="number" id="peds-weight-input" step="0.1" min="0.3" max="150" value="${this.state.weightKg}" 
-                class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white font-bold text-blue-900 text-center text-base" placeholder="أدخل الوزن" />
+                class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white font-bold text-blue-900 text-center text-base font-mono" placeholder="أدخل الوزن" />
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">
                 العمر بالسنين <span dir="ltr" class="text-[11px] font-normal text-slate-500">(Age in years)</span>:
               </label>
               <input type="number" id="peds-age-input" step="0.1" min="0" max="18" value="${this.state.ageYears}" 
-                class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white font-bold text-blue-900 text-center text-base" placeholder="أدخل العمر" />
+                class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white font-bold text-blue-900 text-center text-base font-mono" placeholder="أدخل العمر" />
             </div>
           </div>
         </div>
@@ -92,7 +93,7 @@ export class PedsDashboard {
                 </div>
                 <div>
                   <label class="block font-bold text-slate-700 mb-1">التركيز المتاح:</label>
-                  <select id="peds-concentration-select" dir="ltr" class="w-full p-2 border border-slate-300 rounded-xl bg-white font-semibold text-slate-800 text-left"></select>
+                  <select id="peds-concentration-select" dir="ltr" class="w-full p-2 border border-slate-300 rounded-xl bg-white font-semibold text-slate-800 text-left font-mono"></select>
                 </div>
               </div>
             </div>
@@ -192,27 +193,33 @@ export class PedsDashboard {
 
   renderAirwayContent(airway) {
     if (!airway || !airway.success) {
-      const errMsgs = (airway && Array.isArray(airway.errors)) ? airway.errors.join("<br>") : "خطأ في حساب المجرى الهوائي";
-      return `<div class="p-3 bg-rose-50 text-rose-700 rounded-xl text-xs font-semibold">${errMsgs}</div>`;
+      const errMsgs = (airway && Array.isArray(airway.errors)) ? airway.errors.join("<br>• ") : "خطأ في حساب المجرى الهوائي";
+      return `<div class="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-bold leading-relaxed">⚠️ ${errMsgs}</div>`;
     }
+
+    const cuffedDisplay = airway.cuffedDisplay || (airway.cuffedSizeMm ? `${airway.cuffedSizeMm} mm` : "غير موصى به");
+    const uncuffedDisplay = airway.uncuffedDisplay || (airway.uncuffedSizeMm ? `${airway.uncuffedSizeMm} mm` : "N/A");
 
     return `
       <div class="space-y-2.5 text-xs">
-        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
-          <span class="font-bold text-slate-700">الأنبوب بدون كاف <span dir="ltr" class="text-[10px] text-slate-400 font-normal">(Uncuffed)</span>:</span>
-          <span class="text-blue-600 font-mono font-bold text-sm" dir="ltr">${airway.uncuffedSizeMm} mm</span>
+        <div class="p-2.5 bg-blue-50/70 rounded-xl border border-blue-100 flex justify-between items-center">
+          <span class="font-bold text-blue-950">الأنبوب مع كاف <span dir="ltr" class="text-[10px] text-blue-700 font-normal">(Cuffed ID)</span>:</span>
+          <span class="text-blue-900 font-mono font-extrabold text-xs" dir="ltr">${cuffedDisplay}</span>
         </div>
-        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
-          <span class="font-bold text-slate-700">الأنبوب مع كاف <span dir="ltr" class="text-[10px] text-slate-400 font-normal">(Cuffed)</span>:</span>
-          <span class="text-blue-600 font-mono font-bold text-sm" dir="ltr">${airway.cuffedSizeMm ? airway.cuffedSizeMm + " mm" : "غير موصى به"}</span>
+
+        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+          <span class="font-bold text-slate-700">الأنبوب بدون كاف <span dir="ltr" class="text-[10px] text-slate-400 font-normal">(Uncuffed ID)</span>:</span>
+          <span class="text-slate-900 font-mono font-bold text-xs" dir="ltr">${uncuffedDisplay}</span>
         </div>
-        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
-          <span class="font-bold text-slate-700">عمق الفم التقديري <span dir="ltr" class="text-[10px] text-slate-400 font-normal">(Oral Depth)</span>:</span>
-          <span class="text-slate-900 font-mono font-bold" dir="ltr">${airway.estimatedOralDepthCm} cm</span>
+
+        <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-100 flex justify-between items-center">
+          <span class="font-bold text-emerald-950">عمق الإدخال عند القواطع / الشفة <span dir="ltr" class="text-[10px] text-emerald-700 font-normal">(Oral Depth)</span>:</span>
+          <span class="text-emerald-900 font-mono font-extrabold text-sm" dir="ltr">${airway.estimatedOralDepthCm} cm</span>
         </div>
-        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
-          <span class="font-bold text-slate-700">شفرة المنظار <span dir="ltr" class="text-[10px] text-slate-400 font-normal">(Blade Size)</span>:</span>
-          <span class="text-slate-900 font-bold" dir="ltr">${airway.blade}</span>
+
+        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+          <span class="font-bold text-slate-700">شفرة المنظار الموصى بها <span dir="ltr" class="text-[10px] text-slate-400 font-normal">(Blade Size)</span>:</span>
+          <span class="text-slate-900 font-bold font-mono" dir="ltr">${airway.blade}</span>
         </div>
 
         <div class="p-3 bg-amber-50/80 border border-amber-200 text-amber-900 text-[11px] rounded-xl space-y-1.5 leading-relaxed mt-2">
@@ -220,9 +227,9 @@ export class PedsDashboard {
             <span>⚠️</span> <span>تنبيهات سريرية قياسية:</span>
           </p>
           <ul class="list-disc list-inside space-y-1 opacity-90">
-            <li>معادلات حجم الأنبوب تقديرية فقط؛ يجب دائماً تحضير مقاس أصغر ومقاس أكبر.</li>
+            <li>مقاس الأنبوب الرغامي مقرب لأقرب 0.5 mm؛ يجب دائماً تجهيز مقاس أصغر ومقاس أكبر.</li>
             <li>عمق الأنبوب تقديري؛ أعد التأكد بسماع أصوات التنفس على الجانبين ومراقبة منحنى الـ Capnography.</li>
-            <li>في الأنابيب ذات الكاف (Cuffed)، يجب مراقبة ضغط الكاف وابقائه أقل من <span dir="ltr" class="font-mono font-bold">20 cmH2O</span>.</li>
+            <li>في الأنابيب ذات الكاف (Cuffed)، يجب مراقبة ضغط الكاف وإبقائه أقل من <span dir="ltr" class="font-mono font-bold text-rose-800">&lt; 20 cmH2O</span>.</li>
           </ul>
         </div>
       </div>
@@ -231,8 +238,8 @@ export class PedsDashboard {
 
   renderDrugContent(drug) {
     if (!drug || !drug.success) {
-      const errMsgs = (drug && Array.isArray(drug.errors)) ? drug.errors.join("<br>") : "خطأ في حساب الجرعة";
-      return `<div class="p-3 bg-rose-50 text-rose-700 rounded-xl text-xs font-semibold">${errMsgs}</div>`;
+      const errMsgs = (drug && Array.isArray(drug.errors)) ? drug.errors.join("<br>• ") : "خطأ في حساب الجرعة";
+      return `<div class="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-bold leading-relaxed">⚠️ ${errMsgs}</div>`;
     }
 
     return `
@@ -242,7 +249,7 @@ export class PedsDashboard {
             <div class="text-[11px] text-slate-500 font-medium">الجرعة المحسوبة (Dose)</div>
             <div class="text-base font-mono font-bold text-blue-900 mt-0.5" dir="ltr">${drug.appliedDose} ${drug.doseUnit}</div>
             ${drug.minDose && drug.maxDose ? `<div class="text-[10px] text-slate-500 mt-1" dir="ltr">النطاق: ${drug.minDose} - ${drug.maxDose} ${drug.doseUnit}</div>` : ''}
-            ${drug.isCapped ? `<span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold block mt-1">تم تطبيق الحد الأقصى</span>` : ''}
+            ${drug.isCapped ? `<span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold block mt-1">تم تقييد الجرعة للحد الأقصى</span>` : ''}
             ${drug.isMinEnforced ? `<span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold block mt-1">تم تطبيق الحد الأدنى</span>` : ''}
           </div>
 
@@ -274,8 +281,8 @@ export class PedsDashboard {
 
   renderFluidContent(fluids) {
     if (!fluids || !fluids.success) {
-      const errMsgs = (fluids && Array.isArray(fluids.errors)) ? fluids.errors.join("<br>") : "خطأ في حساب السوائل";
-      return `<div class="p-3 bg-rose-50 text-rose-700 rounded-xl text-xs font-semibold">${errMsgs}</div>`;
+      const errMsgs = (fluids && Array.isArray(fluids.errors)) ? fluids.errors.join("<br>• ") : "خطأ في حساب السوائل";
+      return `<div class="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-bold leading-relaxed">⚠️ ${errMsgs}</div>`;
     }
 
     return `
