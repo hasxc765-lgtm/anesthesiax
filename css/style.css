@@ -4,8 +4,11 @@
 /* ==========================================================================
    1. الإعدادات العامة
    ========================================================================== */
+body, button, input, select, textarea {
+  font-family: 'Tajawal', 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
+}
+
 body {
-  font-family: 'Tajawal', 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   direction: rtl;
   text-align: right;
   background-color: #f8fafc;
@@ -18,7 +21,6 @@ body {
 input, select, textarea {
   color: #0f172a !important;
   background-color: #ffffff !important;
-  font-family: 'Tajawal', 'Cairo', sans-serif;
 }
 
 .font-mono, input[type="number"], select.font-mono {
