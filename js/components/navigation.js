@@ -1,3 +1,7 @@
+// js/components/navigation.js
+
+import { i18n, t } from '../i18n/languageManager.js';
+
 // 1. وظيفة التبديل الفوري للوضع المظلم وحفظه
 if (typeof window !== 'undefined' && !window.toggleDarkMode) {
   window.toggleDarkMode = () => {
@@ -9,10 +13,17 @@ if (typeof window !== 'undefined' && !window.toggleDarkMode) {
   };
 }
 
-// 2. رابط قاعدة بيانات Firebase الخاصة بمشروعك
+// 2. وظيفة التبديل الفوري للغة (عربي / English)
+if (typeof window !== 'undefined' && !window.toggleAppLanguage) {
+  window.toggleAppLanguage = () => {
+    i18n.toggleLanguage();
+  };
+}
+
+// 3. رابط قاعدة بيانات Firebase الخاصة بمشروعك
 const FIREBASE_DB_URL = "https://anesthesiax-15012-default-rtdb.asia-southeast1.firebasedatabase.app";
 
-// 3. دالة جلب وزيادة عداد الزوار الحقيقي سحابياً ومباشراً
+// 4. دالة جلب وزيادة عداد الزوار الحقيقي سحابياً ومباشراً
 window.updateRealVisitors = async function() {
   const countElements = document.querySelectorAll('.live-visitor-count');
   
@@ -56,14 +67,15 @@ export function renderNavigation(currentView) {
   const isDashboard = currentView === 'dashboard';
   const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const initialVisitors = (typeof localStorage !== 'undefined' && localStorage.getItem('anesthesiax_real_visitors')) || '1';
+  const isRtl = i18n.isRTL();
 
   return `
-    <header class="w-full max-w-full mx-auto flex justify-between items-center py-2 px-1 border-b border-slate-200 dark:border-slate-800 mb-3 transition-colors duration-200 select-none overflow-hidden" dir="rtl">
+    <header class="w-full max-w-full mx-auto flex justify-between items-center py-2 px-1 border-b border-slate-200 dark:border-slate-800 mb-3 transition-colors duration-200 select-none overflow-hidden" dir="${isRtl ? 'rtl' : 'ltr'}">
       
       <div class="flex items-center gap-1.5 shrink-0">
         ${!isDashboard ? `
           <button id="btnBackToDashboard" class="px-2 py-1 bg-blue-50 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-slate-700 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold transition flex items-center gap-1 border border-blue-200 dark:border-slate-700 active:scale-95 shrink-0">
-            <span>➔</span> <span>الرئيسية</span>
+            <span>${isRtl ? '➔' : '←'}</span> <span>${t('nav.dashboard')}</span>
           </button>
         ` : ''}
         <div class="shrink-0">
@@ -75,6 +87,17 @@ export function renderNavigation(currentView) {
 
       <div class="flex items-center gap-1 shrink-0">
         
+        <!-- زر تبديل اللغة الفوري -->
+        <button 
+          id="btnToggleLanguage" 
+          type="button" 
+          onclick="window.toggleAppLanguage()"
+          class="flex items-center justify-center text-[11px] bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-bold px-2 py-1 rounded-lg border border-indigo-200 dark:border-indigo-800/50 transition cursor-pointer active:scale-95 shadow-sm shrink-0"
+          title="تبديل اللغة / Switch Language"
+        >
+          <span>${t('nav.langToggle')}</span>
+        </button>
+
         <a 
           href="https://instagram.com/u8cb" 
           target="_blank" 
@@ -105,4 +128,4 @@ export function renderNavigation(currentView) {
       </div>
     </header>
   `;
-}
+      }
